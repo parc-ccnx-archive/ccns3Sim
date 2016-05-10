@@ -209,6 +209,9 @@ waf_config()
             "gcov")
                 ARGS+=" --enable-gcov"
                 ;;
+            "opt"|"optimized")
+                ARGS+=" --build-profile=optimized"
+                ;;
             *)
                 echo "$0: waf_config: ERROR!"
                 echo "    unknown argument: [$opt]"
