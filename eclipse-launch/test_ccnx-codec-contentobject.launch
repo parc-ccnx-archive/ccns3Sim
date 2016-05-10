@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.cdt.launch.applicationLaunchType">
+<intAttribute key="org.eclipse.cdt.launch.ATTR_BUILD_BEFORE_LAUNCH_ATTR" value="2"/>
+<stringAttribute key="org.eclipse.cdt.launch.COREFILE_PATH" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_ARGUMENTS" value="--run test-runner --command-template=&quot;%s --suite=ccnx-codec-contentobject --verbose&quot;"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="${project_loc}/ns-3.25/waf"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="ns-allinone-3.25"/>
+<booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="false"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.WORKING_DIRECTORY" value="${workspace_loc:ns-allinone-3.25}/ns-3.25"/>
+<booleanAttribute key="org.eclipse.cdt.launch.use_terminal" value="true"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/ns-allinone-3.25"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.BRANCH_SIM" value="false"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.CACHE_SIM" value="true"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.D1" value="false"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.D1_ASSOC" value="0"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.D1_LSIZE" value="0"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.D1_SIZE" value="0"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.I1" value="false"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.I1_ASSOC" value="0"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.I1_LSIZE" value="0"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.I1_SIZE" value="0"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.L2" value="false"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.L2_ASSOC" value="0"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.L2_LSIZE" value="0"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.cachegrind.L2_SIZE" value="0"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.launch.FULLPATH_AFTER" value="true"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_BELOWMAIN" value="false"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_DEMANGLE" value="true"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_DSYMUTIL" value="true"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_ERRLIMIT" value="true"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_FREERES" value="true"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_MAINSTACK" value="0"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_MAINSTACK_BOOL" value="false"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_MAXFRAME" value="2000000"/>
+<intAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_NUMCALLERS" value="12"/>
+<listAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_SUPPFILES"/>
+<booleanAttribute key="org.eclipse.linuxtools.valgrind.launch.GENERAL_TRACECHILD" value="false"/>
+<stringAttribute key="org.eclipse.linuxtools.valgrind.launch.TOOL" value="org.eclipse.linuxtools.valgrind.launch.cachegrind"/>
+<stringAttribute key="provider" value="org.eclipse.linuxtools.profiling.provider.valgrind.cachegrind"/>
+</launchConfiguration>

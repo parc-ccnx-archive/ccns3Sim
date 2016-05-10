@@ -1,0 +1,13 @@
+*.pyc
+*.so
+*.o
+*.pcap
+*.tr
+.waf*
+.lock*
+.externalToolBuilders
+.cproject
+.project
+
+.DS_Store
+.vscode
