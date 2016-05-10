@@ -53,117 +53,73 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "nfp-routing-helper.h"
-#include "nfp-routing-protocol.h"
-#include "ns3/node-container.h"
-#include "ns3/node-list.h"
+#ifndef CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_
+#define CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_
 
-using namespace ns3;
-using namespace ns3::ccnx;
-
-NfpRoutingHelper::NfpRoutingHelper ()
+namespace ns3
 {
-  m_routerFactory.SetTypeId ("ns3::ccnx::NfpRoutingProtocol");
-}
+  namespace ccnx
+  {
 
-NfpRoutingHelper::NfpRoutingHelper (NfpRoutingHelper const &copy)
-{
-  m_routerFactory = copy.m_routerFactory;
-}
-
-NfpRoutingHelper::~NfpRoutingHelper ()
-{
-  // empty
-}
-
-CCNxRoutingHelper *
-NfpRoutingHelper::Copy (void) const
-{
-  // calls the default copy constructor and does a simple member-wise assigment
-  return new NfpRoutingHelper (*this);
-}
-
-/**
- * \param node the node within which the new routing protocol will run
- * \returns a newly-created routing protocol
- */
-Ptr<CCNxRoutingProtocol>
-NfpRoutingHelper::Create (Ptr<Node> node) const
-{
-  Ptr<NfpRoutingProtocol> protocol = m_routerFactory.Create<NfpRoutingProtocol> ();
-  protocol->SetNode (node);
-  node->AggregateObject (protocol);
-  protocol->Initialize ();
-  return protocol;
-}
-
-void
-NfpRoutingHelper::Set (std::string name, const AttributeValue &value)
-{
-  m_routerFactory.Set (name, value);
-}
-
-int64_t
-NfpRoutingHelper::SetSteams (NodeContainer &c, int64_t stream)
-{
-  int64_t currentStream = stream;
-  Ptr<Node> node;
-  for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
+    class NfpStats
     {
-      node = (*i);
+    public:
+      NfpStats (uint32_t nodeId);
 
-      // If the routing protocol is a List, the List will handle assigning to each member
-      Ptr<CCNxRoutingProtocol> routing = node->GetObject<CCNxRoutingProtocol> ();
-      NS_ASSERT_MSG (routing, "CCNxRoutingProtocol not installed on node");
-      currentStream += routing->AssignStreams (currentStream);
-    }
-  return (currentStream - stream);
-}
+      NfpStats(const NfpStats &copy);
 
-void
-NfpRoutingHelper::PrintComputationCostAllNodesWithDelay (Time printDelay, Ptr<OutputStreamWrapper> stream)
-{
-  for (int i = 0; i < NodeList::GetNNodes (); ++i)
-    {
-      PrintComputationCostWithDelay (printDelay, stream, NodeList::GetNode (i));
-    }
-}
+      NfpStats & operator += (const NfpStats &other);
 
-void
-NfpRoutingHelper::PrintComputationCostWithDelay (Time printDelay, Ptr<OutputStreamWrapper> stream, Ptr<Node> node)
-{
-  Simulator::Schedule (printDelay, &NfpRoutingHelper::PrintComputationCost, stream, node);
-}
+      void IncrementPayloadsSent();
+      void IncrementBytesSent(uint64_t value);
+      void IncrementPayloadsReceived();
+      void IncrementBytesReceived(uint64_t value);
 
-void
-NfpRoutingHelper::PrintComputationCost (Ptr<OutputStreamWrapper> stream, Ptr<Node> node)
-{
-  // This will fetch whatever is bound to the node as a derived class of CCNxRoutingProtocol.
-  Ptr<NfpRoutingProtocol> nfp = node->GetObject<NfpRoutingProtocol> ();
-  if (nfp)
-    {
-      nfp->PrintComputationCost (stream);
-    }
-  else
-    {
-      *stream->GetStream () << "No NfpRoutingProtocol bound to node " << node->GetId () << std::endl;
-    }
-}
+      void IncrementAdvertiseOriginiated();
+      void IncrementAdvertiseSent();
+      void IncrementAdvertiseReceived();
+      void IncrementAdvertiseReceivedFeasible();
 
-NfpComputationCost
-NfpRoutingHelper::GetComputationCost( Ptr<Node> node )
-{
-  Ptr<NfpRoutingProtocol> nfp = node->GetObject<NfpRoutingProtocol> ();
-  if (nfp)
-    {
-      return nfp->GetComputationCost();
-    }
-  else
-    {
-      NS_ASSERT_MSG(false, "Could not retrieve object NfpRoutingProtocol from node " << node->GetId ());
+      void IncrementWithdrawOriginated();
+      void IncrementWithdrawSent();
+      void IncrementWithdrawReceived();
 
-      // return a "0" if asserts not working.
-      return NfpComputationCost();
-    }
-}
+      uint64_t GetPayloadsSent() const;
+      uint64_t GetBytesSent() const;
+      uint64_t GetPayloadsReceived() const;
+      uint64_t GetBytesReceived() const;
 
+      uint64_t GetAdvertiseOriginiated() const;
+      uint64_t GetAdvertiseSent() const;
+      uint64_t GetAdvertiseReceived() const;
+      uint64_t GetAdvertiseReceivedFeasible() const;
+
+      uint64_t GetWithdrawOriginated() const;
+      uint64_t GetWithdrawSent() const;
+      uint64_t GetWithdrawReceived() const;
+
+      friend std::ostream & operator << (std::ostream &os, const NfpStats &stats);
+
+    protected:
+      uint32_t 	  m_nodeId;
+      uint64_t    m_payloadsSent;           //<! number of NfpPayloads sent (all interfaces)
+      uint64_t    m_bytesSent;              //<! total bytes of NfpPayload sent (over all interfaces)
+
+      uint64_t    m_payloadsReceived;               //<! Number of NfpPayloads received
+      uint64_t    m_bytesReceived;                  //<! Total bytes of NfpPayloads received
+
+      uint64_t    m_advertiseOriginated;            //<! Advertisements we originated
+      uint64_t    m_advertiseSent;                  //<! Advertisements we sent (includes Originated)
+      uint64_t    m_advertiseReceived;              //<! Advertisements we received
+      uint64_t    m_advertiseReceivedFeasible;              //<! Advertisements we received and were feasible
+
+      uint64_t    m_withdrawOriginated;            //<! Withdraws we originated
+      uint64_t    m_withdrawSent;
+      uint64_t    m_withdrawReceived;
+      };
+
+
+  } /* namespace ccnx */
+} /* namespace ns3 */
+
+#endif /* CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_ */

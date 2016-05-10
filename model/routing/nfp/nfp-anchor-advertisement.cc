@@ -169,7 +169,6 @@ NfpAnchorAdvertisement::Replace (Ptr<NfpAdvertise> advertise, Ptr<CCNxConnection
 
   m_equalCostPaths->AddNexthop (Create<CCNxRouteEntry> (advertise->GetPrefix (), advertise->GetDistance (), ingressConnection));
 
-  m_computationCost.IncrementEvents();
   m_expiryTimes[ingressConnection] = expiryTime;
   UpdateLastChangeTime ();
   LogState ();
@@ -187,7 +186,6 @@ NfpAnchorAdvertisement::AddEqualCostPath (Ptr<CCNxConnection> ingressConnection,
 {
   NS_LOG_FUNCTION (this << ingressConnection->GetConnectionId ());
   m_equalCostPaths->AddNexthop (Create<CCNxRouteEntry> (m_bestAdvertisement->GetPrefix (), m_bestAdvertisement->GetDistance (), ingressConnection));
-  m_computationCost.IncrementEvents();
   m_expiryTimes[ingressConnection] = expiryTime;
   UpdateLastChangeTime ();
   LogState ();

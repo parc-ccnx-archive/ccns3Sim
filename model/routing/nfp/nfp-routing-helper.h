@@ -59,6 +59,7 @@
 #include "ns3/object-factory.h"
 #include "ns3/ccnx-routing-helper.h"
 #include "ns3/node-container.h"
+#include "ns3/nfp-computation-cost.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -131,6 +132,16 @@ public:
   static void PrintComputationCostAllNodesWithDelay (Time printDelay, Ptr<OutputStreamWrapper> stream);
   static void PrintComputationCostWithDelay (Time printDelay, Ptr<OutputStreamWrapper> stream, Ptr<Node> node);
   static void PrintComputationCost (Ptr<OutputStreamWrapper> stream, Ptr<Node> node);
+
+  /**
+   * Retrieve the computation cost associated with NFP from the specified node.
+   *
+   * This will fetch the aggregated instance of NfpRoutingProtocol from the node
+   * and return its computation cost.
+   *
+   * @param node [in] The node to lookup
+   */
+  static NfpComputationCost GetComputationCost( Ptr<Node> node );
 
 private:
   /**

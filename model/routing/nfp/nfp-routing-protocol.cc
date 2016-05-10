@@ -359,7 +359,7 @@ NfpRoutingProtocol::HelloTimerExpired ()
 void
 NfpRoutingProtocol::InjectAnchorRoute (Ptr<const CCNxName> prefix, uint32_t anchorSeqnum)
 {
-  m_stats.advertiseOriginated++;
+  m_stats.IncrementAdvertiseOriginated();
 
   // because we are the anchor, the distance is always 0.
   uint16_t distance = 0;
@@ -382,7 +382,7 @@ NfpRoutingProtocol::InjectAnchorRoute (Ptr<const CCNxName> prefix, uint32_t anch
 void
 NfpRoutingProtocol::InjectAnchorWithdraw (Ptr<const CCNxName> prefix)
 {
-  m_stats.withdrawOriginated++;
+  m_stats.IncrementWithdrawOriginated();
   Ptr<NfpWithdraw> withdraw = Create<NfpWithdraw> (m_routerName, prefix);
   Ptr<CCNxConnectionL4> connection = Create<CCNxConnectionL4> ();
   connection->SetConnectionLocalHost ();
@@ -546,11 +546,11 @@ NfpRoutingProtocol::ReceivePayload (Ptr<NfpPayload> payload, Ptr<CCNxConnection>
 
   if (!m_routerName->Equals (*payload->GetRouterName ()))
     {
-      m_stats.payloadsReceived++;
-      m_stats.bytesReceived += payload->GetSerializedSize ();
+      m_stats.IncrementPayloadsReceived();
+      m_stats.IncrementBytesReceived (payload->GetSerializedSize ());
 
       // Neighbor management
-      bool accept = ReceiveHello (payload->GetRouterName (), payload->GetMessageSeqnum (), ingressConnection);
+      bool accept =  ReceiveHello(payload->GetRouterName (), payload->GetMessageSeqnum (), ingressConnection);
 
       // If the message is out-of-sequence from prior messages, ignore it
       if (accept)
@@ -646,7 +646,7 @@ NfpRoutingProtocol::ReceiveAdvertise (Ptr<NfpAdvertise> advertise, Ptr<CCNxConne
         {
 	  NS_LOG_INFO("Update advertisement " << *advertise << " ingress " << ingressConnection->GetConnectionId());
 
-	  m_stats.advertiseReceivedFeasible++;
+	  m_stats.IncrementAdvertiseReceivedFeasible();
           AddWorkQueueEntry (advertise->GetAnchorName (), prefixName);
         }
     }
@@ -657,7 +657,7 @@ NfpRoutingProtocol::ReceiveWithdraw (Ptr<NfpWithdraw> withdraw, Ptr<CCNxConnecti
 {
   NS_LOG_FUNCTION (this << withdraw << ingressConnection->GetConnectionId ());
 
-  m_stats.withdrawReceive++;
+  m_stats.IncrementWithdrawReceived();
 
   m_computationCost.IncrementEvents();
   Ptr<const CCNxName> prefixName = withdraw->GetPrefix ();
@@ -686,6 +686,7 @@ NfpRoutingProtocol::ReceiveHello (Ptr<const CCNxName> neighborName, uint16_t msg
   NS_LOG_FUNCTION (this << neighborName << msgSeqnum << ingressConnection->GetConnectionId ());
 
   bool result = false;
+  // table event
   m_computationCost.IncrementEvents();
   Ptr<NfpNeighborKey> key = Create<NfpNeighborKey> (neighborName, ingressConnection);
   NeighborMapType::iterator i = m_neighbors.find (key);
@@ -722,7 +723,6 @@ NfpRoutingProtocol::ReceiveHello (Ptr<const CCNxName> neighborName, uint16_t msg
 void
 NfpRoutingProtocol::NeighborStateChanged (Ptr<NfpNeighborKey> neighborKey)
 {
-  m_computationCost.IncrementEvents();
   NS_LOG_FUNCTION (this << *neighborKey);
   NeighborMapType::iterator i = m_neighbors.find (neighborKey);
   NS_ASSERT_MSG (i != m_neighbors.end (), "Got a state change callback but cannot find neighbor in map: " << *neighborKey);
@@ -956,8 +956,8 @@ NfpRoutingProtocol::Broadcast (Ptr<CCNxPacket> packet)
   for (InterfaceMapType::const_iterator i = m_interfaces.begin (); i != m_interfaces.end (); ++i)
     {
       m_computationCost.IncrementLoopIterations();
-      m_stats.payloadsSent++;
-      m_stats.bytesSent += packet->GetMessage ()->GetPayload ()->GetSize ();
+      m_stats.IncrementPayloadsSent();
+      m_stats.IncrementBytesSent (packet->GetMessage ()->GetPayload ()->GetSize ());
 
       Ptr<CCNxL3Interface> l3interface = i->second;
       Ptr<CCNxConnection> broadcastConnection = l3interface->GetBroadcastConnection ();
@@ -1048,28 +1048,7 @@ void
 NfpRoutingProtocol::PrintRoutingStats (Ptr<OutputStreamWrapper> streamWrapper) const
 {
   std::ostream *stream = streamWrapper->GetStream ();
-  ns3::LogTimePrinter timePrinter = ns3::LogGetTimePrinter ();
-  (*timePrinter)(*stream);
-  *stream << std::setw (5) << m_node->GetId ();
-  *stream << " Routing stats";
-  *stream << " payloads recv " << m_stats.payloadsReceived << " sent " << m_stats.payloadsSent;
-  *stream << " bytes recv " << m_stats.bytesReceived << " sent " << m_stats.bytesSent << std::endl;
-
-  (*timePrinter)(*stream);
-  *stream << std::setw (5) << m_node->GetId ();
-  *stream << " Routing stats";
-  *stream << " advertise orig " << m_stats.advertiseOriginated;
-  *stream << " recv " << m_stats.advertiseReceived;
-  *stream << " sent " << m_stats.advertiseSent;
-  *stream << " feasible " << m_stats.advertiseReceivedFeasible << std::endl;
-
-  (*timePrinter)(*stream);
-  *stream << std::setw (5) << m_node->GetId ();
-  *stream << " Routing stats";
-  *stream << " withdraw orig " << m_stats.withdrawOriginated;
-  *stream << " recv " << m_stats.withdrawReceive;
-  *stream << " sent " << m_stats.withdrawSent << std::endl;
-
+  *stream << m_stats;
 }
 
 void

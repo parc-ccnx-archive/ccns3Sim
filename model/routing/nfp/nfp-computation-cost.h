@@ -110,6 +110,7 @@ namespace ns3
 
       uint64_t GetEvents() const;
       uint64_t GetLoopIterations() const;
+      uint64_t GetTotalCost() const;
 
       friend std::ostream & operator << (std::ostream &os, const NfpComputationCost &cost);
 

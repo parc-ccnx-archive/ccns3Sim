@@ -141,6 +141,12 @@ NfpComputationCost::GetLoopIterations() const
   return m_loopIterations;
 }
 
+uint64_t
+NfpComputationCost::GetTotalCost() const
+{
+  return GetLoopIterations() + GetEvents();
+}
+
 std::ostream &
 ns3::ccnx::operator << (std::ostream &os, const NfpComputationCost &cost)
 {
