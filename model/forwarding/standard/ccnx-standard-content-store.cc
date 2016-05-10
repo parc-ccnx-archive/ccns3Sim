@@ -1,56 +1,28 @@
 /*
- * Copyright (c) 2016, Xerox Corporation (Xerox) and Palo Alto Research Center, Inc (PARC)
+ * Copyright (c) 2016, Xerox Corporation (Xerox)and Palo Alto Research Center (PARC)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in the
- *   documentation and/or other materials provided with the distribution.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Patent rights are not granted under this agreement. Patent rights are
+ *       available under FRAND terms.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL XEROX OR PARC BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL XEROX or PARC BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-/* ################################################################################
- * #
- * # PATENT NOTICE
- * #
- * # This software is distributed under the BSD 2-clause License (see LICENSE
- * # file).  This BSD License does not make any patent claims and as such, does
- * # not act as a patent grant.  The purpose of this section is for each contributor
- * # to define their intentions with respect to intellectual property.
- * #
- * # Each contributor to this source code is encouraged to state their patent
- * # claims and licensing mechanisms for any contributions made. At the end of
- * # this section contributors may each make their own statements.  Contributor's
- * # claims and grants only apply to the pieces (source code, programs, text,
- * # media, etc) that they have contributed directly to this software.
- * #
- * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
- * #
- * # Do not remove this header notification.  The contents of this section must be
- * # present in all distributions of the software.  You may only modify your own
- * # intellectual property statements.  Please provide contact information.
- *
- * - Palo Alto Research Center, Inc
- * This software distribution does not grant any rights to patents owned by Palo
- * Alto Research Center, Inc (PARC). Rights to these patents are available via
- * various mechanisms. As of January 2016 PARC has committed to FRAND licensing any
- * intellectual property used by its contributions to this software. You may
- * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
 #include "ns3/assert.h"
@@ -127,7 +99,7 @@ CCNxStandardContentStore::CCNxStandardContentStore () : m_objectCapacity (_defau
       m_layerDelayConstant (_defaultLayerDelayConstant), m_layerDelaySlope (_defaultLayerDelaySlope),
       m_layerDelayServers (_defaultLayerDelayServers)
 {
-
+    m_lruList = Create<CCNxStandardContentStoreLruList> ();
 }
 
 CCNxStandardContentStore::~CCNxStandardContentStore ()
@@ -263,13 +235,26 @@ CCNxStandardContentStore::ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkIte
             }
         }
     }
-  else
-    {   //hash map only
-      CSByHashType::iterator it = m_csByHash.find (workItem->GetPacket());
-      if (it!=m_csByHash.end())
-        {
-          entry = it->second;
-        }
+  else //no name
+    {
+      if (interest->HasKeyidRestriction ())
+          {        //Hash and keyid map only
+            CSByHashKeyidType::iterator it = m_csByHashKeyid.find (workItem->GetPacket());
+  	      if (it!=m_csByHashKeyid.end())
+              {
+                entry = it->second;
+              }
+          }
+        else
+          {
+            //hash map only
+            CSByHashType::iterator it = m_csByHash.find (workItem->GetPacket());
+            if (it!=m_csByHash.end())
+              {
+                entry = it->second;
+              }
+          }
+
     }
 
  if (entry)
@@ -279,7 +264,7 @@ CCNxStandardContentStore::ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkIte
 	//increment it's use count
 	 entry->IncrementUseCount();
 
-	 RefreshLruListEntry(entry);
+	 m_lruList->RefreshEntry(entry);
 
 	 workItem->SetContentStorePacket(entry->GetPacket());
        }
@@ -315,11 +300,11 @@ CCNxStandardContentStore::ServiceAddContentObject (Ptr<CCNxStandardForwarderWork
 
       if (!result)
         {
-	  result=RemoveContentObject(m_lruList.back()->GetPacket());
+	  result=RemoveContentObject(m_lruList->GetTailPacket());
         }
       if (result)
 	{
-	  result = AddLruListEntry(newEntry);
+	  result = m_lruList->AddEntry(newEntry);
 	}
       if (result)
 	{
@@ -386,6 +371,18 @@ CCNxStandardContentStore::RemoveContentObject(Ptr<CCNxPacket> cPacket)
 		result=m_csByNameKeyid.erase(cPacket);
             }
         }   //name map
+	else
+	  {
+#ifdef KEYIDHACK
+          if (1) //always erase this map, since all content is given a keyid
+#else
+	    if (cPacket->m_message->HasKeyid())
+#endif
+            {
+		result=m_csByHashKeyid.erase(cPacket);
+            }
+
+	  }
 
     }   //hash map
 
@@ -400,45 +397,7 @@ CCNxStandardContentStore::RemoveContentObject(Ptr<CCNxPacket> cPacket)
   return result;
 }
 
-bool
-CCNxStandardContentStore::AddLruListEntry(Ptr<CCNxStandardContentStoreEntry> entry)
-{
 
-	m_lruList.push_front(entry);
-	return true;
-
-}
-
-bool
-CCNxStandardContentStore::DeleteLruListEntry(Ptr<CCNxStandardContentStoreEntry> entry)
-{
-
-	 m_lruList.remove(entry);
-	 return true;
-
-}
-
-bool
-CCNxStandardContentStore::DeleteLruListPacket(Ptr<CCNxPacket> cPacket)
-{
-  /*
-  * Do a Lazy delete of the Ptr<CCNxStandardContentStoreEntry> from linked list, ie:
-  * If this is the packet at the end of the linked list, remove it.
-  *
-  * If it is not deleted, it will eventually get aged out.
-  * A guaranteed delete requires mapping the cPacket to the Ptr<CCNxStandardContentStoreEntry>,
-  * which requires searching the maps - not difficult but tedious and unnecessary most of the
-  * time, since deletes will be typically used to remove the last item in the linked list.
-  *
-  */
-
-     if (m_lruList.back()->GetPacket() == cPacket) //lazy delete
-       {
-	     m_lruList.pop_back();
-	     return true;
-       }
-     return false;
-}
 
 bool
 CCNxStandardContentStore::AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardContentStoreEntry> newEntry)
@@ -447,6 +406,7 @@ CCNxStandardContentStore::AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardC
   Ptr<CCNxContentObject> content = DynamicCast<CCNxContentObject, CCNxMessage>(cPacket->GetMessage());
 
   m_csByHash[cPacket] = newEntry;
+
 
   if (content->GetName())
     {
@@ -461,6 +421,16 @@ CCNxStandardContentStore::AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardC
         m_csByNameKeyid[cPacket] = newEntry;
       }
     }
+  else
+#ifdef KEYIDHACK
+   if (1)  //for now, all content will treated as if it has a keyid
+ #else
+   if (content->HasKeyid())
+ #endif
+     {
+       m_csByNameKeyid[cPacket] = newEntry;
+     }
+
   return true;
 }
 
@@ -468,28 +438,16 @@ CCNxStandardContentStore::AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardC
 
 
 
-bool
-CCNxStandardContentStore::RefreshLruListEntry (Ptr<CCNxStandardContentStoreEntry> entry)
-{
-  //move this entry to the front of the lru List
-  m_lruList.remove(entry);
-  m_lruList.push_front(entry);
-  return true;
-}
 
-
-
-Ptr<CCNxPacket>
-CCNxStandardContentStore::GetLruListTailPacket () const
-{
-  return m_lruList.back()->GetPacket();
-}
 
 size_t
 CCNxStandardContentStore::GetObjectCount () const
 {
   // since we have other methods to check the map sizes, we will do this count using the LRU list
-  return m_lruList.size ();
+  if (m_lruList->GetSize() != m_csByHash.size()){
+      NS_LOG_ERROR("LRU list Size=" << m_lruList->GetSize() << " but Hash map size=" << m_csByHash.size() << ". These should be equal." );
+  }
+  return m_lruList->GetSize ();
 }
 
 size_t
@@ -498,22 +456,60 @@ CCNxStandardContentStore::GetObjectCapacity () const
   return m_objectCapacity;
 }
 
-size_t
-CCNxStandardContentStore::GetMapByHashCount () const
-{
-  return m_csByHash.size ();
-}
 
-size_t
-CCNxStandardContentStore::GetMapByNameCount () const
-{
-  return m_csByName.size ();
-}
+Ptr<const CCNxByteArray>
+CCNxStandardContentStore::GetKeyidOrRestriction(Ptr<const CCNxPacket> z)
+  {
+#ifdef KEYIDHACK
+  Ptr<CCNxHashValue> magicHashValue = Create<CCNxHashValue>(55);
+#endif
 
-size_t
-CCNxStandardContentStore::GetMapByNameKeyidCount () const
+  Ptr<CCNxInterest> zInterest;
+  Ptr<const CCNxByteArray> zKeyid;
+  switch (z->GetMessage()->GetMessageType())
+  {
+  case CCNxMessage::Interest :
+	  zInterest = DynamicCast<CCNxInterest, CCNxMessage>(z->GetMessage());
+	  zKeyid = zInterest->GetKeyidRestriction()->GetValue();
+	  break;
+  case CCNxMessage::ContentObject :
+#ifdef KEYIDHACK
+	  //hack  magic number keyIdRest into content
+	  zKeyid = magicHashValue->GetValue();    //TODO - remove when marc's keyid available
+#else
+	  zKeyid = ???
+#endif
+	      break;
+  default:
+      NS_ASSERT("cant find keyid - packet has bad message type");
+      zKeyid = Ptr<CCNxByteArray> (0);
+      break;
+  }
+  return zKeyid;
+
+  }
+
+Ptr<const CCNxByteArray>
+CCNxStandardContentStore::GetHashOrRestriction(Ptr<const CCNxPacket> z)
 {
-    return m_csByNameKeyid.size ();
+    Ptr<CCNxInterest> zInterest;
+
+
+      switch (z->GetMessage()->GetMessageType())
+      {
+      case CCNxMessage::Interest :
+	  zInterest = DynamicCast<CCNxInterest, CCNxMessage>(z->GetMessage());
+	  return(zInterest->GetHashRestriction()->GetValue());
+	  break;
+      case CCNxMessage::ContentObject :
+	  return(z->GetContentObjectHash().GetValue());
+	  break;
+      default:
+          NS_ASSERT("cant find hash - packet has bad message type");
+          return(Ptr<CCNxByteArray> (0));
+          break;
+      } //switch
+
 }
 
 
