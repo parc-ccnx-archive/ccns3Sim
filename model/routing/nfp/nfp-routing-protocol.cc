@@ -116,6 +116,8 @@ NfpRoutingProtocol::NfpRoutingProtocol ()
   m_helloTimer = Timer (Timer::REMOVE_ON_DESTROY);
   m_advertiseTimer = Timer (Timer::REMOVE_ON_DESTROY);
   m_anchorRouteTimer = Timer (Timer::REMOVE_ON_DESTROY);
+  m_processWorkQueueTimer  = Timer (Timer::REMOVE_ON_DESTROY);
+
   m_uniformRandomVariable = CreateObject<UniformRandomVariable> ();
   m_nfpPrefix = Create<CCNxName> ("ccnx:/name=nfp");
   m_minimumMtu = GetMinimumMtu ();
@@ -163,15 +165,16 @@ NfpRoutingProtocol::DoInitialize (void)
   m_helloTimer.SetFunction (&NfpRoutingProtocol::HelloTimerExpired, this);
   m_advertiseTimer.SetFunction (&NfpRoutingProtocol::AdvertiseTimerExpired, this);
   m_anchorRouteTimer.SetFunction (&NfpRoutingProtocol::AnchorRouteTimerExpired, this);
+  m_processWorkQueueTimer.SetFunction (&NfpRoutingProtocol::ProcessWorkQueueTimerExpired, this);
 
-  // Set the hello timer to start in 1 jitter interval (i.e. immediately)
-  SetTimer (m_helloTimer, m_jitter, Time (0));
+  // Set the hello timer to start in 1 jitter interval with 25% jitter
+  SetTimer (m_helloTimer, m_jitter, m_jitter / 4);
 
-  // Set the advertise timer to start in 1 jitter interval (i.e. immediately)
-  SetTimer (m_advertiseTimer, m_jitter, Time (0));
+  // Set the advertise timer to start in 1 jitter interval with 25% jitter
+  SetTimer (m_advertiseTimer, m_jitter, m_jitter / 4);
 
-  // Set the anchor route timer to start in 1 jitter interval (i.e. immediately)
-  SetTimer (m_anchorRouteTimer, m_jitter, Time (0));
+  // Set the anchor route timer to start in 1 jitter interval with 25% jitter
+  SetTimer (m_anchorRouteTimer, m_jitter, m_jitter / 4);
 }
 
 /**
@@ -207,9 +210,6 @@ NfpRoutingProtocol::AddAnchorPrefix (Ptr<const CCNxName> prefix)
     {
       m_anchorNames[prefix] = 1;
       InjectAnchorRoute (prefix, m_anchorSeqnum++);
-
-      // immediately advertise it
-      ProcessWorkQueue();
     }
 }
 
@@ -295,6 +295,24 @@ NfpRoutingProtocol::CalculateJitteredTime (Time interval, Time jitter)
   Time t = interval - offset;
   NS_ASSERT_MSG(t > 0, "Negative time!  interval = " << interval << " jitter = " << jitter << " offset = " << offset);
   return t;
+}
+
+void
+NfpRoutingProtocol::ProcessWorkQueueTimerExpired()
+{
+  m_computationCost.IncrementEvents();
+  ProcessWorkQueue();
+}
+
+void
+NfpRoutingProtocol::SetProcessWorkQueueTimer()
+{
+  static Time interval = MilliSeconds(10);
+  static Time jitter = MilliSeconds(5);
+
+  if (!m_processWorkQueueTimer.IsRunning()) {
+      SetTimer(m_processWorkQueueTimer, interval, jitter);
+  }
 }
 
 void
@@ -406,12 +424,7 @@ NfpRoutingProtocol::AnchorRouteTimerExpired ()
         {
           InjectAnchorRoute (i->first, anchorSeqnum);
         }
-
-      /**
-       * If we added any new routes, this will send an advertisement immediately.
-       */
-      ProcessWorkQueue ();
-    }
+     }
 
   SetTimer (m_anchorRouteTimer, m_routeTimeout, m_jitter);
 }
@@ -424,8 +437,6 @@ NfpRoutingProtocol::AdvertiseTimerExpired ()
   NS_LOG_DEBUG ("AdvertiseTimerExpired, processing work queue");
 
   m_computationCost.IncrementEvents();
-
-  ProcessWorkQueue ();
 
   /*
    * Pop stuff off the timer heap to advertise anything whose timer has expired.
@@ -450,9 +461,6 @@ NfpRoutingProtocol::AdvertiseTimerExpired ()
           break;
         }
     }
-
-  // This will make new m_prefixTimerHeap entries for the advertisements sent.
-  ProcessWorkQueue ();
 
   // Now look at the top element in the heap to set our next expiry timer
   if ( (entry = m_prefixTimerHeap.Peek ()) )
@@ -592,9 +600,6 @@ NfpRoutingProtocol::ReceivePayload (Ptr<NfpPayload> payload, Ptr<CCNxConnection>
         {
           NS_LOG_INFO ("ReceivePayload from " << *payload->GetRouterName () << ", msgSeqnum " << payload->GetMessageSeqnum () << " out-of-order, ignoring");
         }
-
-      // In case this message caused any changes in state
-      ProcessWorkQueue ();
     }
   else
     {
@@ -626,14 +631,14 @@ NfpRoutingProtocol::ReceiveAdvertise (Ptr<NfpAdvertise> advertise, Ptr<CCNxConne
 {
   NS_LOG_FUNCTION (this << advertise << ingressConnection->GetConnectionId ());
 
-  m_stats.advertiseReceived++;
+  m_stats.IncrementAdvertiseReceived();
   m_computationCost.IncrementEvents();
   Ptr<const CCNxName> prefixName = advertise->GetPrefix ();
   PrefixMapType::iterator i = m_prefixes.find (prefixName);
   if (i == m_prefixes.end ())
     {
       NS_LOG_INFO ("Adding advertisement " << *advertise << " ingress " << ingressConnection->GetConnectionId());
-      m_stats.advertiseReceivedFeasible++;
+      m_stats.IncrementAdvertiseReceivedFeasible();
       AddAdvertise (advertise, ingressConnection);
     }
   else
@@ -881,6 +886,8 @@ void
 NfpRoutingProtocol::ProcessWorkQueue (void)
 {
   if (!m_workQueue.empty()) {
+      NS_LOG_DEBUG("Node " << m_node->GetId() << " Process work queue");
+
       Ptr<NfpPayload> payload = CreatePayload ();
       while (!m_workQueue.empty ())
         {
@@ -913,7 +920,7 @@ NfpRoutingProtocol::ProcessWorkQueue (void)
                   NS_LOG_DEBUG("Append to payload " << *advertise);
                   payload->AppendMessage (advertise);
 
-                  m_stats.advertiseSent++;
+                  m_stats.IncrementAdvertiseSent();
                 }
               else
                 {
@@ -926,8 +933,9 @@ NfpRoutingProtocol::ProcessWorkQueue (void)
                       payload = CreatePayload ();
                     }
 
+                  NS_LOG_DEBUG("Append to payload " << *withdraw);
                   payload->AppendMessage (withdraw);
-                  m_stats.withdrawSent++;
+                  m_stats.IncrementWithdrawSent();
                 }
 
               m_computationCost.IncrementEvents();
@@ -1011,6 +1019,8 @@ NfpRoutingProtocol::SetNode (Ptr<Node> node)
   m_ccnx = m_node->GetObject<CCNxL3Protocol> ();
   NS_ASSERT_MSG (m_ccnx, "Failed to lookup the CCNxL3Protocol on this node");
 
+  m_stats.SetNodeId(node->GetId());
+
   SetRouterName ();
 }
 
@@ -1019,6 +1029,7 @@ NfpRoutingProtocol::AddWorkQueueEntry (Ptr<const CCNxName> anchorName, Ptr<const
 {
   NS_LOG_FUNCTION (this << anchorName << prefix);
   m_workQueue.push_back ( Create<NfpWorkQueueEntry> (anchorName, prefix) );
+  SetProcessWorkQueueTimer();
 }
 
 Time
@@ -1113,6 +1124,12 @@ NfpRoutingProtocol::GetComputationCost() const
       total += i->second->GetComputationCost();
   }
   return total;
+}
+
+NfpStats
+NfpRoutingProtocol::GetStats() const
+{
+  return m_stats;
 }
 
 void

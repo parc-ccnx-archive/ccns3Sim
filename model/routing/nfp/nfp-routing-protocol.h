@@ -302,6 +302,8 @@ public:
 
   void PrintComputationCost (Ptr<OutputStreamWrapper> streamWrapper) const;
 
+  NfpStats GetStats() const;
+
 protected:
   /**
    * The storage type for Anchor Prefixes.
@@ -755,6 +757,24 @@ protected:
   Time GetCurrentTime (void) const;
 
   NfpComputationCost m_computationCost;
+
+  /**
+   * Whenever there is a change that requires a message to be sent, we queue it and start
+   * (if not running) this timer so we send the messages a short delay later.
+   */
+  Timer m_processWorkQueueTimer;
+
+  /**
+   * The callback from `m_processWorkQueueTimer`.
+   */
+  void ProcessWorkQueueTimerExpired();
+
+  /**
+   * Call to set the timer, if it is not already running.  If it is running,
+   * this method has no effect.
+   */
+  void SetProcessWorkQueueTimer();
+
 };
 }
 }

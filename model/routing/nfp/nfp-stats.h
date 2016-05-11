@@ -56,6 +56,9 @@
 #ifndef CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_
 #define CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_
 
+#include <ostream>
+#include <stdint.h>
+
 namespace ns3
 {
   namespace ccnx
@@ -64,18 +67,20 @@ namespace ns3
     class NfpStats
     {
     public:
-      NfpStats (uint32_t nodeId);
+      NfpStats ();
 
       NfpStats(const NfpStats &copy);
 
       NfpStats & operator += (const NfpStats &other);
+
+      void SetNodeId(uint32_t nodeId);
 
       void IncrementPayloadsSent();
       void IncrementBytesSent(uint64_t value);
       void IncrementPayloadsReceived();
       void IncrementBytesReceived(uint64_t value);
 
-      void IncrementAdvertiseOriginiated();
+      void IncrementAdvertiseOriginated();
       void IncrementAdvertiseSent();
       void IncrementAdvertiseReceived();
       void IncrementAdvertiseReceivedFeasible();
@@ -89,7 +94,7 @@ namespace ns3
       uint64_t GetPayloadsReceived() const;
       uint64_t GetBytesReceived() const;
 
-      uint64_t GetAdvertiseOriginiated() const;
+      uint64_t GetAdvertiseOriginated() const;
       uint64_t GetAdvertiseSent() const;
       uint64_t GetAdvertiseReceived() const;
       uint64_t GetAdvertiseReceivedFeasible() const;

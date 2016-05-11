@@ -60,6 +60,7 @@
 #include "ns3/ccnx-routing-helper.h"
 #include "ns3/node-container.h"
 #include "ns3/nfp-computation-cost.h"
+#include "ns3/nfp-stats.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -142,6 +143,14 @@ public:
    * @param node [in] The node to lookup
    */
   static NfpComputationCost GetComputationCost( Ptr<Node> node );
+
+  /**
+   * Returns the routing statistics from time 0 to now.
+   *
+   * @param node [in] The node to lookup
+   * @return
+   */
+  static NfpStats GetStats( Ptr<Node> node );
 
 private:
   /**

@@ -167,3 +167,20 @@ NfpRoutingHelper::GetComputationCost( Ptr<Node> node )
     }
 }
 
+NfpStats
+NfpRoutingHelper::GetStats( Ptr<Node> node )
+{
+  Ptr<NfpRoutingProtocol> nfp = node->GetObject<NfpRoutingProtocol> ();
+  if (nfp)
+    {
+      return nfp->GetStats();
+    }
+  else
+    {
+      NS_ASSERT_MSG(false, "Could not retrieve object NfpRoutingProtocol from node " << node->GetId ());
+
+      // return a "0" if asserts not working.
+      return NfpStats();
+    }
+}
+
