@@ -80,6 +80,9 @@ namespace ns3
       void IncrementPayloadsReceived();
       void IncrementBytesReceived(uint64_t value);
 
+      void IncrementHellosSent();
+      uint64_t GetHellosSent() const;
+
       void IncrementAdvertiseOriginated();
       void IncrementAdvertiseSent();
       void IncrementAdvertiseReceived();
@@ -113,6 +116,7 @@ namespace ns3
       uint64_t    m_payloadsReceived;               //<! Number of NfpPayloads received
       uint64_t    m_bytesReceived;                  //<! Total bytes of NfpPayloads received
 
+      uint64_t	  m_hellosSent;			    //<! Number of empty messages sent as hellos
       uint64_t    m_advertiseOriginated;            //<! Advertisements we originated
       uint64_t    m_advertiseSent;                  //<! Advertisements we sent (includes Originated)
       uint64_t    m_advertiseReceived;              //<! Advertisements we received

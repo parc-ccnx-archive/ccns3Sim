@@ -63,7 +63,7 @@ using namespace ns3::ccnx;
 
 NfpStats::NfpStats ()
   : m_nodeId(0),
-    m_payloadsSent (0), m_bytesSent (0), m_payloadsReceived (0), m_bytesReceived (0),
+    m_payloadsSent (0), m_bytesSent (0), m_payloadsReceived (0), m_bytesReceived (0), m_hellosSent(0),
     m_advertiseOriginated (0), m_advertiseSent (0), m_advertiseReceived (0), m_advertiseReceivedFeasible (0),
     m_withdrawOriginated(0), m_withdrawSent (0), m_withdrawReceived (0)
 {
@@ -72,7 +72,7 @@ NfpStats::NfpStats ()
 NfpStats::NfpStats(const NfpStats &copy)
   : m_nodeId(copy.m_nodeId),
     m_payloadsSent (copy.m_payloadsSent), m_bytesSent (copy.m_bytesSent), m_payloadsReceived (copy.m_payloadsReceived),
-    m_bytesReceived (copy.m_bytesReceived),
+    m_bytesReceived (copy.m_bytesReceived), m_hellosSent (copy.m_hellosSent),
     m_advertiseOriginated (copy.m_advertiseOriginated), m_advertiseSent (copy.m_advertiseSent), m_advertiseReceived (copy.m_advertiseReceived),
     m_advertiseReceivedFeasible (copy.m_advertiseReceivedFeasible),
     m_withdrawOriginated(copy.m_withdrawOriginated), m_withdrawSent (copy.m_withdrawSent), m_withdrawReceived (copy.m_withdrawReceived)
@@ -93,6 +93,7 @@ NfpStats::operator += (const NfpStats &other)
   m_bytesSent += other.m_bytesSent;
   m_payloadsReceived += other.m_payloadsReceived;
   m_bytesReceived += other.m_bytesReceived;
+  m_hellosSent += other.m_hellosSent;
 
   m_advertiseOriginated += other.m_advertiseOriginated;
   m_advertiseSent += other.m_advertiseSent;
@@ -220,6 +221,16 @@ uint64_t NfpStats::GetWithdrawReceived() const
   return m_withdrawReceived;
 }
 
+void NfpStats::IncrementHellosSent()
+{
+  m_hellosSent++;
+}
+
+uint64_t
+NfpStats::GetHellosSent() const
+{
+  return m_hellosSent;
+}
 
 std::ostream &
 ns3::ccnx::operator << (std::ostream &os, const NfpStats &stats)
@@ -229,7 +240,8 @@ ns3::ccnx::operator << (std::ostream &os, const NfpStats &stats)
   os << std::setw (5) << stats.m_nodeId;
   os << " Routing stats";
   os << " payloads recv " << stats.m_payloadsReceived << " sent " << stats.m_payloadsSent;
-  os << " bytes recv " << stats.m_bytesReceived << " sent " << stats.m_bytesSent << std::endl;
+  os << " bytes recv " << stats.m_bytesReceived << " sent " << stats.m_bytesSent;
+  os << " hellos sent " << stats.m_hellosSent << std::endl;
 
   (*timePrinter)(os);
   os << std::setw (5) << stats.m_nodeId;

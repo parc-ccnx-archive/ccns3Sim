@@ -208,6 +208,7 @@ NfpRoutingProtocol::AddAnchorPrefix (Ptr<const CCNxName> prefix)
     }
   else
     {
+      NS_LOG_WARN("Add anchor prefix " << *prefix);
       m_anchorNames[prefix] = 1;
       InjectAnchorRoute (prefix, m_anchorSeqnum++);
     }
@@ -347,6 +348,8 @@ NfpRoutingProtocol::HelloTimerExpired ()
    */
   if (m_lastBroadcast + m_helloInterval - m_jitter <= GetCurrentTime ())
     {
+      m_stats.IncrementHellosSent();
+
       Ptr<NfpPayload> payload = CreatePayload ();
       Ptr<CCNxPacket> packet = CreatePacket (payload);
 
@@ -891,8 +894,9 @@ NfpRoutingProtocol::ProcessWorkQueue (void)
       Ptr<NfpPayload> payload = CreatePayload ();
       while (!m_workQueue.empty ())
         {
-          m_computationCost.IncrementLoopIterations();
-          Ptr<NfpWorkQueueEntry> workEntry = m_workQueue.pop_front ();
+	  // don't increment the LoopIterations, we count this in the IncrementEvents() just below
+
+	  Ptr<NfpWorkQueueEntry> workEntry = m_workQueue.pop_front ();
           NS_LOG_DEBUG ("ProcessWorkQueue workEntry " << *workEntry);
 
           m_computationCost.IncrementEvents();
