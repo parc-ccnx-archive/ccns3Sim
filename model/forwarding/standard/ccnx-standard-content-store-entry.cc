@@ -78,13 +78,13 @@ Ptr<CCNxPacket> CCNxStandardContentStoreEntry::GetPacket () const
 
 bool CCNxStandardContentStoreEntry::IsExpired () const
 {
-  // TODO - FIXME
+  // TODO CCN - FIXME
   return false;
 }
 
 bool CCNxStandardContentStoreEntry::IsStale () const
 {
-  // TODO - FIXME
+  // TODO CCN - FIXME
   return false;
 }
 

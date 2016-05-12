@@ -67,7 +67,7 @@ namespace ccnx {
  *
  * Factory to create a Standard FIB.
  *
- * TODO: Need to add setters for future FIB parameters, such as "max entries"
+ * TODO CCN: Need to add setters for future FIB parameters, such as "max entries"
  */
 class CCNxStandardFibFactory : public ns3::ObjectFactory
 {

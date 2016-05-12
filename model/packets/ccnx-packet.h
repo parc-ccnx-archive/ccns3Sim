@@ -138,13 +138,13 @@ public:
    * Set a virtual ContentObjectHash on the packet.  The hash is carried along with the packet to
    * allow "calculating" the hash without using a SHA.  It is carried in an ns3::Packet as a PacketTag.
    */
-  void SetContentObjectHash (CCNxHashValue hash);
+  void SetContentObjectHash (Ptr<CCNxHashValue> hash);
 
   /**
    * Get a virtual ContentObjectHash on the packet.  The hash is carried along with the packet to
    * allow "calculating" the hash without using a SHA.  It is carried in an ns3::Packet as a PacketTag.
    */
-  CCNxHashValue GetContentObjectHash (void) const;
+  Ptr<CCNxHashValue> GetContentObjectHash (void) const;
 
 protected:
   /**

@@ -82,6 +82,12 @@ CCNxHashValue::CCNxHashValue (uint64_t value, size_t length)
   InitializeFromInteger (value, length);
 }
 
+CCNxHashValue::CCNxHashValue (Ptr<const CCNxByteArray> byteArray)
+{
+  m_value = byteArray;
+}
+
+
 Ptr<const CCNxByteArray>
 CCNxHashValue::GetValue () const
 {

@@ -79,7 +79,7 @@ namespace ccnx {
  * `ReceiveInterestCallback`.  Likewise for `SatisfyInterest()`, the PIT table will return
  * the result to `SatisyfInterestCallback`.
  *
- * TODO: Probably want to make an Iterator on the PIT table with find() and erase() calls
+ * TODO CCN: Probably want to make an Iterator on the PIT table with find() and erase() calls
  * rather than have RemoveEntry().
  */
 class CCNxPit : public ns3::Object

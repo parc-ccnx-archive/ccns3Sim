@@ -364,15 +364,16 @@ CCNxPacket::Deserialize ()
 }
 
 void
-CCNxPacket::SetContentObjectHash (CCNxHashValue hash)
+CCNxPacket::SetContentObjectHash (Ptr<CCNxHashValue> hash)
 {
-  m_hash = hash;
+  m_hash = hash->GetValue();
 }
 
-CCNxHashValue
+Ptr<CCNxHashValue>
 CCNxPacket::GetContentObjectHash (void) const
 {
-  return m_hash;
+  Ptr<CCNxHashValue> hash = Create<CCNxHashValue> (m_hash.GetValue());
+  return hash;
 }
 
 void

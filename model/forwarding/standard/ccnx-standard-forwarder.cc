@@ -97,7 +97,8 @@ GetDefaultFibFactory ()
 static ObjectFactory
 GetDefaultContentStoreFactory ()
 {
-  static CCNxStandardContentStoreFactory factory;
+  // This will have a TypeId of 0 - Default value is no content store
+  static ObjectFactory factory;
   return factory;
 }
 
@@ -136,7 +137,6 @@ CCNxStandardForwarder::GetTypeId ()
   return tid;
 }
 
-//#TODO add changes suggested by marc 5/3 for #85.
 
 CCNxStandardForwarder::CCNxStandardForwarder ()
   : m_pitFactory (GetDefaultPitFactory ()), m_fibFactory (GetDefaultFibFactory ()),
@@ -173,9 +173,9 @@ CCNxStandardForwarder::DoInitialize (void)
   m_fib->SetLookupCallback (MakeCallback (&CCNxStandardForwarder::FibLookupCallback, this));
   m_fib->Initialize ();
 
-  m_contentStore = m_contentStoreFactory.Create<CCNxContentStore> ();
-  if (m_contentStore)
+  if (m_contentStoreFactory.GetTypeId().GetUid())
     {
+    m_contentStore = m_contentStoreFactory.Create<CCNxContentStore> ();
     m_contentStore->SetMatchInterestCallback (MakeCallback (&CCNxStandardForwarder::ContentStoreMatchInterestCallback, this));
     m_contentStore->SetAddContentObjectCallback (MakeCallback (&CCNxStandardForwarder::ContentStoreAddContentObjectCallback, this));
     m_contentStore->Initialize ();
@@ -475,7 +475,7 @@ CCNxStandardForwarder::AddRoute (Ptr<const CCNxRoute> route)
   for (CCNxRoute::const_iterator i = route->begin (); i != route->end (); ++i)
     {
       Ptr<const CCNxRouteEntry> entry = *i;
-      success |= AddRoute (entry->GetConnection (), entry->GetPrefix ()); //TODO add cost to fibEntry - currently cost is lost! ensure cost updated if entry already exists.
+      success |= AddRoute (entry->GetConnection (), entry->GetPrefix ()); //TODO CCN add cost to fibEntry - currently cost is lost! ensure cost updated if entry already exists.
     }
   return success;
 }
