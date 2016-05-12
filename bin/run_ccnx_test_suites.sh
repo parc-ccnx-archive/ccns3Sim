@@ -311,6 +311,22 @@ pushd "$WAF_DIR" > /dev/null
 mkdir -p "$CCNX_DBG_DIR_NAME"
 
 # ================================================================
+# show_test_results()
+# ================================================================
+show_test_results()
+{
+
+    RESULT="$(tail -3 $CCNX_DBG_LOG | grep ' of 1 test')"
+    PASS_REGEX="0 skipped, 0 failed, 0 crashed, 0 valgrind errors"
+    echo $RESULT | grep "$PASS_REGEX" > /dev/null 2>&1
+    if [ $? == 0 ]; then
+        DISP="${C_GREEN}${RESULT}${C_END}"
+    else
+        DISP="${C_RED}${RESULT}${C_END}"
+    fi
+    echo -e "    :: $DISP"
+}
+# ================================================================
 # run_single_suite()
 # ================================================================
 run_single_suite()
@@ -325,8 +341,7 @@ run_single_suite()
         ./test.py $VERBOSE --suite "$SUITE" >> "$CCNX_DBG_LOG" 2>&1
     fi
     # print the result
-    # TODO: Not sure what happens when all testcases are run
-    echo "    :: $(tail -3 $CCNX_DBG_LOG | grep ' of 1 test')"
+    show_test_results
 }
 
 # ================================================================
@@ -342,7 +357,7 @@ debug_single_suite()
         ./waf --run test-runner --command-template="lldb -- %s --suite=${SUITE} $VERBOSE"
     fi
     # print the result
-    echo "    :: $(tail -3 $CCNX_DBG_LOG | grep ' of 1 test')"
+    show_test_results
 }
 
 # ================================================================
@@ -420,7 +435,7 @@ populate_all_suites()
      if [ "$ALL_SUITES" == "" ]; then
         echo "Building a list of all $REPO_DIR_NAME test suites..."
         TC_NAME_REGEX="ccn|nfp|static-routing-helper|static-routing-protocol|validation-rsa-sha256"
-        ALL_SUITES="$(./test.py --list|egrep -i "$TC_NAME_REGEX" | egrep -vi 'waf|buildings' | awk '{print $2}')"
+        ALL_SUITES="$(./test.py --list|egrep -i "$TC_NAME_REGEX" | egrep -vi 'waf|buildings|click' | awk '{print $2}')"
     fi
 }
 verify_test_suite_names()
