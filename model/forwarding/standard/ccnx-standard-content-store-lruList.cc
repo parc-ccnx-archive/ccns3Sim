@@ -28,7 +28,7 @@
 #include "ns3/assert.h"
 #include "ns3/log.h"
 #include "ccnx-standard-content-store-lruList.h"
-
+#include "ns3/ccnx-standard-content-store-entry.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;

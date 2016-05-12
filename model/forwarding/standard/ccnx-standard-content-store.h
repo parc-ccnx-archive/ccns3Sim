@@ -36,7 +36,7 @@
 #include "ns3/ccnx-delay-queue.h"
 #include "ns3/ccnx-name.h"
 #include "ns3/ccnx-hash-value.h"
-#include "ns3/log.h"
+
 
 namespace ns3 {
 namespace ccnx {
@@ -83,7 +83,7 @@ public:
   virtual void SetAddContentObjectCallback (AddContentObjectCallback addContentObjectCallback);
 
 
-//TODO make ServiceMatchInterest and other internal methods private:
+//TODO CCN make ServiceMatchInterest and other internal methods private:
 
   /**
    * After input delay, service a MatchInterest request and send the
@@ -269,7 +269,7 @@ public:
         //Name and Keyid to CS entry lookup
         typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByHashKeyid> CSByHashKeyidType;
 
-        //TODO ask marc can content object  have keyid but no name?
+        //TODO CCN ask marc can content object  have keyid but no name?
 
 protected:
 
@@ -279,7 +279,7 @@ protected:
 	* It is always added to the hash list (since all content objects have a hash value),
 	* but only added to the name list if it has a name,
 	* and only added to the name/keyid list if it has a name and a keyid.
-	* Protected
+	* They are Protected rather than private so they can be accessed by test methods in a derived class used for unit testing.
 	*
 	*/
 
@@ -290,6 +290,15 @@ protected:
         CSByNameKeyidType m_csByNameKeyid;
 
         CSByHashKeyidType m_csByHashKeyid;
+
+        /**
+          * The Least Recently Used (lru) list is a class which has the least recently used packet at the end of the list,
+          * and the most recently used at the beginning. The list allows the LRU algorithm to be used when
+          * to evict packets when the content store has reached maximum size.
+	  * Protected rather than private so it can be accessed by test methods in a derived class used for unit testing.
+          */
+
+        Ptr<CCNxStandardContentStoreLruList> m_lruList;
 
 private:
 
@@ -312,12 +321,7 @@ private:
   /** Maxium number of content objects to store in content store */
   long long m_objectCapacity;
 
-   /**
-    * The Least Recently Used (lru) list is a class which has the least recently used packet at the end of the list,
-    * and the most recently used at the beginning. The list allows the LRU algorithm to be used when
-    * to evict packets when the content store has reached maximum size.
-    */
-   Ptr<CCNxStandardContentStoreLruList> m_lruList;
+
 
    /**
     * Set by the forwarder as the callback for matchInterest

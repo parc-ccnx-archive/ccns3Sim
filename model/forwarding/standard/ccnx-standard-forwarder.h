@@ -215,16 +215,26 @@ private:
    */
   ObjectFactory m_fibFactory;
 
+
+
+
   /**
    * The factory to create a ContentStore.  Maybe set by the attribute "ContentStoreFactory".
-   * Defaults to `CCNxStandardContentStoreFactory`.
+   * Defaults to No Content Store. To use the standard Content Store, set the attribute as
+   * follows in the code which generates the standardForwarder:
+   * @code
+   * {
+   *   static CCNxStandardContentStoreFactory factory;
+   *   forwarder->SetAttribute ("ContentStoreFactory", ObjectFactoryValue (factory));
+   * }
+   * @endcode
    */
   ObjectFactory m_contentStoreFactory;
 
   /**
    * This function is called by the base class CCNxL3Protocol
    */
-  //TODO make these ccnxPacket parameters const
+  //TODO CCN make these ccnxPacket parameters const
 
   /**
    * Operator used for FIB and PIT name comparison.

@@ -29,11 +29,19 @@
 #include "ns3/log.h"
 #include "ns3/integer.h"
 #include "ns3/ccnx-delay-queue.h"
+#include "ns3/object.h"
 
 #include "ccnx-standard-content-store.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
+
+
+//TODO CCN  - Marc: in simulation, where does content object hash come from? is it guaranteed to be unique? needs to be
+
+NS_LOG_COMPONENT_DEFINE ("CCNxStandardContentStore");
+NS_OBJECT_ENSURE_REGISTERED (CCNxStandardContentStore);
+
 
 static const long long _defaultObjectCapacity = 10000;  //size_t and uint64_t dont work with AddAttribute
 
@@ -41,15 +49,10 @@ static const Time _defaultLayerDelayConstant = MicroSeconds (1);
 static const Time _defaultLayerDelaySlope = NanoSeconds (10);
 static unsigned _defaultLayerDelayServers = 1;
 
-//TODO - Marc: in simulation, where does content object hash come from? is it guaranteed to be unique? needs to be
-
-NS_LOG_COMPONENT_DEFINE ("CCNxStandardContentStore");
-NS_OBJECT_ENSURE_REGISTERED (CCNxStandardContentStore);
-
 /**
  * Used as a default callback for m_recieveInterestCallback in case the user does not set it.
  */
-//TODO - ask marc if NullMatchInterestCallback should be global or CCNxStandardContentStore scoped?
+//TODO CCN - ask marc if NullMatchInterestCallback should be global or CCNxStandardContentStore scoped?
 static void
 NullMatchInterestCallback (Ptr<CCNxForwarderMessage> message)
 {
@@ -389,7 +392,7 @@ CCNxStandardContentStore::RemoveContentObject(Ptr<CCNxPacket> cPacket)
 
   if (result) //dont delete it if it was not found in the maps
     {
-      DeleteLruListPacket(cPacket);
+      m_lruList->DeletePacket(cPacket);
         {
         }
     }
@@ -475,7 +478,7 @@ CCNxStandardContentStore::GetKeyidOrRestriction(Ptr<const CCNxPacket> z)
   case CCNxMessage::ContentObject :
 #ifdef KEYIDHACK
 	  //hack  magic number keyIdRest into content
-	  zKeyid = magicHashValue->GetValue();    //TODO - remove when marc's keyid available
+	  zKeyid = magicHashValue->GetValue();    //TODO CCN - remove when marc's keyid available
 #else
 	  zKeyid = ???
 #endif
@@ -502,7 +505,7 @@ CCNxStandardContentStore::GetHashOrRestriction(Ptr<const CCNxPacket> z)
 	  return(zInterest->GetHashRestriction()->GetValue());
 	  break;
       case CCNxMessage::ContentObject :
-	  return(z->GetContentObjectHash().GetValue());
+	  return(z->GetContentObjectHash()->GetValue());
 	  break;
       default:
           NS_ASSERT("cant find hash - packet has bad message type");

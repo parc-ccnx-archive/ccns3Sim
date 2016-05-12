@@ -25,64 +25,58 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_STANDARD_CONTENT_STORE_LRU_LIST_H_
-#define CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_STANDARD_CONTENT_STORE_LRU_LIST_H_
+#ifndef CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_
+#define CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_
 
 #include <map>
-#include "ns3/simple-ref-count.h"
+#include "ns3/ccnx-content-store.h"
 #include "ns3/ccnx-standard-content-store-entry.h"
+#include "ns3/ccnx-standard-forwarder-work-item.h"
+#include "ns3/ccnx-delay-queue.h"
+#include "ns3/ccnx-name.h"
+#include "ns3/ccnx-hash-value.h"
+#include "ns3/log.h"
 
 namespace ns3 {
 namespace ccnx {
 
-class CCNxStandardContentStoreLruList : public ns3::SimpleRefCount<CCNxStandardContentStoreLruList>
+class CCNxStandardContentStoreWithTestMethods : public CCNxStandardContentStore
 {
 public:
 
   /**
-   * Create a standard content store.  It is configured via the NS attribute system.
+   * Returns the number of content object in the hash map.
+   *
+   * @return The number of objects in the hash map.
    */
-  CCNxStandardContentStoreLruList ();
-
+  virtual size_t GetMapByHashCount() const
+  {
+    return m_csByHash.size ();
+  }
   /**
-   * Virtual destructor for inheritance
+   * Returns the number of content object in the name map.
+   *
+   * @return The number of objects in the name map.
    */
-  virtual ~CCNxStandardContentStoreLruList ();
+  virtual size_t GetMapByNameCount() const
+  {
+    return m_csByName.size ();
+  }
+  /**
+   * Returns the number of content object in the nameKeyid map.
+   *
+   * @return The number of objects in the nameKeyid map.
+   */
+  virtual size_t GetMapByNameKeyidCount() const
+  {
+      return m_csByNameKeyid.size ();
+  }
 
 
-
-  virtual bool AddEntry(Ptr<CCNxStandardContentStoreEntry> entry);
-
-  virtual bool DeleteEntry(Ptr<CCNxStandardContentStoreEntry> entry);
-
-  virtual bool RefreshEntry(Ptr<CCNxStandardContentStoreEntry> entry);
-
-  virtual bool DeletePacket(Ptr<CCNxPacket> cPacket);
-
-  virtual   Ptr<CCNxPacket> GetTailPacket() const;
-
-  virtual uint64_t GetSize() const;
-
-protected:
-
-
-private:
-
-   /**
-    * The Least Recently Used (lru) list has the least recently used packet at the end of the list,
-    * and the most recently used at the beginning. The list allows the LRU algorithm to be used when
-    * to evict packets when the content store has reached maximum size.
-    */
-   std::list<Ptr<CCNxStandardContentStoreEntry> > m_lruList;
 
 };
 
 }   /* namespace ccnx */
 } /* namespace ns3 */
 
-
-
-
-
-
-#endif /* CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_STANDARD_CONTENT_STORE_LRU_LIST_H_ */
+#endif /* CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_ */
