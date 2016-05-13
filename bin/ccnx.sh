@@ -101,6 +101,7 @@ ccnx_help()
     A_GCOV="${C_WHITE}gcov${C_END}"
     A_GCOV_CLEAN="${C_WHITE}gcov_clean${C_END}"
     A_LIST="${C_WHITE}list${C_END}"
+    A_OPT="${C_WHITE}opt${C_END}"
     A_PURGE="${C_WHITE}debug_purge${C_END}"
     A_PYTHON="${C_WHITE}python${C_END}"
     A_REBUILD="${C_WHITE}rebuild${C_END}"
@@ -108,24 +109,29 @@ ccnx_help()
 
     A_EXE="${C_WHITE}$0${C_END}"
     echo -e "
-usage: $A_EXE [$A_LIST] [$A_CLEAN] [$A_CFG] [$A_BUILD] [$A_GCOV] [$A_REBUILD] [$A_PYTHON] [$A_TEST] [$A_EX <example_name>]
+usage: $A_EXE [$A_LIST] [$A_CLEAN] [$A_CFG] [$A_BUILD] [$A_GCOV] [$A_OPT] [$A_REBUILD] [$A_PYTHON] [$A_TEST] [$A_EX <example_name>]
 
     $A_CLEAN           Runs './waf clean'
     $A_CFG          Runs './waf configure' or './waf configure --enable-gcov' if the
-                    coverage argument is also provided. There is a defaut list of
-                    waf enable/disable args that does not include python unless
-                    the argument python is also provided
+                    coverage argument is also provided. It is also possible to use
+                    the optimized build profile with the $A_OPT argument (this will
+                    add --build-profile=optimized). There is a default list of waf
+                    enable/disable args that does not include python unless the
+                    argument python is also provided
     $A_BUILD           Runs './waf build'
-    $A_GCOV            Runs './waf configure --enable-gcov' with or without the config
-                    argument. This is currently only available for  GNU/Linux.
-                    If the configuration has python enabled, the build will
-                    fail. You can do '$0 $A_REBUILD $A_GCOV to clean/config/build
+    $A_GCOV            Adds '--enable-gcov' to the configure command. Requires $A_CFG.
+                    If the configuration has both $A_GCOV and $A_PYTHON enabled,
+                    the build will fail.
+                    You can do '$0 $A_REBUILD $A_GCOV to clean/config/build
                     for gcov.
+    $A_OPT             Adds --build-profile=optimized to the configure command.
+                    Requires $A_CFG. You can do '$0 $A_REBUILD $A_OPT to
+                    clean/config/build
     $A_PYTHON          Used to run 'waf configure' with python enabled (i.e.
                     --disable-python is not used). Can not be combined with
                     gcov. $A_GCOV_CLEAN is implied when gcov arg is not provided.
     $A_REBUILD         Equivalent to '$0 $A_CLEAN $A_CFG $A_BUILD'. Can also provide the
-                    $A_GCOV argument.
+                    $A_GCOV and/or $_A_OPT argument.
     $A_TEST            Run 'test.py'
     $A_EX <example_name>
                     Run the provided example name
@@ -145,6 +151,7 @@ CLEAN=0
 CONFIG=0
 BUILD=0
 GCOV=0
+OPTIMIZED=0
 TEST=0
 RUN_EXAMPLE=0
 LIST=0
@@ -184,11 +191,13 @@ for arg in "$@"; do
             CLEAN=1
             ;;
         "cov"|"gcov"|"coverage")
-            echo "Configuration with --enable-gcov..."
             GCOV=1
             ;;
         "config"|"configure"|"cfg")
             CONFIG=1
+            ;;
+        "opt"|"optimized")
+            OPTIMIZED=1
             ;;
         "python")
             PYTHON=1
@@ -256,15 +265,15 @@ pushd "$WAF_DIR" > /dev/null
 
     # configuration options
     if [ $CONFIG == 1 ]; then
-        if [ $PYTHON == 1 ] && [ $GCOV == 1 ]; then
-            waf_config "python gcov"
-        elif [ $PYTHON == 1 ]; then
-            waf_config "python"
-        elif [ $GCOV == 1 ]; then
-            waf_config "gcov"
-        else
-            waf_config
+        if [ $PYTHON == 1  ] && [ $GCOV == 1 ]; then
+            echo "ERROR! $0: cannot enable both python and gcov!"
+            exit 13
         fi
+        CONFIG_ARGS=""
+        [ $PYTHON == 1 ] && CONFIG_ARGS+=" python"
+        [ $GCOV == 1 ] && CONFIG_ARGS+=" gcov"
+        [ $OPTIMIZED == 1 ] && CONFIG_ARGS+=" optimized"
+        waf_config "$CONFIG_ARGS"
     fi
 
     if [ $BUILD == 1  ]; then

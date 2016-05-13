@@ -60,7 +60,7 @@
 using namespace ns3;
 using namespace ns3::ccnx;
 
-CCNxStandardContentStoreFactory::CCNxStandardContentStoreFactory () : ns3::ObjectFactory ("ns3::ccnx::CCNxStandardContentStore")
+CCNxStandardContentStoreFactory::CCNxStandardContentStoreFactory () : ObjectFactory("ns3::ccnx::CCNxStandardContentStore")
 {
 }
 

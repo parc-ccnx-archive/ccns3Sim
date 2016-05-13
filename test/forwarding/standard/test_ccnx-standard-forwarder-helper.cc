@@ -75,7 +75,7 @@ namespace TestSuiteCCNxStandardForwarderHelper {
 //b4 two interests one content, repeat
 //b5 no interest one content
 
-//TODO - KEYID and HASH unit tests as listed below
+//TODO CCN - KEYID and HASH unit tests as listed below
 // KEYID
 //1 keyid interest, content key doesnt match
 //receiveInterest -  with keyid restriction - verdict forward

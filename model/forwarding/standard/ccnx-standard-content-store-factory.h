@@ -67,7 +67,7 @@ namespace ccnx {
  *
  * Factory to create a Standard ContentStore.
  *
- * TODO: Need to add setters for future ContentStore parameters
+ * TODO CCN: Need to add setters for future ContentStore parameters
  */
 class CCNxStandardContentStoreFactory : public ns3::ObjectFactory
 {

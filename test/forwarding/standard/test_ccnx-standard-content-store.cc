@@ -1,20 +1,22 @@
 /*
- * Copyright (c) 2016, Xerox Corporation (Xerox) and Palo Alto Research Center, Inc (PARC)
+ * Copyright (c) 2016, Xerox Corporation (Xerox)and Palo Alto Research Center (PARC)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * * Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in the
- *   documentation and/or other materials provided with the distribution.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Patent rights are not granted under this agreement. Patent rights are
+ *       available under FRAND terms.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL XEROX OR PARC BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL XEROX or PARC BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -22,42 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* ################################################################################
- * #
- * # PATENT NOTICE
- * #
- * # This software is distributed under the BSD 2-clause License (see LICENSE
- * # file).  This BSD License does not make any patent claims and as such, does
- * # not act as a patent grant.  The purpose of this section is for each contributor
- * # to define their intentions with respect to intellectual property.
- * #
- * # Each contributor to this source code is encouraged to state their patent
- * # claims and licensing mechanisms for any contributions made. At the end of
- * # this section contributors may each make their own statements.  Contributor's
- * # claims and grants only apply to the pieces (source code, programs, text,
- * # media, etc) that they have contributed directly to this software.
- * #
- * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
- * #
- * # Do not remove this header notification.  The contents of this section must be
- * # present in all distributions of the software.  You may only modify your own
- * # intellectual property statements.  Please provide contact information.
- *
- * - Palo Alto Research Center, Inc
- * This software distribution does not grant any rights to patents owned by Palo
- * Alto Research Center, Inc (PARC). Rights to these patents are available via
- * various mechanisms. As of January 2016 PARC has committed to FRAND licensing any
- * intellectual property used by its contributions to this software. You may
- * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
- */
 
 #include "ns3/test.h"
 #include "ns3/ccnx-standard-content-store.h"
 #include "ns3/ccnx-forwarder-message.h"
 #include "ns3/ccnx-standard-forwarder-work-item.h"
 #include "../../mockups/mockup_ccnx-virtual-connection.h"
+#include "../../mockups/ccnx-standard-content-store-with-test-methods.h"
 #include "ns3/integer.h"
 #include "../../TestMacros.h"
 
@@ -135,10 +108,10 @@ StepSimulatorAddContentObject ()
 }
 
 
-static Ptr<CCNxStandardContentStore>
+static Ptr<CCNxStandardContentStoreWithTestMethods>
 CreateContentStore ()
 {
-  Ptr<CCNxStandardContentStore> contentStore = CreateObject<CCNxStandardContentStore> ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> contentStore = CreateObject<CCNxStandardContentStoreWithTestMethods> ();
   contentStore->SetMatchInterestCallback (MakeCallback (&MockupMatchInterestCallback));
   contentStore->SetAddContentObjectCallback (MakeCallback (&MockupAddContentObjectCallback));
   contentStore->Initialize ();
@@ -239,12 +212,12 @@ CreateTestData ()
   data.content1 = Create<CCNxContentObject> (data.name1);
   data.cPacket1 = CCNxPacket::CreateFromMessage (data.content1);
   data.hash1 = Create<CCNxHashValue>(1);
-  data.cPacket1->SetContentObjectHash(*data.hash1);
+  data.cPacket1->SetContentObjectHash(data.hash1);
   data.cForwarderMessage1 = Create<CCNxForwarderMessage> (data.cPacket1,data.ingress1);
   data.cWorkItem1 = CreateWorkItem(data.cPacket1,data.ingress1);
 
   //interest and content #2 - content has hash, name, and keyid. interest has name and hash matches
-  //TODO make interest and content nameless
+  //TODO CCN make interest and content nameless
   data.name2 = Create<CCNxName> ("ccnx:/name=catfur/name=and/name=mayonnaise/name=feels/name=good");
 
   Ptr<CCNxHashValue> keyidRest2;
@@ -258,7 +231,7 @@ CreateTestData ()
   data.content2 = Create<CCNxContentObject> (data.name2);
   data.cPacket2 = CCNxPacket::CreateFromMessage (data.content2);
   data.hash2 = Create<CCNxHashValue>(2);
-  data.cPacket2->SetContentObjectHash(*data.hash2);
+  data.cPacket2->SetContentObjectHash(data.hash2);
   data.cForwarderMessage2 = Create<CCNxForwarderMessage> (data.cPacket2,data.ingress2);
   data.cWorkItem2 = CreateWorkItem(data.cPacket2,data.ingress2);
 
@@ -276,7 +249,7 @@ CreateTestData ()
   data.content3 = Create<CCNxContentObject> (data.name3);
   data.cPacket3 = CCNxPacket::CreateFromMessage (data.content3);
   data.hash3 = Create<CCNxHashValue>(3);
-  data.cPacket3->SetContentObjectHash(*data.hash3);
+  data.cPacket3->SetContentObjectHash(data.hash3);
   data.cForwarderMessage3 = Create<CCNxForwarderMessage> (data.cPacket3,data.ingress3);
   data.cWorkItem3 = CreateWorkItem(data.cPacket3,data.ingress3);
 
@@ -290,10 +263,10 @@ BeginTest (MatchInterest)
 {
   printf ("TestCCNxStandardContentStore_matchInterest DoRun\n");
   //AddContentObject with name,  verify MatchInterest returns same packet
-  //TODO add method to allow us to verify entry->GetUseCount
+  //TODO CCN add method to allow us to verify entry->GetUseCount
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
 
@@ -305,13 +278,13 @@ BeginTest (MatchInterest)
 }
 EndTest ()
 
-BeginTest (MatchInterestHash)  //TODO try this with nameless object - doesnt test hash if there is a name
+BeginTest (MatchInterestHash)  //TODO CCN try this with nameless object - doesnt test hash if there is a name
 {
   printf ("TestCCNxStandardContentStore_matchInterestHash DoRun\n");
   //AddContentObject with name,  verify MatchInterest returns same packet
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem2,data.eConnList1); StepSimulatorAddContentObject();
 
@@ -330,7 +303,7 @@ BeginTest (MatchInterestKeyid)
   //* 	AddContentObject with name/keyid,   verify MatchInterest returns same packet,
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem3,data.eConnList1); StepSimulatorAddContentObject();
   a->MatchInterest(data.iWorkItem3); StepSimulatorMatchInterest ();
@@ -346,7 +319,7 @@ BeginTest (MatchInterestTwoObjects)
   //* 	AddContentObject 1, AddContentObject 2, MatchInterest 2, verify GetObjectCount and GetLru
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
   a->AddContentObject(data.cWorkItem2,data.eConnList1); StepSimulatorAddContentObject();
@@ -359,7 +332,6 @@ BeginTest (MatchInterestTwoObjects)
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameCount(),2,"map by name size wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameKeyidCount(),2, "Wrong namekeyid map size");
   NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),2,"LRU list size wrong");
-  NS_TEST_EXPECT_MSG_EQ(a->GetLruListTailPacket(),data.cPacket1,"LRU tail packet wrong");
 
 
 
@@ -374,10 +346,10 @@ BeginTest (MatchInterestButExpired)
   // 	AddContentObject with name but expired,  verify MatchInterest returns null packet
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
-  // TODO make content object expire
+  // TODO CCN make content object expire
   a->MatchInterest(data.iWorkItem1); StepSimulatorMatchInterest ();
 
   NS_TEST_EXPECT_MSG_EQ(_lookupMatchInterestCallbackPacket,Ptr<CCNxPacket>(0),"Null packet should be returned");
@@ -385,7 +357,6 @@ BeginTest (MatchInterestButExpired)
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameCount(),0,"map by name size wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameKeyidCount(),0, "Wrong namekeyid map size");
   NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),0,"LRU list size wrong");
-  NS_TEST_EXPECT_MSG_EQ(a->GetLruListTailPacket(),Ptr<CCNxPacket>(0),"LRU tail packet wrong");
 
 }
 EndTest ()
@@ -397,11 +368,10 @@ BeginTest (AddContentObject)
   //AddContentObject,  verify  Lrulist and Maps
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1);  StepSimulatorAddContentObject();
 
-  NS_TEST_EXPECT_MSG_EQ(data.cPacket1,a->GetLruListTailPacket(),"Lru list add failed");
   NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),1,"Lru list length wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByHashCount(),1,"map by hash size wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameCount(),1,"map by name size wrong");
@@ -416,12 +386,11 @@ BeginTest (AddContentObject2x)
   //AddContentObject 2x, and verify no change to Lrulist and Maps
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
 
-  NS_TEST_EXPECT_MSG_EQ(data.cPacket1,a->GetLruListTailPacket(),"Lru list add failed");
   NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),1,"Lru list length wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByHashCount(),1,"map by hash size wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameCount(),1,"map by name size wrong");
@@ -436,7 +405,7 @@ BeginTest (AddContentObject_ObjectCapacity)
   //SetObjectCapacity=1, AddContentObject 2x and see 1st object deleted
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   //set object capacity
    a->SetAttribute("ObjectCapacity",IntegerValue (1));
@@ -447,7 +416,6 @@ BeginTest (AddContentObject_ObjectCapacity)
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
   a->AddContentObject(data.cWorkItem2,data.eConnList1); StepSimulatorAddContentObject();
 
-  NS_TEST_EXPECT_MSG_EQ(data.cPacket2,a->GetLruListTailPacket(),"Lru list add failed");
   NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),1,"Lru list length wrong");
 
 }
@@ -462,7 +430,7 @@ BeginTest (FindEntryInHashMap)
 
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
@@ -476,8 +444,8 @@ BeginTest (FindEntryInHashMap)
   Ptr<CCNxContentObject> content1 = Create<CCNxContentObject> (name1);
   Ptr<CCNxPacket> cPacket1 = CCNxPacket::CreateFromMessage (content1);
   Ptr<CCNxHashValue> hash2 = Create<CCNxHashValue>(2);
-  cPacket1->SetContentObjectHash(*hash2);
-  std::cout <<"new cPacket1 new hash value exp=2, act="<< *cPacket1->GetContentObjectHash().GetValue() << std::endl;
+  cPacket1->SetContentObjectHash(hash2);
+  std::cout <<"new cPacket1 new hash value exp=2, act="<< *cPacket1->GetContentObjectHash()->GetValue() << std::endl;
   NS_TEST_EXPECT_MSG_EQ(a->FindEntryInHashMap(cPacket1), Ptr<CCNxStandardContentStoreEntry>(0),"packet should not have matched");
 
   //compare with new packet - same as content2 but with same hash as content3 - should match content3
@@ -485,8 +453,8 @@ BeginTest (FindEntryInHashMap)
   Ptr<CCNxContentObject> content2 = Create<CCNxContentObject> (name2);
   Ptr<CCNxPacket> cPacket2 = CCNxPacket::CreateFromMessage (content2);
   Ptr<CCNxHashValue> hash3 = Create<CCNxHashValue>(3);
-  cPacket2->SetContentObjectHash(*hash3);
-  std::cout<< "new cPacket2 new hash value exp=3, act="<< *cPacket2->GetContentObjectHash().GetValue() << std::endl;
+  cPacket2->SetContentObjectHash(hash3);
+  std::cout<< "new cPacket2 new hash value exp=3, act="<< *cPacket2->GetContentObjectHash()->GetValue() << std::endl;
   Ptr<CCNxStandardContentStoreEntry> newEntry = a->FindEntryInHashMap(cPacket2);
   NS_TEST_EXPECT_MSG_EQ(newEntry->GetPacket(),data.cPacket3,"packet should  have matched");
 
@@ -495,44 +463,7 @@ BeginTest (FindEntryInHashMap)
 EndTest ()
 
 
-BeginTest (RefreshLruListEntry)
-{
-  printf ("TestCCNxStandardContentStore_RefreshLruListEntry DoRun\n");
-  //* RefreshLruListEntry  - AddContentObject 2x, RefreshLruListEntry(tail), verify LruListTail
 
-  TestData data = CreateTestData ();
-
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
-
-  a->AddContentObject(data.cWorkItem1,data.eConnList1);  StepSimulatorAddContentObject();
-  a->AddContentObject(data.cWorkItem3,data.eConnList1); StepSimulatorAddContentObject();
-  a->RefreshLruListEntry(a->FindEntryInHashMap(data.cPacket1));
-  NS_TEST_EXPECT_MSG_EQ(a->GetLruListTailPacket(),data.cPacket3,"LRU tail packet wrong");
-
-}
-EndTest ()
-
-
-BeginTest (DeleteLruListPacket)
-{
-  printf ("TestCCNxStandardContentStore_DeleteLruListPacket DoRun\n");
-//  * 	AddContentObject 2x, try to delete head, verify not deleted
-//  * 	AddContentObject 2x, try to delete tail, verify  deleted
-
-  TestData data = CreateTestData ();
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
-
-  a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
-  a->AddContentObject(data.cWorkItem2,data.eConnList1); StepSimulatorAddContentObject();
-
-  NS_TEST_EXPECT_MSG_EQ(a->DeleteLruListPacket(data.cPacket2),false,"should not have been able to delete this packet");
-  NS_TEST_EXPECT_MSG_EQ(a->DeleteLruListPacket(data.cPacket1),true,"should not have been able to delete this packet");
-
-  NS_TEST_EXPECT_MSG_EQ(a->GetLruListTailPacket(),data.cPacket2,"Lru list add failed");
-  NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),1,"Lru list length wrong");
-
-}
-EndTest ()
 
 
 BeginTest (RemoveContentObject)
@@ -543,7 +474,7 @@ BeginTest (RemoveContentObject)
 //  * 	AddContentObject, verify RemoveContentObject of different object returns false, verify lrulist and maps
 
   TestData data = CreateTestData ();
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
   NS_TEST_EXPECT_MSG_EQ(a->RemoveContentObject(data.cPacket1),true,"could not remove content object");
@@ -568,14 +499,14 @@ BeginTest (AddMapEntry)
 {
   printf ("TestCCNxStandardContentStore_AddMapEntry DoRun\n");
 
-  //  * TODO	AddMapEntry with cPacket hash only, verify maps
-  //  * TODO	AddMapEntry with cPacket hash + name, verify maps
+  //  * TODO CCN	AddMapEntry with cPacket hash only, verify maps
+  //  * TODO CCN	AddMapEntry with cPacket hash + name, verify maps
 
 
 
   //AddMapEntry with cPacket hash + name + keyid, verify maps
   TestData data = CreateTestData ();
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
   Ptr<CCNxStandardContentStoreEntry> newEntry = Create<CCNxStandardContentStoreEntry> (data.cPacket1);
 
   NS_TEST_EXPECT_MSG_EQ(a->AddMapEntry(data.cPacket1,newEntry),true,"could not add map entry");
@@ -588,26 +519,6 @@ EndTest ()
 
 
 
-BeginTest (AddLruListEntry)
-{
-  printf ("TestCCNxStandardContentStore_AddLruListEntry DoRun\n");
-
-  //  * AddLruListEntry - create entry, AddLruListEntry, verify lrulist
-  //  * DeleteLruListEntry - create entry, addlrulistentry, deletelrulistentry, verify lrulist
-
-
-  TestData data = CreateTestData ();
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
-  Ptr<CCNxStandardContentStoreEntry> newEntry = Create<CCNxStandardContentStoreEntry> (data.cPacket1);
-
-  NS_TEST_EXPECT_MSG_EQ(a->AddLruListEntry(newEntry),true,"could not add lru list entry");
-  NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),1,"Lru list length wrong");
-
-  NS_TEST_EXPECT_MSG_EQ(a->DeleteLruListEntry(newEntry),true,"could not delete lru list entry");
-  NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),0,"Lru list length wrong");
-
-}
-EndTest ()
 
 
 
@@ -618,14 +529,14 @@ BeginTest (IsEntryValid)
   //  *  verify IsEntryValid returns true
 
   TestData data = CreateTestData ();
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
   Ptr<CCNxStandardContentStoreEntry> newEntry = Create<CCNxStandardContentStoreEntry> (data.cPacket1);
   a->AddContentObject(data.cWorkItem1,data.eConnList1);  StepSimulatorAddContentObject();
 
   NS_TEST_EXPECT_MSG_EQ(a->IsEntryValid(a->FindEntryInHashMap(data.cPacket1)),true,"entry should be valid");
 
-  // TODO wait until IsStale, verify IsEntryValid returns false
-  // TODO wait until IsExpired, verify IsEntryValid returns false
+  // TODO CCN wait until IsStale, verify IsEntryValid returns false
+  // TODO CCN wait until IsExpired, verify IsEntryValid returns false
 
 }
 EndTest ()
@@ -637,7 +548,7 @@ BeginTest (GetMapCounts)
   //AddContentObject with name, verify GetMapCounts = 1,1,0
   TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
 
@@ -646,7 +557,7 @@ BeginTest (GetMapCounts)
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameKeyidCount(),1, "Wrong namekeyid map size"); //if no KEYIDHACK, chg the exp to 0
 ;
 
-  //TODO test add of nameless objects and objects without Keyid when possible
+  //TODO CCN test add of nameless objects and objects without Keyid when possible
 
 }
 EndTest ()
@@ -672,12 +583,9 @@ public:
     AddTestCase (new MatchInterestTwoObjects (), TestCase::QUICK);
     AddTestCase (new AddContentObject2x (), TestCase::QUICK);
     AddTestCase (new FindEntryInHashMap (), TestCase::QUICK);
-    AddTestCase (new RefreshLruListEntry (), TestCase::QUICK);
-    AddTestCase (new DeleteLruListPacket (), TestCase::QUICK);
     AddTestCase (new RemoveContentObject (), TestCase::QUICK);
     AddTestCase (new AddMapEntry (), TestCase::QUICK);
-    AddTestCase (new AddLruListEntry (), TestCase::QUICK);
-    // TODO FINISH THIS AddTestCase (new MatchInterestButExpired (), TestCase::QUICK);
+    // TODO CCN FINISH THIS AddTestCase (new MatchInterestButExpired (), TestCase::QUICK);
     AddTestCase (new IsEntryValid (), TestCase::QUICK);
 
 

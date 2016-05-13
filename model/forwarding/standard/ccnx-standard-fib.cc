@@ -171,7 +171,7 @@ CCNxStandardFib::RemoveConnection (  Ptr<CCNxConnection>  connection)
 unsigned
 CCNxStandardFib::PerformLookup (Ptr<CCNxStandardForwarderWorkItem> workItem)
 {
-  unsigned nameCompoentsUsed = 0; //TODO - is nameCompoentsUsed being properly incremented?
+  unsigned nameCompoentsUsed = 0; //TODO CCN - is nameCompoentsUsed being properly incremented?
 
   Ptr<CCNxConnectionList> egress = Create<CCNxConnectionList> ();
   workItem->SetConnectionsList (egress);
@@ -227,7 +227,7 @@ CCNxStandardFib::PerformLookup (Ptr<CCNxStandardForwarderWorkItem> workItem)
 
   NS_LOG_DEBUG ("Lookup match count: " << egress->size ());
 
-  //TODO - if connections is empty, best match was same as ingress, so need to recurse until different connection found or no result
+  //TODO CCN - if connections is empty, best match was same as ingress, so need to recurse until different connection found or no result
   return nameCompoentsUsed;
 }
 
@@ -251,7 +251,7 @@ CCNxStandardFib::GetServiceTime (Ptr<CCNxForwarderMessage> message)
 }
 
 void
-CCNxStandardFib::DequeueCallback (Ptr<CCNxForwarderMessage> message) //TODO _this is after lookup
+CCNxStandardFib::DequeueCallback (Ptr<CCNxForwarderMessage> message) //TODO CCN _this is after lookup
 {
   // We saved the results of the route lookup in GetServiceTime() in the derived class.
   // For compatibility with the standard CCNxFib API, we extract them and put them where they

@@ -96,7 +96,7 @@ namespace TestSuiteCCNxStandardPit {
 //b4 two interests one content, repeat
 //b5 no interest one content
 
-//TODO - KEYID and HASH unit tests as listed below
+//TODO CCN - KEYID and HASH unit tests as listed below
 // KEYID
 //1 keyid interest, content key doesnt match
 //receiveInterest -  with keyid restriction - verdict forward
@@ -601,10 +601,10 @@ BeginTest (b6)
   Ptr<CCNxPacket> cPacketNoRestrictions = CCNxPacket::CreateFromMessage (contentNoRestrictions);
 
   Ptr<CCNxPacket> cPacketHashKeyRestrictions = CCNxPacket::CreateFromMessage (contentNoRestrictions);
-  cPacketHashKeyRestrictions->SetContentObjectHash (*hashValRest1);
+  cPacketHashKeyRestrictions->SetContentObjectHash (hashValRest1);
 
   Ptr<CCNxPacket> cPacketNoMatchRestrictions = CCNxPacket::CreateFromMessage (contentNoRestrictions);
-  cPacketNoMatchRestrictions->SetContentObjectHash (*hashValRest2);
+  cPacketNoMatchRestrictions->SetContentObjectHash (hashValRest2);
 
   Ptr<CCNxVirtualConnection> connection1 = Create<CCNxVirtualConnection> ();
   Ptr<CCNxVirtualConnection> connection2 = Create<CCNxVirtualConnection> ();
@@ -687,7 +687,7 @@ public:
     AddTestCase (new Constructor (), TestCase::QUICK);
     AddTestCase (new b1 (), TestCase::QUICK);
     AddTestCase (new b1a (), TestCase::QUICK);
-    //TODO HASH ONLY PACKETS - HOW TO CREATE?    AddTestCase (new b1b (), TestCase::QUICK);
+    //TODO CCN HASH ONLY PACKETS - HOW TO CREATE?    AddTestCase (new b1b (), TestCase::QUICK);
     AddTestCase (new b2 (), TestCase::QUICK);
     AddTestCase (new b3 (), TestCase::QUICK);
     AddTestCase (new b4 (), TestCase::QUICK);

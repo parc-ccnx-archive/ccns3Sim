@@ -110,16 +110,9 @@ def build(bld):
         'model/crypto/ccnx-signer.cc',
         'model/crypto/ccnx-verifier.cc',
         'model/crypto/hashers/ccnx-hasher-fnv1a.cc',
-        'model/crypto/hashers/ccnx-hasher-sha256-factory.cc',
-        'model/crypto/hashers/ccnx-hasher-sha256-sim.cc',
-        'model/crypto/signers/ccnx-signer-rsa-factory.cc',
-        'model/crypto/signers/ccnx-signer-rsa-sim.cc',
-        'model/crypto/verifiers/ccnx-verifier-rsa-factory.cc',
-        'model/crypto/verifiers/ccnx-verifier-rsa-sim.cc',        
  
         # Validation
         'model/validation/ccnx-validation.cc',
-        'model/validation/rsa-sha256/ccnx-validation-rsa-sha256.cc',
         # node
         'model/node/ccnx-connection.cc',
         'model/node/ccnx-connection-list.cc',
@@ -139,6 +132,7 @@ def build(bld):
         'model/forwarding/ccnx-fib.cc',
         'model/forwarding/ccnx-pit.cc',
         'model/forwarding/standard/ccnx-standard-content-store.cc',
+        'model/forwarding/standard/ccnx-standard-content-store-lruList.cc',
         'model/forwarding/standard/ccnx-standard-content-store-entry.cc',
         'model/forwarding/standard/ccnx-standard-content-store-factory.cc',
         'model/forwarding/standard/ccnx-standard-fib.cc',
@@ -239,15 +233,8 @@ def build(bld):
         'model/crypto/ccnx-signer.h',
         'model/crypto/ccnx-verifier.h',
         'model/crypto/hashers/ccnx-hasher-fnv1a.h',
-        'model/crypto/hashers/ccnx-hasher-sha256-factory.h',
-        'model/crypto/hashers/ccnx-hasher-sha256-sim.h',
-        'model/crypto/signers/ccnx-signer-rsa-factory.h',
-        'model/crypto/signers/ccnx-signer-rsa-sim.h',        
-        'model/crypto/verifiers/ccnx-verifier-rsa-factory.h',
-        'model/crypto/verifiers/ccnx-verifier-rsa-sim.h',        
         # Validation
         'model/validation/ccnx-validation.h',
-        'model/validation/rsa-sha256/ccnx-validation-rsa-sha256.h',
         # node
         'model/node/ccnx-connection.h',
         'model/node/ccnx-connection-list.h',
@@ -269,6 +256,7 @@ def build(bld):
         'model/forwarding/ccnx-forwarder.h',
         'model/forwarding/ccnx-forwarder-message.h',
         'model/forwarding/standard/ccnx-standard-content-store.h',
+        'model/forwarding/standard/ccnx-standard-content-store-lruList.h',
         'model/forwarding/standard/ccnx-standard-content-store-entry.h',
         'model/forwarding/standard/ccnx-standard-content-store-factory.h',
         'model/forwarding/standard/ccnx-standard-fib.h',
