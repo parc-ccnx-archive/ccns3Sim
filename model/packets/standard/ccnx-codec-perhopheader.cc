@@ -84,20 +84,20 @@ CCNxCodecPerHopHeader::GetInstanceTypeId (void) const
 Ptr<CCNxCodecPerHopHeaderEntry>
 CCNxCodecPerHopHeader::GetTLVtoCodec(uint16_t type) const
 {
-	Ptr<CCNxCodecPerHopHeaderEntry> codec = Ptr<CCNxCodecPerHopHeaderEntry>(0);
+  Ptr<CCNxCodecPerHopHeaderEntry> codec = Ptr<CCNxCodecPerHopHeaderEntry>(0);
 
-	CodecMapType::const_iterator i = codecMap.find(type);
-	if (i != codecMap.end()) {
-		codec = i->second;
-	}
-	return codec;
+  CodecMapType::const_iterator i = codecMap.find(type);
+  if (i != codecMap.end()) {
+	  codec = i->second;
+  }
+  return codec;
 }
 
 void
 CCNxCodecPerHopHeader::RegisterCodec(uint16_t tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec)
 {
-	NS_ASSERT_MSG(codecMap[tlvType] == 0, "Can't overwrite the codec for specific type");
-	codecMap[tlvType] = codec;
+  NS_ASSERT_MSG(codecMap[tlvType] == 0, "Can't overwrite the codec for specific type");
+  codecMap[tlvType] = codec;
 }
 
 uint32_t
@@ -169,7 +169,14 @@ CCNxCodecPerHopHeader::Deserialize (Buffer::Iterator inputIterator)
 void
 CCNxCodecPerHopHeader::Print (std::ostream &os) const
 {
-	// empty
+  for (size_t i = 0; i < GetHeader()->size(); ++i)
+  {
+      Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetHeader()->GetHeader(i);
+      uint16_t type = perhopEntry->GetInstanceTLVType();
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = GetTLVtoCodec(type);
+      NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
+      codec->Print(perhopEntry, os);
+  }
 }
 
 CCNxCodecPerHopHeader::CCNxCodecPerHopHeader ()

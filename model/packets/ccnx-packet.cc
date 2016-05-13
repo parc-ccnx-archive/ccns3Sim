@@ -226,7 +226,8 @@ CCNxPacket::GenerateNs3Packet ()
       NS_ASSERT_MSG (false, "Unsupported m_message run time type " << messageType);
     }
 
-  p->AddHeader (m_codecPerHopHeader);
+  if (GetPerHopHeaderLength() != 0)
+    p->AddHeader (m_codecPerHopHeader);
 
   // The fixed header goes outside the message header
   p->AddHeader (m_codecFixedHeader);
@@ -382,6 +383,7 @@ std::ostream &
 ns3::ccnx::operator<< (std::ostream &os, CCNxPacket const &packet)
 {
   os << "header " << *packet.GetFixedHeader ()
+     << "perhopheader " << *packet.GetPerhopHeaders()
      << ", message " << *packet.GetMessage ()
      << ", validation " << packet.GetValidation ();
   return os;
