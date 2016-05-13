@@ -66,7 +66,7 @@ namespace ccnx {
 /**
  * @ingroup ccnx-messages
  *
- * Class representation of an InterestLifetime Per Hop Header Entry.
+ * Class representation of InterestLifetime Per Hop Header Entry.
  */
 class CCNxInterestLifetime : public CCNxPerHopHeaderEntry {
 public:

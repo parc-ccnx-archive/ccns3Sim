@@ -94,17 +94,16 @@ CCNxInterestLifetime::~CCNxInterestLifetime ()
   // empty
 }
 
-
 uint16_t
 CCNxInterestLifetime :: GetTLVType(void)
 {
-    return m_interestLifetimeTLVType;
+  return m_interestLifetimeTLVType;
 }
 
 uint16_t
 CCNxInterestLifetime :: GetInstanceTLVType (void) const
 {
-	return GetTLVType ();
+  return GetTLVType ();
 }
 
 Ptr<CCNxTime>

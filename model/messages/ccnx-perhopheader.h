@@ -73,7 +73,7 @@ public:
    * Base class constructor for CCNxPerHopHeader.
    *
    */
-	CCNxPerHopHeader ();
+  CCNxPerHopHeader ();
 
   /**
    * Destructor for CCNxPerHopHeader
@@ -90,7 +90,12 @@ public:
   /**
    * @return The size of the vector of per hop headers
    */
-  size_t GetHeaderSize(void) const;
+  size_t size(void) const;
+
+  /**
+   * Removes all elements of the vector
+   */
+  void clear();
 
   /**
    * Returns the CCNxPerHopHeaderEntry at the given index
@@ -111,8 +116,6 @@ public:
    * Typedef defining a vector of CCNxPerHopHeaderEntry
    */
   typedef std::vector< Ptr<CCNxPerHopHeaderEntry> > HdrListType;
-
-  HdrListType GetHeaderList();
 
 private:
 
