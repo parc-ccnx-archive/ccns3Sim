@@ -274,12 +274,12 @@ CCNxStandardPit::ServiceSatisfyInterest (Ptr<CCNxForwarderMessage> item)
 	  NS_LOG_DEBUG("Content object has name, but did not match LookupPitEntryByName");
       }
 
-      // TODO: If it has a ValidationAlgorithm and that has a KeyId do a NameAndKeyId lookup here
+      // TODO CCN: If it has a ValidationAlgorithm and that has a KeyId do a NameAndKeyId lookup here
       // then add those to the reverseRouteSet.
   }
 
   {
-    Ptr<CCNxHashValue> hash = Create<CCNxHashValue>(item->GetPacket()->GetContentObjectHash());
+    Ptr<CCNxHashValue> hash = Create<CCNxHashValue>(item->GetPacket()->GetContentObjectHash()->GetValue());
     Ptr<CCNxStandardPitEntry> entry = LookupPitEntryByHash (hash);
     if (entry) {
         CCNxStandardPitEntry::ReverseRouteType aSet = entry->SatisfyInterest(item->GetIngressConnection());
@@ -389,7 +389,7 @@ CCNxStandardPit::LookupPitEntry(Ptr<CCNxInterest> interest)
       entry = LookupPitEntryByHash(interest->GetHashRestriction ());
   } else if (interest->GetName ()) {
       if (interest->HasKeyidRestriction()) {
-	  // TODO: Fill in the keyid instead of NULL
+	  // TODO CCN: Fill in the keyid instead of NULL
 	  entry = LookupPitEntryByNameAndKeyId(interest->GetName (), NULL);
       } else {
 	  entry = LookupPitEntryByName(interest->GetName ());
@@ -477,7 +477,7 @@ CCNxStandardPit::RemovePitEntryByName(Ptr<const CCNxName> name)
 void
 CCNxStandardPit::RemoveEntry (Ptr<CCNxInterest> interest)
 {
-//TODO write RemoveEntry function
+//TODO CCN write RemoveEntry function
 
 }
 

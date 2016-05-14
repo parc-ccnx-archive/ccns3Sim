@@ -192,10 +192,6 @@ RunSimulation (void)
 
   Ptr<CCNxName> prefixName = Create<CCNxName> (prefixString);
 
-  char contentNameString[100];
-
-  Ptr<CCNxName> contentName = Create<CCNxName> (contentNameString);
-
   node1_ccnx->GetForwarder ()->AddRoute (node1ToNode0Connection, prefixName);
 
   // Now send packets and run simulation

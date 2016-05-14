@@ -67,7 +67,7 @@ namespace ccnx {
  *
  * Factory to create a Standard PIT.
  *
- * TODO: Need to add setters for future PIT parameters, such as "max entries"
+ * TODO CCN: Need to add setters for future PIT parameters, such as "max entries"
  */
 class CCNxStandardPitFactory : public ns3::ObjectFactory
 {
@@ -78,7 +78,7 @@ public:
   /**
    * Sets the default lifetime of an Interest that does not have a "LifeTime" header
    *
-   * TODO: This is not working yet, need to move the concept of lifetime out of PitEntry in to Pit.
+   * TODO CCN: This is not working yet, need to move the concept of lifetime out of PitEntry in to Pit.
    *
    * @param lifetime
    */

@@ -229,8 +229,8 @@ CCNxPacket::GenerateNs3Packet ()
       NS_ASSERT_MSG (false, "Unsupported m_message run time type " << messageType);
     }
 
-  // Is this the correct place for per hop headers???
-  p->AddHeader (m_codecPerHopHeader);
+  if (m_codecPerHopHeader.GetHeaderLength() != 0)
+    p->AddHeader (m_codecPerHopHeader);
 
   // The fixed header goes outside the message header
   p->AddHeader (m_codecFixedHeader);
@@ -364,15 +364,16 @@ CCNxPacket::Deserialize ()
 }
 
 void
-CCNxPacket::SetContentObjectHash (CCNxHashValue hash)
+CCNxPacket::SetContentObjectHash (Ptr<CCNxHashValue> hash)
 {
-  m_hash = hash;
+  m_hash = hash->GetValue();
 }
 
-CCNxHashValue
+Ptr<CCNxHashValue>
 CCNxPacket::GetContentObjectHash (void) const
 {
-  return m_hash;
+  Ptr<CCNxHashValue> hash = Create<CCNxHashValue> (m_hash.GetValue());
+  return hash;
 }
 
 void
