@@ -68,6 +68,7 @@ namespace ccnx {
  * Represents a Per Hop header entry. This class is a base class for per hop
  * header representation.
  * Implementation classes: CCNxInterestLifetime
+ * @see CCNxInterestLifetime
  */
 class CCNxPerHopHeaderEntry : public Object {
 public:

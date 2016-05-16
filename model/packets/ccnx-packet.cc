@@ -157,10 +157,10 @@ CCNxPacket::GetValidation () const
   return m_validation;
 }
 
-CCNxPerHopHeader
+Ptr<CCNxPerHopHeader>
 CCNxPacket::GetPerhopHeaders() const
 {
-	return m_codecPerHopHeader.GetHeader();
+  return m_codecPerHopHeader.GetHeader();
 }
 
 size_t
@@ -202,9 +202,6 @@ CCNxPacket::ComputePacketSize () const
 Ptr<Packet>
 CCNxPacket::GenerateNs3Packet ()
 {
-  // Set the total per hop header length
-  m_codecPerHopHeader.SetHeaderLength(m_codecPerHopHeader.GetSerializedSize());
-
   Ptr<CCNxFixedHeader> fh = GenerateFixedHeader (m_message->GetMessageType ());
   m_codecFixedHeader.SetHeader (fh);
 
@@ -229,7 +226,7 @@ CCNxPacket::GenerateNs3Packet ()
       NS_ASSERT_MSG (false, "Unsupported m_message run time type " << messageType);
     }
 
-  if (m_codecPerHopHeader.GetHeaderLength() != 0)
+  if (GetPerHopHeaderLength() != 0)
     p->AddHeader (m_codecPerHopHeader);
 
   // The fixed header goes outside the message header
@@ -279,7 +276,7 @@ CCNxPacket::GetMessageTypeAsPacketType (CCNxMessage::MessageType messageType = C
 uint32_t
 CCNxPacket::GetPerHopHeaderLength (void) const
 {
-  return m_codecPerHopHeader.GetHeaderLength();
+  return m_codecPerHopHeader.GetSerializedSize();
 }
 
 uint8_t
@@ -335,7 +332,7 @@ CCNxPacket::Deserialize ()
    */
   if (hdrSize >= 8)
   {
-	  m_codecPerHopHeader.SetHeaderLength(hdrSize-8);
+      m_codecPerHopHeader.SetDeserializeLength(hdrSize-8);
       uint32_t msgSize = copy->RemoveHeader (m_codecPerHopHeader);
       NS_LOG_DEBUG ("Deserialize: per hop headers = " << msgSize);
   }
@@ -379,13 +376,14 @@ CCNxPacket::GetContentObjectHash (void) const
 void
 CCNxPacket::AddPerHopHeaderEntry (Ptr<CCNxPerHopHeaderEntry> perHopHeaderEntry)
 {
-	m_codecPerHopHeader.GetHeader().AddHeader(perHopHeaderEntry);
+  m_codecPerHopHeader.GetHeader()->AddHeader(perHopHeaderEntry);
 }
 
 std::ostream &
 ns3::ccnx::operator<< (std::ostream &os, CCNxPacket const &packet)
 {
   os << "header " << *packet.GetFixedHeader ()
+     << "perhopheader " << *packet.GetPerhopHeaders()
      << ", message " << *packet.GetMessage ()
      << ", validation " << packet.GetValidation ();
   return os;

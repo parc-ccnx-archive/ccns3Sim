@@ -94,21 +94,27 @@ CCNxInterestLifetime::~CCNxInterestLifetime ()
   // empty
 }
 
-
 uint16_t
 CCNxInterestLifetime :: GetTLVType(void)
 {
-    return m_interestLifetimeTLVType;
+  return m_interestLifetimeTLVType;
 }
 
 uint16_t
 CCNxInterestLifetime :: GetInstanceTLVType (void) const
 {
-	return GetTLVType ();
+  return GetTLVType ();
 }
 
 Ptr<CCNxTime>
 CCNxInterestLifetime::GetInterestLifetime () const
 {
   return m_interestLifetime;
+}
+
+std::ostream &
+ns3::ccnx::operator<< (std::ostream &os, CCNxInterestLifetime const &interestLifetime)
+{
+  os << "{ Interest Lifetime timeValue " << interestLifetime.GetInterestLifetime ()->getTime () << " }";
+  return os;
 }

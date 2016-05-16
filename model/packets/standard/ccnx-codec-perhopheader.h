@@ -106,6 +106,13 @@ public:
   virtual void Serialize (Buffer::Iterator output) const;
 
   /**
+   * Because the per-hop headers are simply a list of TLVs, we do not know how much to read.
+   *
+   * @param [in] length
+   */
+   void SetDeserializeLength(uint32_t length);
+
+  /**
    * Reads from the Buffer::Iterator and creates an object instantiation of the buffer.
    *
    * The buffer should point to the beginning of the T_OBJECT TLV.
@@ -126,24 +133,11 @@ public:
    * Constructor for CCNxCodecPerHopHeader
    */
   CCNxCodecPerHopHeader ();
-  CCNxCodecPerHopHeader (uint32_t length);
 
   /**
    * Destructor for CCNxCodecPerHopHeader
    */
   virtual ~CCNxCodecPerHopHeader ();
-
-  /**
-   * Returns the length of all per hop headers
-   */
-  uint32_t GetHeaderLength () const;
-
-  /**
-   * Sets the length of all per hop headers
-   *
-   * @param [in] length Set the combined length of all per hop headers
-   */
-  void SetHeaderLength (uint32_t length);
 
   /**
    * Return the codec associated with the TLV type
@@ -156,11 +150,14 @@ public:
   /**
    * Returns the internal CCNxPerHopHeader
    */
-  CCNxPerHopHeader GetHeader () const;
+  Ptr<CCNxPerHopHeader> GetHeader () const;
 
 protected:
-  CCNxPerHopHeader m_perHopHeader;
-  uint32_t m_length;
+  Ptr<CCNxPerHopHeader> m_perHopHeader;
+  /**
+   * The number of bytes to Deserialize, based on `SetDeserializeLength()`
+   */
+  uint32_t m_deserializeLength;
 };
 
 } // namespace ccnx
