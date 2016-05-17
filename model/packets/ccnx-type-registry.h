@@ -53,95 +53,77 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_CCNXCODECPERHOPHEADER_H
-#define CCNS3SIM_CCNXCODECPERHOPHEADER_H
+#ifndef CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_REGISTRY_H_
+#define CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_REGISTRY_H_
 
-#include "ns3/header.h"
-#include "ns3/ccnx-perhopheader.h"
-#include "ns3/ccnx-codec-perhopheaderentry.h"
+#include <map>
+#include "ns3/simple-ref-count.h"
+#include "ns3/ptr.h"
 
 namespace ns3 {
 namespace ccnx {
 
-/**
- * @ingroup ccnx-packet
- *
- * Codec for reading/writing CCNx per hop headers.
- * This represents complete block of all per hop headers
- *
- */
-class CCNxCodecPerHopHeader : public Header
+template<class TlvType, class RegistryClass>
+class CCNxTypeRegistry : public SimpleRefCount< CCNxTypeRegistry<TlvType, RegistryClass> >
 {
-public:
-  static TypeId GetTypeId (void);
-
-  virtual TypeId GetInstanceTypeId (void) const;
-
-  // virtual from Header
-
-  /**
-   * Computes the byte length of the encoded TLV.  Does not do
-   * any encoding (it's const).
-   */
-  virtual uint32_t GetSerializedSize (void) const;
-
-  /**
-   * Serializes this object into the Buffer::Iterator.  it is the responsibility
-   * of the caller to ensure there is at least GetSerializedSize() bytes available.
-   *
-   * @param [in] output The buffer position to begin writing.
-   */
-  virtual void Serialize (Buffer::Iterator output) const;
-
-  /**
-   * Because the per-hop headers are simply a list of TLVs, we do not know how much to read.
-   *
-   * @param [in] length
-   */
-   void SetDeserializeLength(uint32_t length);
-
-  /**
-   * Reads from the Buffer::Iterator and creates an object instantiation of the buffer.
-   *
-   * The buffer should point to the beginning of the T_OBJECT TLV.
-   *
-   * @param [in] input The buffer to read from
-   * @return The number of bytes processed.
-   */
-  virtual uint32_t Deserialize (Buffer::Iterator input);
-
-  /**
-   * Display this codec's state to the provided output stream.
-   *
-   * @param [in] os The output stream to write to
-   */
-  virtual void Print (std::ostream &os) const;
-
-  /**
-   * Constructor for CCNxCodecPerHopHeader
-   */
-  CCNxCodecPerHopHeader ();
-
-  /**
-   * Destructor for CCNxCodecPerHopHeader
-   */
-  virtual ~CCNxCodecPerHopHeader ();
-
-  /**
-   * Returns the internal CCNxPerHopHeader
-   */
-  Ptr<CCNxPerHopHeader> GetHeader () const;
-
 protected:
-  Ptr<CCNxPerHopHeader> m_perHopHeader;
+
   /**
-   * The number of bytes to Deserialize, based on `SetDeserializeLength()`
+   * Typedef for mapping TLV type to codec
    */
-  uint32_t m_deserializeLength;
+
+  typedef typename std::map< TlvType, Ptr<RegistryClass> > RegistryMapType;
+  typedef typename RegistryMapType::const_iterator ConstIteratorType;
+  RegistryMapType m_registry;
+
+public:
+  /**
+   * A generic registry of TLV type to codec.
+   *
+   * @param description [in] A description of the registry (purely informative)
+   */
+
+  CCNxTypeRegistry (std::string description) : m_description(description)
+  {
+  }
+
+  virtual ~CCNxTypeRegistry () {}
+
+  /**
+   * Create a mapping between TLV type and another class
+   */
+  void Register(TlvType tlvType, Ptr<RegistryClass> registeredClass)
+  {
+    NS_ASSERT_MSG(m_registry[tlvType] == 0, "Can't overwrite the registered class for type " << tlvType);
+    m_registry[tlvType] = registeredClass;
+  }
+
+  /**
+   * Remove the registration for a type.  To replace a registration, you must first remove it
+   * then re-register with a call to `Register()`.
+   *
+   * @param tlvType
+   */
+
+  void UnRegister(TlvType tlvType)
+  {
+    m_registry.erase(tlvType);
+  }
+
+  Ptr<RegistryClass> Lookup(TlvType tlvType)
+  {
+    Ptr<RegistryClass> registeredClass = Ptr<RegistryClass>(0);
+    ConstIteratorType i = m_registry.find(tlvType);
+    if (i != m_registry.end()) {
+	registeredClass = i->second;
+    }
+    return registeredClass;
+  }
+
+private:
+  std::string m_description;
 };
+} /* namespace ccnx */
+} /* namespace ns3 */
 
-} // namespace ccnx
-} // namespace ns3
-
-
-#endif //CCNS3SIM_CCNXCODECPERHOPHEADER_H
+#endif /* CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_REGISTRY_H_ */

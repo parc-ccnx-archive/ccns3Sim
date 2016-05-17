@@ -53,95 +53,27 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_CCNXCODECPERHOPHEADER_H
-#define CCNS3SIM_CCNXCODECPERHOPHEADER_H
+#include "ccnx-codec-registry.h"
 
-#include "ns3/header.h"
-#include "ns3/ccnx-perhopheader.h"
-#include "ns3/ccnx-codec-perhopheaderentry.h"
+using namespace ns3;
+using namespace ns3::ccnx;
 
-namespace ns3 {
-namespace ccnx {
+CCNxCodecRegistry::PerHopRegistryType CCNxCodecRegistry::m_perHopRegistry("PerHop Registry");
 
-/**
- * @ingroup ccnx-packet
- *
- * Codec for reading/writing CCNx per hop headers.
- * This represents complete block of all per hop headers
- *
- */
-class CCNxCodecPerHopHeader : public Header
+void
+CCNxCodecRegistry::PerHopRegisterCodec(TlvTypeType tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec)
 {
-public:
-  static TypeId GetTypeId (void);
+  m_perHopRegistry.Register(tlvType, codec);
+}
 
-  virtual TypeId GetInstanceTypeId (void) const;
+void
+CCNxCodecRegistry::PerHopUnegisterCodec(TlvTypeType tlvType)
+{
+  m_perHopRegistry.UnRegister(tlvType);
+}
 
-  // virtual from Header
-
-  /**
-   * Computes the byte length of the encoded TLV.  Does not do
-   * any encoding (it's const).
-   */
-  virtual uint32_t GetSerializedSize (void) const;
-
-  /**
-   * Serializes this object into the Buffer::Iterator.  it is the responsibility
-   * of the caller to ensure there is at least GetSerializedSize() bytes available.
-   *
-   * @param [in] output The buffer position to begin writing.
-   */
-  virtual void Serialize (Buffer::Iterator output) const;
-
-  /**
-   * Because the per-hop headers are simply a list of TLVs, we do not know how much to read.
-   *
-   * @param [in] length
-   */
-   void SetDeserializeLength(uint32_t length);
-
-  /**
-   * Reads from the Buffer::Iterator and creates an object instantiation of the buffer.
-   *
-   * The buffer should point to the beginning of the T_OBJECT TLV.
-   *
-   * @param [in] input The buffer to read from
-   * @return The number of bytes processed.
-   */
-  virtual uint32_t Deserialize (Buffer::Iterator input);
-
-  /**
-   * Display this codec's state to the provided output stream.
-   *
-   * @param [in] os The output stream to write to
-   */
-  virtual void Print (std::ostream &os) const;
-
-  /**
-   * Constructor for CCNxCodecPerHopHeader
-   */
-  CCNxCodecPerHopHeader ();
-
-  /**
-   * Destructor for CCNxCodecPerHopHeader
-   */
-  virtual ~CCNxCodecPerHopHeader ();
-
-  /**
-   * Returns the internal CCNxPerHopHeader
-   */
-  Ptr<CCNxPerHopHeader> GetHeader () const;
-
-protected:
-  Ptr<CCNxPerHopHeader> m_perHopHeader;
-  /**
-   * The number of bytes to Deserialize, based on `SetDeserializeLength()`
-   */
-  uint32_t m_deserializeLength;
-};
-
-} // namespace ccnx
-} // namespace ns3
-
-
-#endif //CCNS3SIM_CCNXCODECPERHOPHEADER_H
+Ptr<CCNxCodecPerHopHeaderEntry>
+CCNxCodecRegistry::PerHopLookupCodec(TlvTypeType tlvType)
+{
+  return m_perHopRegistry.Lookup(tlvType);
+}
