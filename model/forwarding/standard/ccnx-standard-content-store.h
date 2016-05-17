@@ -91,7 +91,7 @@ public:
    *
    * @param workItem [in] The work Item containing the interest being serviced
    */
-  void ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkItem> workItem);
+  bool ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkItem> workItem);
 
   /**
    * After input delay, service a AddContentObject request and send the
@@ -106,10 +106,10 @@ public:
    * @return true If the object was added
    * @return false If the object was not added
    */
-  virtual void ServiceAddContentObject (Ptr<CCNxStandardForwarderWorkItem> workItem);
+   bool ServiceAddContentObject (Ptr<CCNxStandardForwarderWorkItem> workItem);
 
   /**
-   * Removes the given object from the content store
+   * Deletes the given object from the content store
    *
    * This should be the same object (name, keyid, hash) as was added previously, or
    * found via `MatchInterest()`.
@@ -118,7 +118,7 @@ public:
    * @return true if removed
    * @return false If not removed (i.e. not found)
    */
-  virtual bool RemoveContentObject (Ptr<CCNxPacket> cPacket);
+  virtual bool DeleteContentObject (Ptr<CCNxPacket> cPacket);
 
   /**
    * Returns the number of content object packets in the content store.
@@ -368,7 +368,7 @@ private:
     * @param item [in] The work item to service
     */
 
-   void ServiceInputQueue (Ptr<CCNxStandardForwarderWorkItem> workItem);
+   void DequeueCallback (Ptr<CCNxStandardForwarderWorkItem> workItem);
 
   /**
    * The layer delay is:

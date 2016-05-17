@@ -144,6 +144,20 @@ public:
   Ptr<CCNxPacket> GetContentStorePacket () const;
 
 
+  /**
+  * set this flag to indicate if content was added successfully.
+  *
+  */
+ void SetContentAddedFlag (bool added) ;
+
+ /**
+  * get this flag to see if content was added successfully.
+  *
+  * @return true if content was added successfully.
+  */
+ bool GetContentAddedFlag () const;
+
+
 private:
   Ptr<CCNxConnection> m_egressConnection;
   CCNxRoutingError::RoutingErrno m_routingErrno;
@@ -151,6 +165,8 @@ private:
   Ptr<CCNxConnectionList> m_connectionsList;
 
   Ptr<CCNxPacket> m_contentStorePacket;
+
+  bool m_contentAddedFlag;
 };
 
 }   /* namespace ccnx */

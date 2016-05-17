@@ -45,6 +45,7 @@ BeginTest (Constructor)
 {
   printf ("TestCCNxStandardContentStoreConstructor DoRun\n");
   LogComponentEnable ("CCNxStandardContentStore", LOG_LEVEL_DEBUG);
+  LogComponentEnable ("CCNxStandardContentStoreLruList", LOG_LEVEL_DEBUG);
 }
 EndTest ()
 
@@ -466,25 +467,25 @@ EndTest ()
 
 
 
-BeginTest (RemoveContentObject)
+BeginTest (DeleteContentObject)
 {
-  printf ("TestCCNxStandardContentStore_RemoveContentObject DoRun\n");
+  printf ("TestCCNxStandardContentStore_DeleteContentObject DoRun\n");
 
-//  * 	AddContentObject with hash/keyid/name, verify RemoveContentObject returns true, verify lrulist and maps=0,0,0
-//  * 	AddContentObject, verify RemoveContentObject of different object returns false, verify lrulist and maps
+//  * 	AddContentObject with hash/keyid/name, verify DeleteContentObject returns true, verify lrulist and maps=0,0,0
+//  * 	AddContentObject, verify DeleteContentObject of different object returns false, verify lrulist and maps
 
   TestData data = CreateTestData ();
   Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
-  NS_TEST_EXPECT_MSG_EQ(a->RemoveContentObject(data.cPacket1),true,"could not remove content object");
+  NS_TEST_EXPECT_MSG_EQ(a->DeleteContentObject(data.cPacket1),true,"could not remove content object");
   NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),0,"Lru list length wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByHashCount(),0,"map by hash size wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameCount(),0,"map by name size wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameKeyidCount(),0, "map by namekeyid size wrong");
 
   a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
-  NS_TEST_EXPECT_MSG_EQ(a->RemoveContentObject(data.cPacket2),false,"could remove content object");
+  NS_TEST_EXPECT_MSG_EQ(a->DeleteContentObject(data.cPacket2),false,"could remove content object");
   NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),1,"Lru list length wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByHashCount(),1,"map by hash size wrong");
   NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameCount(),1,"map by name size wrong");
@@ -583,7 +584,7 @@ public:
     AddTestCase (new MatchInterestTwoObjects (), TestCase::QUICK);
     AddTestCase (new AddContentObject2x (), TestCase::QUICK);
     AddTestCase (new FindEntryInHashMap (), TestCase::QUICK);
-    AddTestCase (new RemoveContentObject (), TestCase::QUICK);
+    AddTestCase (new DeleteContentObject (), TestCase::QUICK);
     AddTestCase (new AddMapEntry (), TestCase::QUICK);
     // TODO CCN FINISH THIS AddTestCase (new MatchInterestButExpired (), TestCase::QUICK);
     AddTestCase (new IsEntryValid (), TestCase::QUICK);

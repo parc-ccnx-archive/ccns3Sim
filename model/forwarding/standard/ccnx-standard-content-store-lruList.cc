@@ -29,6 +29,9 @@
 #include "ns3/log.h"
 #include "ccnx-standard-content-store-lruList.h"
 #include "ns3/ccnx-standard-content-store-entry.h"
+#include <list>
+#include <unordered_map>
+#include <assert.h>
 
 using namespace ns3;
 using namespace ns3::ccnx;
@@ -49,22 +52,48 @@ CCNxStandardContentStoreLruList::~CCNxStandardContentStoreLruList ()
 
 
 
-
 bool
 CCNxStandardContentStoreLruList::AddEntry(Ptr<CCNxStandardContentStoreEntry> entry)
 {
 
-	m_lruList.push_front(entry);
-	return true;
+      LruMapType::iterator it = m_lruMap.find(entry); //search map
+
+      if(it != m_lruMap.end())
+	{ // already exists
+	      m_lruList.erase(it->second); //remove  from list. should be fast
+	      m_lruList.push_front(entry); //add entry to the front of the list
+	      it->second = m_lruList.begin(); //update map
+	}
+      else
+	{  //not in map
+	      m_lruList.push_front(entry); //add entry to the front of the list
+	      m_lruMap.insert(make_pair(entry, m_lruList.begin())); //add it to the map
+	}
+
+
+      return true;
 
 }
 
 bool
 CCNxStandardContentStoreLruList::DeleteEntry(Ptr<CCNxStandardContentStoreEntry> entry)
 {
+  bool result=false;
 
-	 m_lruList.remove(entry);
-	 return true;
+  LruMapType::iterator it = m_lruMap.find(entry);
+
+  if(it != m_lruMap.end())
+    { // already exists, remove it from list and map (quicker to update map entry?)
+      result=true;
+      m_lruList.erase(it->second);
+      m_lruMap.erase(it);
+    }
+  else
+    {
+      NS_LOG_ERROR("Can't delete Entry - entry not found in m_lruMap.");
+    }
+  return result;
+
 
 }
 
@@ -72,50 +101,28 @@ uint64_t
 CCNxStandardContentStoreLruList::GetSize() const
 {
 
-	 return m_lruList.size();
+  NS_ASSERT_MSG(m_lruList.size()==m_lruMap.size(), "LRU list and map sizes differ" );
+  return m_lruList.size();
 
 
 }
 
-bool
-CCNxStandardContentStoreLruList::DeletePacket(Ptr<CCNxPacket> cPacket)
+Ptr<CCNxStandardContentStoreEntry>
+CCNxStandardContentStoreLruList::GetBackEntry()
 {
-  /*
-  * Do a Lazy delete of the Ptr<CCNxStandardContentStoreEntry> from linked list, ie:
-  * If this is the packet at the end of the linked list, remove it.
-  *
-  * If it is not deleted, it will eventually get aged out.
-  * A guaranteed delete requires mapping the cPacket to the Ptr<CCNxStandardContentStoreEntry>,
-  * which requires searching the maps - not difficult but tedious and unnecessary most of the
-  * time, since deletes will be typically used to remove the last item in the linked list.
-  *
-  */
-
-     if (m_lruList.back()->GetPacket() == cPacket) //lazy delete
-       {
-	     m_lruList.pop_back();
-	     return true;
-       }
-     return false;
+  return m_lruList.back();
 }
 
 
-
-
-bool
-CCNxStandardContentStoreLruList::RefreshEntry (Ptr<CCNxStandardContentStoreEntry> entry)
+Ptr<CCNxStandardContentStoreEntry>
+CCNxStandardContentStoreLruList::GetFrontEntry()
 {
-  //move this entry to the front of the lru List
-  m_lruList.remove(entry);
-  m_lruList.push_front(entry);
-  return true;
+  return m_lruList.front();
 }
 
 
 
-Ptr<CCNxPacket>
-CCNxStandardContentStoreLruList::GetTailPacket () const
-{
-  return m_lruList.back()->GetPacket();
-}
+
+
+
 
