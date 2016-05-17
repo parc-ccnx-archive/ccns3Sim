@@ -165,7 +165,7 @@ public:
    * @return true if removed
    * @return false If not removed (i.e. not found)
    */
-  virtual bool RemoveContentObject (Ptr<CCNxPacket> cPacket) = 0;
+  virtual bool DeleteContentObject (Ptr<CCNxPacket> cPacket) = 0;
 
   /**
    * Returns the number of content object packets in the content store.

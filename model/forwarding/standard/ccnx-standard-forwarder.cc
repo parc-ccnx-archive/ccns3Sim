@@ -318,7 +318,7 @@ CCNxStandardForwarder::PitReceiveInterestCallback (Ptr<CCNxForwarderMessage> mes
       if (m_contentStore)
 	{
 	      NS_LOG_DEBUG ("INTEREST:Verdict=" << verdict << ".  Starting check for match in content store.");
-
+	      m_forwarderStats.interestsToContentStore++;
 	      // start next asynchronous call
 	      m_contentStore->MatchInterest (message);
 	}
@@ -333,8 +333,9 @@ CCNxStandardForwarder::PitReceiveInterestCallback (Ptr<CCNxForwarderMessage> mes
   else //verdict == Aggregate, discard interest
     {
       m_forwarderStats.interestsVerdictAggregate++;
-      Ptr<CCNxStandardForwarderWorkItem> item = DynamicCast<CCNxStandardForwarderWorkItem, CCNxForwarderMessage> (message);
-      FinishRouteLookup (item, Ptr<CCNxConnectionList> (0));
+      Ptr<CCNxStandardForwarderWorkItem> workItem = DynamicCast<CCNxStandardForwarderWorkItem, CCNxForwarderMessage> (message);
+      NS_ASSERT_MSG ( (workItem), "Got null dynamic cast from CCNxForwarderMessage to CCNxStandardForwarderWorkItem");
+      FinishRouteLookup (workItem, Ptr<CCNxConnectionList> (0));
     }
 }
 
@@ -349,9 +350,10 @@ CCNxStandardForwarder::PitSatisfyInterestCallback (Ptr<CCNxForwarderMessage> mes
 
   if (egressConnections->size() ) //match!
       {
-      m_forwarderStats.contentObjectsMatched++;
+      m_forwarderStats.contentObjectsMatchedInPit++;
       if  (m_contentStore) // there is a CS, so add this content
 	{
+	  m_forwarderStats.contentObjectsToContentStore++;
 	  NS_LOG_DEBUG ("CONTENT:name=" << *message->GetPacket()->GetMessage()->GetName() <<" matched Pit Entry  - starting add to Content Store. 1st egressConn=" << egressConnections->front()->GetConnectionId());
 	  m_contentStore->AddContentObject(message,egressConnections); //will fwd packet after this, so must retain egressConnections
 	}
@@ -363,7 +365,7 @@ CCNxStandardForwarder::PitSatisfyInterestCallback (Ptr<CCNxForwarderMessage> mes
       }
   else
     { //no match - drop pkt
-      m_forwarderStats.contentObjectsNotMatched++;
+      m_forwarderStats.contentObjectsNotMatchedInPit++;
       NS_LOG_DEBUG ("CONTENT: no Pit Entry match, discarding packet.");
       FinishRouteLookup (item, Ptr<CCNxConnectionList>(0));
     }
@@ -391,10 +393,12 @@ void
 CCNxStandardForwarder::ContentStoreMatchInterestCallback (Ptr<CCNxForwarderMessage> message)
 {
   Ptr<CCNxStandardForwarderWorkItem> workItem = DynamicCast<CCNxStandardForwarderWorkItem, CCNxForwarderMessage> (message);
+  NS_ASSERT_MSG ( (workItem), "Got null dynamic cast from CCNxForwarderMessage to CCNxStandardForwarderWorkItem");
 
   NS_LOG_FUNCTION (workItem->GetPacket () );
   if ( workItem->GetContentStorePacket() )
     { //matching content found.
+      m_forwarderStats.interestsContentStoreHits++;
       //Replace interest packet with content packet, set ingressConnection to Null and send back to pit
       NS_LOG_DEBUG ("INTEREST sent to content store, found match.  Sending Content back to pit.");
       Ptr<CCNxStandardForwarderWorkItem> newWorkItem =
@@ -403,6 +407,8 @@ CCNxStandardForwarder::ContentStoreMatchInterestCallback (Ptr<CCNxForwarderMessa
     }
   else
     { //no match, verdict was forward, send to fib
+      m_forwarderStats.interestsContentStoreMisses++;
+      m_forwarderStats.interestsToFib++;
       NS_LOG_DEBUG ("INTEREST sent to content store but no match.  Starting FIB lookup.");
       m_fib->Lookup(workItem);
     }
@@ -413,8 +419,17 @@ void
 CCNxStandardForwarder::ContentStoreAddContentObjectCallback (Ptr<CCNxForwarderMessage> message)
 {
   Ptr<CCNxStandardForwarderWorkItem> workItem = DynamicCast<CCNxStandardForwarderWorkItem, CCNxForwarderMessage> (message);
+  NS_ASSERT_MSG ( (workItem), "Got null dynamic cast from CCNxForwarderMessage to CCNxStandardForwarderWorkItem");
   NS_LOG_DEBUG ("CONTENT:name=" << *message->GetPacket()->GetMessage()->GetName() <<" returned from CS. 1st egressConn=" << workItem->GetConnectionsList()->front()->GetConnectionId());
 
+  if (workItem->GetContentAddedFlag())
+    {
+      m_forwarderStats.contentObjectsAddedToContentStore++;
+    }
+  else
+    {
+      m_forwarderStats.contentObjectsNotAddedToContentStore++;
+    }
   NS_LOG_FUNCTION (workItem->GetPacket ());
   FinishRouteLookup (workItem, workItem->GetConnectionsList()); //back to layer 3 protocol eventually
 
@@ -535,7 +550,7 @@ CCNxStandardForwarder::PrintForwardingTable (Ptr<OutputStreamWrapper> streamWrap
  * (time)     4 StandardForwarder Interests  ToPit 206 ToForward 200 ToAggregate 6
  * (time)     4 StandardForwarder Interests  ToCs  200 Hits 20 Misses 180
  * (time)     4 StandardForwarder Interests  ToFib 180 Forwarded 150 NotForwarded 30
- * (time)     4 StandardForwarder Content    ToPit 192 Matched 150 NotMatched 42
+ * (time)     4 StandardForwarder Content    ToPit 192 MatchedInPit 150 NotMatchedInPit 42
  */
 void
 CCNxStandardForwarder::PrintForwardingStatistics (Ptr<OutputStreamWrapper> streamWrapper) const
@@ -577,8 +592,16 @@ CCNxStandardForwarder::PrintForwardingStatistics (Ptr<OutputStreamWrapper> strea
   *stream << std::setw (5) << m_node->GetId () << std::setw (0) << " StandardForwarder ";
   *stream << std::setw(10) << "Content" << std::setw(0);
   *stream << " ToPit " << m_forwarderStats.contentObjectsToPit;
-  *stream << " Matched " << m_forwarderStats.contentObjectsMatched;
-  *stream << " NotMatched " << m_forwarderStats.contentObjectsNotMatched << std::endl;
+  *stream << " Matched " << m_forwarderStats.contentObjectsMatchedInPit;
+  *stream << " NotMatched " << m_forwarderStats.contentObjectsNotMatchedInPit << std::endl;
+
+  (*timePrinter)(*stream);
+  *stream << std::setw (5) << m_node->GetId () << std::setw (0) << " StandardForwarder ";
+  *stream << std::setw(10) << "Content" << std::setw(0);
+  *stream << " ToContentStore " << m_forwarderStats.contentObjectsToContentStore;
+  *stream << " Matched " << m_forwarderStats.contentObjectsAddedToContentStore;
+  *stream << " NotMatched " << m_forwarderStats.contentObjectsNotAddedToContentStore << std::endl;
+
 }
 
 // ================

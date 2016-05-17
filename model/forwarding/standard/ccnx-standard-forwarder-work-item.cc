@@ -113,3 +113,13 @@ Ptr<CCNxPacket> CCNxStandardForwarderWorkItem::GetContentStorePacket () const
 {
   return m_contentStorePacket;
 }
+
+void CCNxStandardForwarderWorkItem::SetContentAddedFlag (bool added)
+{
+  m_contentAddedFlag = added;
+}
+
+bool CCNxStandardForwarderWorkItem::GetContentAddedFlag () const
+{
+  return m_contentAddedFlag;
+}

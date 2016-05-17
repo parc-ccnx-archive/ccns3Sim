@@ -148,9 +148,13 @@ private:
     size_t interestsFibForwarded;	/*!< Number of interests with positive size connection list */
     size_t interestsFibNotForwarded;	/*!< Number of interests with zero size connection list */
 
-    size_t contentObjectsToPit;		/*!< number of content objects sent to PIT */
-    size_t contentObjectsMatched;	/*!< Number of content objects matched (positive size connection list) */
-    size_t contentObjectsNotMatched;	/*!< Number of content objects not matched (zero size connection list) */
+    size_t contentObjectsToPit;			/*!< number of content objects sent to PIT */
+    size_t contentObjectsMatchedInPit;		/*!< Number of content objects matched (positive size connection list) */
+    size_t contentObjectsNotMatchedInPit;	/*!< Number of content objects not matched (zero size connection list) */
+
+    size_t contentObjectsToContentStore;  	/*!< Number of content objects sent to Content Store */
+    size_t contentObjectsAddedToContentStore;	/*!< Number of content objects added to Content Store */
+    size_t contentObjectsNotAddedToContentStore; /*!< Number of content objects Not Added to Content Store */
   } ForwarderStats;
 
   ForwarderStats m_forwarderStats;

@@ -28,7 +28,7 @@
 #ifndef CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_STANDARD_CONTENT_STORE_LRU_LIST_H_
 #define CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_STANDARD_CONTENT_STORE_LRU_LIST_H_
 
-#include <map>
+#include <unordered_map>
 #include "ns3/simple-ref-count.h"
 #include "ns3/ccnx-standard-content-store-entry.h"
 
@@ -39,42 +39,63 @@ class CCNxStandardContentStoreLruList : public ns3::SimpleRefCount<CCNxStandardC
 {
 public:
 
-  /**
-   * Create a standard content store.  It is configured via the NS attribute system.
-   */
+
   CCNxStandardContentStoreLruList ();
 
-  /**
-   * Virtual destructor for inheritance
-   */
   virtual ~CCNxStandardContentStoreLruList ();
 
+  /**
+   * The Least Recently Used (lru) list has the least recently used packet at the end of the list,
+   * and the most recently used at the beginning. The list allows the LRU algorithm to be used when
+   * to evict packets when the content store has reached maximum size.
+   *
+   * The data structure need to enable the scalable quick operations listed below in priority order:
+   *
+   * 1. find an entry if present.
+   * 2. Add an entry if not present.
+   * 3. Delete the least recently used entry.  occurs every time an object is added (once the CS has filled).
+   * 4. Refresh an entry if present.
+   *
+   * This approach uses an unordered map < Ptr<entry>, listIterator> and a list < entry >. The map delivers quick
+   * scalable find(1) while the list provides add(2),refresh(4),delete(3).
+   *
+   * @param entry
+   * @return
+   **/
+
+  /*
+   * Add/Refresh an Entry to/in the LRU.
+   */
+   bool AddEntry(Ptr<CCNxStandardContentStoreEntry> entry);
+
+  /*
+   * Delete an Entry from the LRU. Not a common operation.
+   */
+   bool DeleteEntry(Ptr<CCNxStandardContentStoreEntry> entry);
+
+   /*
+    * Return entry ptr so it can be deleted from Lru and  other structures.
+    */
+
+   Ptr<CCNxStandardContentStoreEntry> GetBackEntry() ;
+
+   Ptr<CCNxStandardContentStoreEntry> GetFrontEntry() ;
 
 
-  virtual bool AddEntry(Ptr<CCNxStandardContentStoreEntry> entry);
 
-  virtual bool DeleteEntry(Ptr<CCNxStandardContentStoreEntry> entry);
+   uint64_t GetSize() const;
 
-  virtual bool RefreshEntry(Ptr<CCNxStandardContentStoreEntry> entry);
-
-  virtual bool DeletePacket(Ptr<CCNxPacket> cPacket);
-
-  virtual   Ptr<CCNxPacket> GetTailPacket() const;
-
-  virtual uint64_t GetSize() const;
 
 protected:
 
 
 private:
 
-   /**
-    * The Least Recently Used (lru) list has the least recently used packet at the end of the list,
-    * and the most recently used at the beginning. The list allows the LRU algorithm to be used when
-    * to evict packets when the content store has reached maximum size.
-    */
-   std::list<Ptr<CCNxStandardContentStoreEntry> > m_lruList;
+  typedef std::list<Ptr<CCNxStandardContentStoreEntry> > LruListType;
+  LruListType m_lruList;
 
+  typedef std::map <Ptr<CCNxStandardContentStoreEntry>,  LruListType::iterator > LruMapType;
+  LruMapType m_lruMap;
 };
 
 }   /* namespace ccnx */
