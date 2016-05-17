@@ -53,95 +53,69 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_CCNXCODECPERHOPHEADER_H
-#define CCNS3SIM_CCNXCODECPERHOPHEADER_H
+#ifndef CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
+#define CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
 
-#include "ns3/header.h"
-#include "ns3/ccnx-perhopheader.h"
-#include "ns3/ccnx-codec-perhopheaderentry.h"
+#include "ns3/ccnx-type-registry.h"
+#include "ccnx-codec-perhopheaderentry.h"
 
 namespace ns3 {
 namespace ccnx {
 
-/**
- * @ingroup ccnx-packet
- *
- * Codec for reading/writing CCNx per hop headers.
- * This represents complete block of all per hop headers
- *
- */
-class CCNxCodecPerHopHeader : public Header
+  /**
+   * Registry of the codecs for each message element.  This allows a user to override a codec or
+   * supply a new codec for a new TLV field.
+   *
+   * Per hop headers are a simple list, so the registry is only a single TLV type.
+   *
+   * CCNxMessages are a hierarchical listing of TLV type.  Therefore, they must be specified as a list.
+   * For example, the Name codec of an Interest is ".1.0" because an Interest is TLV type "1" and a Name is
+   * TLV type "0".  The list can be specified as a string (like the previous exampe) or as a std::vector of
+   * uint32_t.
+   *
+   * N.B. Only Per Hop headers are currently implemented
+   */
+class CCNxCodecRegistry
 {
 public:
-  static TypeId GetTypeId (void);
+  virtual ~CCNxCodecRegistry ();
 
-  virtual TypeId GetInstanceTypeId (void) const;
-
-  // virtual from Header
+  typedef uint32_t TlvTypeType;
 
   /**
-   * Computes the byte length of the encoded TLV.  Does not do
-   * any encoding (it's const).
+   * Create a mapping between TLV type and codec
    */
-  virtual uint32_t GetSerializedSize (void) const;
+  static void PerHopRegisterCodec(TlvTypeType tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec);
 
   /**
-   * Serializes this object into the Buffer::Iterator.  it is the responsibility
-   * of the caller to ensure there is at least GetSerializedSize() bytes available.
+   * Remove a mapping for a TLV type.  To update a registry, you must first unregister it,
+   * then call the register method.
+   */
+  static void PerHopUnegisterCodec(TlvTypeType tlvType);
+
+  /**
+   * Lookup the codec for a TLV type appearing in the list of per hop headers.
    *
-   * @param [in] output The buffer position to begin writing.
+   * @param [in] tlvType
+   * @return Ptr<>(0) If no match
+   * @return non-null If tlv type matched, returns the codec to use
    */
-  virtual void Serialize (Buffer::Iterator output) const;
+  static Ptr<CCNxCodecPerHopHeaderEntry> PerHopLookupCodec(TlvTypeType tlvType);
 
-  /**
-   * Because the per-hop headers are simply a list of TLVs, we do not know how much to read.
-   *
-   * @param [in] length
-   */
-   void SetDeserializeLength(uint32_t length);
-
-  /**
-   * Reads from the Buffer::Iterator and creates an object instantiation of the buffer.
-   *
-   * The buffer should point to the beginning of the T_OBJECT TLV.
-   *
-   * @param [in] input The buffer to read from
-   * @return The number of bytes processed.
-   */
-  virtual uint32_t Deserialize (Buffer::Iterator input);
-
-  /**
-   * Display this codec's state to the provided output stream.
-   *
-   * @param [in] os The output stream to write to
-   */
-  virtual void Print (std::ostream &os) const;
-
-  /**
-   * Constructor for CCNxCodecPerHopHeader
-   */
-  CCNxCodecPerHopHeader ();
-
-  /**
-   * Destructor for CCNxCodecPerHopHeader
-   */
-  virtual ~CCNxCodecPerHopHeader ();
-
-  /**
-   * Returns the internal CCNxPerHopHeader
-   */
-  Ptr<CCNxPerHopHeader> GetHeader () const;
+  // ========
+  // CCNx Message & Validation Registry
 
 protected:
-  Ptr<CCNxPerHopHeader> m_perHopHeader;
   /**
-   * The number of bytes to Deserialize, based on `SetDeserializeLength()`
+   * All static class, so hide constructor
    */
-  uint32_t m_deserializeLength;
+  CCNxCodecRegistry ();
+
+  typedef CCNxTypeRegistry< TlvTypeType, CCNxCodecPerHopHeaderEntry > PerHopRegistryType;
+  static PerHopRegistryType m_perHopRegistry;
 };
 
-} // namespace ccnx
-} // namespace ns3
+} /* namespace ccnx */
+} /* namespace ns3 */
 
-
-#endif //CCNS3SIM_CCNXCODECPERHOPHEADER_H
+#endif /* CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_ */

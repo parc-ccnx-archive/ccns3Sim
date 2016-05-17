@@ -55,6 +55,7 @@
 
 #include "ns3/log.h"
 #include "ns3/ccnx-tlv.h"
+#include "ccnx-codec-registry.h"
 #include "ccnx-codec-perhopheader.h"
 
 using namespace ns3;
@@ -63,8 +64,6 @@ using namespace ns3::ccnx;
 NS_LOG_COMPONENT_DEFINE ("CCNxCodecPerHopHeader");
 
 NS_OBJECT_ENSURE_REGISTERED (CCNxCodecPerHopHeader);
-
-CCNxCodecPerHopHeader::CodecMapType CCNxCodecPerHopHeader::codecMap;
 
 TypeId
 CCNxCodecPerHopHeader::GetTypeId (void)
@@ -81,25 +80,6 @@ CCNxCodecPerHopHeader::GetInstanceTypeId (void) const
   return GetTypeId ();
 }
 
-Ptr<CCNxCodecPerHopHeaderEntry>
-CCNxCodecPerHopHeader::GetTLVtoCodec(uint16_t type) const
-{
-  Ptr<CCNxCodecPerHopHeaderEntry> codec = Ptr<CCNxCodecPerHopHeaderEntry>(0);
-
-  CodecMapType::const_iterator i = codecMap.find(type);
-  if (i != codecMap.end()) {
-	  codec = i->second;
-  }
-  return codec;
-}
-
-void
-CCNxCodecPerHopHeader::RegisterCodec(uint16_t tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec)
-{
-  NS_ASSERT_MSG(codecMap[tlvType] == 0, "Can't overwrite the codec for specific type");
-  codecMap[tlvType] = codec;
-}
-
 uint32_t
 CCNxCodecPerHopHeader::GetSerializedSize (void) const
 {
@@ -109,7 +89,7 @@ CCNxCodecPerHopHeader::GetSerializedSize (void) const
   {
     Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetHeader()->GetHeader(i);
     uint16_t type = perhopEntry->GetInstanceTLVType();
-    Ptr<CCNxCodecPerHopHeaderEntry> codec = GetTLVtoCodec(type);
+    Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
     NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
     length += codec->GetSerializedSize(perhopEntry);
   }
@@ -126,7 +106,7 @@ CCNxCodecPerHopHeader::Serialize (Buffer::Iterator outputIterator) const
   {
       Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetHeader()->GetHeader(i);
       uint16_t type = perhopEntry->GetInstanceTLVType();
-      Ptr<CCNxCodecPerHopHeaderEntry> codec = GetTLVtoCodec(type);
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
       NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
       codec->Serialize(perhopEntry, outputIterator);
   }
@@ -149,7 +129,7 @@ CCNxCodecPerHopHeader::Deserialize (Buffer::Iterator inputIterator)
       // backup to start of TLV
       iterator.Prev(CCNxTlv::GetTLSize());
 
-      Ptr<CCNxCodecPerHopHeaderEntry> codec = GetTLVtoCodec(type);
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
       NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
 
       size_t bytesRead = 0;
@@ -173,7 +153,7 @@ CCNxCodecPerHopHeader::Print (std::ostream &os) const
   {
       Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetHeader()->GetHeader(i);
       uint16_t type = perhopEntry->GetInstanceTLVType();
-      Ptr<CCNxCodecPerHopHeaderEntry> codec = GetTLVtoCodec(type);
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
       NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
       codec->Print(perhopEntry, os);
   }

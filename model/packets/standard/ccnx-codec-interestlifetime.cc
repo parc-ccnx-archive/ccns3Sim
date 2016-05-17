@@ -56,6 +56,7 @@
 #include "ns3/log.h"
 #include "ns3/ccnx-tlv.h"
 #include "ns3/ccnx-schema-v1.h"
+#include "ccnx-codec-registry.h"
 #include "ccnx-codec-perhopheader.h"
 #include "ccnx-codec-interestlifetime.h"
 
@@ -67,13 +68,14 @@ NS_LOG_COMPONENT_DEFINE ("CCNxCodecInterestLifetime");
 
 NS_OBJECT_ENSURE_REGISTERED (CCNxCodecInterestLifetime);
 
-static bool m_registered = false;
-static void RegisterCodec()
+static bool _registered = false;
+static void
+RegisterCodec()
 {
-    if (!m_registered) {
-	m_registered = true;
+    if (!_registered) {
+	_registered = true;
 	    Ptr<CCNxCodecInterestLifetime> codec = CreateObject<CCNxCodecInterestLifetime>();
-	CCNxCodecPerHopHeader::RegisterCodec(CCNxInterestLifetime::GetTLVType(), codec);
+	CCNxCodecRegistry::PerHopRegisterCodec(CCNxInterestLifetime::GetTLVType(), codec);
     }
 }
 
