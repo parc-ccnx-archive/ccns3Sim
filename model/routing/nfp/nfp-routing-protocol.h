@@ -75,6 +75,7 @@
 #include "ns3/nfp-prefix-timer-heap.h"
 
 #include "ns3/nfp-computation-cost.h"
+#include "ns3/nfp-stats.h"
 
 // For unit tests
 class NfpRoutingProtocolFriend;
@@ -233,31 +234,6 @@ class NfpRoutingProtocol : public CCNxRoutingProtocol
   friend class ::NfpRoutingProtocolFriend;
 
 public:
-  class Stats
-  {
-public:
-    Stats () : payloadsSent (0), bytesSent (0), payloadsReceived (0), bytesReceived (0),
-      advertiseOriginated (0), advertiseSent (0), advertiseReceived (0), advertiseReceivedFeasible (0),
-      withdrawOriginated(0), withdrawSent (0), withdrawReceive (0)
-    {
-    }
-
-    uint64_t    payloadsSent;           //<! number of NfpPayloads sent (all interfaces)
-    uint64_t    bytesSent;              //<! total bytes of NfpPayload sent (over all interfaces)
-
-    uint64_t    payloadsReceived;               //<! Number of NfpPayloads received
-    uint64_t    bytesReceived;                  //<! Total bytes of NfpPayloads received
-
-    uint64_t    advertiseOriginated;            //<! Advertisements we originated
-    uint64_t    advertiseSent;                  //<! Advertisements we sent (includes Originated)
-    uint64_t    advertiseReceived;              //<! Advertisements we received
-    uint64_t    advertiseReceivedFeasible;              //<! Advertisements we received and were feasible
-
-    uint64_t    withdrawOriginated;            //<! Withdraws we originated
-    uint64_t    withdrawSent;
-    uint64_t    withdrawReceive;
-  };
-
   static TypeId GetTypeId ();
 
   // ========================================
@@ -325,6 +301,8 @@ public:
   NfpComputationCost GetComputationCost() const;
 
   void PrintComputationCost (Ptr<OutputStreamWrapper> streamWrapper) const;
+
+  NfpStats GetStats() const;
 
 protected:
   /**
@@ -684,7 +662,7 @@ protected:
   /**
    * Stats about behavior
    */
-  Stats m_stats;
+  NfpStats m_stats;
 
   /**
    * Callback of Timer when m_helloTimer expires
@@ -779,6 +757,24 @@ protected:
   Time GetCurrentTime (void) const;
 
   NfpComputationCost m_computationCost;
+
+  /**
+   * Whenever there is a change that requires a message to be sent, we queue it and start
+   * (if not running) this timer so we send the messages a short delay later.
+   */
+  Timer m_processWorkQueueTimer;
+
+  /**
+   * The callback from `m_processWorkQueueTimer`.
+   */
+  void ProcessWorkQueueTimerExpired();
+
+  /**
+   * Call to set the timer, if it is not already running.  If it is running,
+   * this method has no effect.
+   */
+  void SetProcessWorkQueueTimer();
+
 };
 }
 }

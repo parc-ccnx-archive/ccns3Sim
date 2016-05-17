@@ -53,8 +53,8 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_MODEL_ROUTING_NFP_NFP_COMPUTATION_COST_H_
-#define CCNS3SIM_MODEL_ROUTING_NFP_NFP_COMPUTATION_COST_H_
+#ifndef CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_
+#define CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_
 
 #include <ostream>
 #include <stdint.h>
@@ -64,62 +64,71 @@ namespace ns3
   namespace ccnx
   {
 
-    /**
-     * @ingroup nfp-routing
-     *
-     * Computational cost is measured in the number of events and the number of loop iterations.
-     *
-     * An event is something like packet received or timer callback.
-     */
-    class NfpComputationCost
+    class NfpStats
     {
     public:
-      NfpComputationCost ();
-      NfpComputationCost (const NfpComputationCost &copy);
-      virtual ~NfpComputationCost ();
+      NfpStats ();
 
-      void IncrementEvents();
-      void IncrementLoopIterations();
-      void IncrementLoopIterations(uint64_t count);
+      NfpStats(const NfpStats &copy);
 
-      /**
-       * Add one computation cost to this computation cost
-       *
-       * @param other [in] The other one to add
-       * @return This result of the summation
-       */
-      NfpComputationCost operator + (const NfpComputationCost &other) const;
+      NfpStats & operator += (const NfpStats &other);
 
-      /**
-       * Add one computation cost to this computation cost
-       *
-       * @param other [in] The other one to add
-       * @return This computation cost
-       */
-      NfpComputationCost & operator += (const NfpComputationCost &other);
+      void SetNodeId(uint32_t nodeId);
 
-      /**
-       * Two objects are equal if they have the same event count and loop iteration count
-       *
-       * @param other
-       * @return
-       */
-      bool operator == (const NfpComputationCost &other) const;
+      void IncrementPayloadsSent();
+      void IncrementBytesSent(uint64_t value);
+      void IncrementPayloadsReceived();
+      void IncrementBytesReceived(uint64_t value);
 
-      bool operator != (const NfpComputationCost &other) const;
+      void IncrementHellosSent();
+      uint64_t GetHellosSent() const;
 
-      uint64_t GetEvents() const;
-      uint64_t GetLoopIterations() const;
-      uint64_t GetTotalCost() const;
+      void IncrementAdvertiseOriginated();
+      void IncrementAdvertiseSent();
+      void IncrementAdvertiseReceived();
+      void IncrementAdvertiseReceivedFeasible();
 
-      friend std::ostream & operator << (std::ostream &os, const NfpComputationCost &cost);
+      void IncrementWithdrawOriginated();
+      void IncrementWithdrawSent();
+      void IncrementWithdrawReceived();
 
-    private:
-      uint64_t	m_events;		/*< The number of events its callback */
-      uint64_t	m_loopIterations;	/*< The number of transit through any control loop */
-    };
+      uint64_t GetPayloadsSent() const;
+      uint64_t GetBytesSent() const;
+      uint64_t GetPayloadsReceived() const;
+      uint64_t GetBytesReceived() const;
+
+      uint64_t GetAdvertiseOriginated() const;
+      uint64_t GetAdvertiseSent() const;
+      uint64_t GetAdvertiseReceived() const;
+      uint64_t GetAdvertiseReceivedFeasible() const;
+
+      uint64_t GetWithdrawOriginated() const;
+      uint64_t GetWithdrawSent() const;
+      uint64_t GetWithdrawReceived() const;
+
+      friend std::ostream & operator << (std::ostream &os, const NfpStats &stats);
+
+    protected:
+      uint32_t 	  m_nodeId;
+      uint64_t    m_payloadsSent;           //<! number of NfpPayloads sent (all interfaces)
+      uint64_t    m_bytesSent;              //<! total bytes of NfpPayload sent (over all interfaces)
+
+      uint64_t    m_payloadsReceived;               //<! Number of NfpPayloads received
+      uint64_t    m_bytesReceived;                  //<! Total bytes of NfpPayloads received
+
+      uint64_t	  m_hellosSent;			    //<! Number of empty messages sent as hellos
+      uint64_t    m_advertiseOriginated;            //<! Advertisements we originated
+      uint64_t    m_advertiseSent;                  //<! Advertisements we sent (includes Originated)
+      uint64_t    m_advertiseReceived;              //<! Advertisements we received
+      uint64_t    m_advertiseReceivedFeasible;              //<! Advertisements we received and were feasible
+
+      uint64_t    m_withdrawOriginated;            //<! Withdraws we originated
+      uint64_t    m_withdrawSent;
+      uint64_t    m_withdrawReceived;
+      };
+
 
   } /* namespace ccnx */
 } /* namespace ns3 */
 
-#endif /* CCNS3SIM_MODEL_ROUTING_NFP_NFP_COMPUTATION_COST_H_ */
+#endif /* CCNS3SIM_MODEL_ROUTING_NFP_NFP_STATS_H_ */

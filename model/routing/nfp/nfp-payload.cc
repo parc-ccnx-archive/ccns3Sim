@@ -206,7 +206,8 @@ NfpPayload::DeserializeRouterName (Buffer::Iterator const &start, Buffer::Iterat
 uint32_t
 NfpPayload::DeserializeMessageSeqnum (Buffer::Iterator const &start, Buffer::Iterator &current)
 {
-  NS_ASSERT_MSG (ComputeRemaining (start, current) >= CCNxTlv::GetTLSize (), "Must have at least 4 bytes in buffer");
+  uint32_t remaining = ComputeRemaining (start, current);
+  NS_ASSERT_MSG ( remaining >= CCNxTlv::GetTLSize (), "Must have at least 4 bytes in buffer");
   uint16_t innerType = CCNxTlv::ReadType (current);
   uint16_t innerLength = CCNxTlv::ReadLength (current);
 
