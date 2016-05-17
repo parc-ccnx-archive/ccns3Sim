@@ -53,56 +53,69 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "ccnx-perhopheader.h"
+#ifndef CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
+#define CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
 
-using namespace ns3;
-using namespace ns3::ccnx;
+#include "ccnx-type-registry.h"
+#include "ccnx-codec-perhopheaderentry.h"
 
-CCNxPerHopHeader::CCNxPerHopHeader ()
+namespace ns3 {
+namespace ccnx {
+
+  /**
+   * Registry of the codecs for each message element.  This allows a user to override a codec or
+   * supply a new codec for a new TLV field.
+   *
+   * Per hop headers are a simple list, so the registry is only a single TLV type.
+   *
+   * CCNxMessages are a hierarchical listing of TLV type.  Therefore, they must be specified as a list.
+   * For example, the Name codec of an Interest is ".1.0" because an Interest is TLV type "1" and a Name is
+   * TLV type "0".  The list can be specified as a string (like the previous exampe) or as a std::vector of
+   * uint32_t.
+   *
+   * N.B. Only Per Hop headers are currently implemented
+   */
+class CCNxCodecRegistry
 {
-}
+public:
+  virtual ~CCNxCodecRegistry ();
 
-CCNxPerHopHeader::~CCNxPerHopHeader ()
-{
-  // empty
-}
+  typedef uint32_t TlvTypeType;
 
-void
-CCNxPerHopHeader::AddHeader(Ptr<CCNxPerHopHeaderEntry> header)
-{
-  m_perhopheaders.push_back(header);
-}
+  /**
+   * Create a mapping between TLV type and codec
+   */
+  static void PerHopRegisterCodec(TlvTypeType tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec);
 
-size_t
-CCNxPerHopHeader::size(void) const
-{
-  return m_perhopheaders.size ();
-}
+  /**
+   * Remove a mapping for a TLV type.  To update a registry, you must first unregister it,
+   * then call the register method.
+   */
+  static void PerHopUnegisterCodec(TlvTypeType tlvType);
 
-void
-CCNxPerHopHeader::clear ()
-{
-  m_perhopheaders.clear ();
-}
+  /**
+   * Lookup the codec for a TLV type appearing in the list of per hop headers.
+   *
+   * @param [in] tlvType
+   * @return Ptr<>(0) If no match
+   * @return non-null If tlv type matched, returns the codec to use
+   */
+  static Ptr<CCNxCodecPerHopHeaderEntry> PerHopLookupCodec(TlvTypeType tlvType);
 
-Ptr<CCNxPerHopHeaderEntry>
-CCNxPerHopHeader::GetHeader(size_t index) const
-{
-  return m_perhopheaders[index];
-}
+  // ========
+  // CCNx Message & Validation Registry
 
-void
-CCNxPerHopHeader::RemoveHeader(size_t index)
-{
-  m_perhopheaders.erase (m_perhopheaders.begin() + index);
-}
+protected:
+  /**
+   * All static class, so hide constructor
+   */
+  CCNxCodecRegistry ();
 
-std::ostream &
-ns3::ccnx::operator<< (std::ostream &os, CCNxPerHopHeader const &headerlist)
-{
-  for (size_t i = 0; i < headerlist.size(); ++i)
-  {
-      os << "Per Hop Header" << headerlist.GetHeader(i)->Print(os);
-  }
-  return os;
-}
+  typedef CCNxTypeRegistry< TlvTypeType, CCNxCodecPerHopHeaderEntry > PerHopRegistryType;
+  static PerHopRegistryType m_perHopRegistry;
+};
+
+} /* namespace ccnx */
+} /* namespace ns3 */
+
+#endif /* CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_ */

@@ -59,7 +59,6 @@
 #include "ns3/header.h"
 #include "ns3/ccnx-perhopheader.h"
 #include "ns3/ccnx-codec-perhopheaderentry.h"
-#include <map>
 
 namespace ns3 {
 namespace ccnx {
@@ -78,17 +77,6 @@ public:
 
   virtual TypeId GetInstanceTypeId (void) const;
 
-  /*
-   * Typedef for mapping TLV type to codec
-   */
-  typedef std::map< uint16_t, Ptr<CCNxCodecPerHopHeaderEntry> > CodecMapType;
-  static CodecMapType codecMap;
-
-  /**
-   * Create a mapping between TLV type and codec
-   */
-  static void RegisterCodec(uint16_t tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec);
-
   // virtual from Header
 
   /**
@@ -104,6 +92,13 @@ public:
    * @param [in] output The buffer position to begin writing.
    */
   virtual void Serialize (Buffer::Iterator output) const;
+
+  /**
+   * Because the per-hop headers are simply a list of TLVs, we do not know how much to read.
+   *
+   * @param [in] length
+   */
+   void SetDeserializeLength(uint32_t length);
 
   /**
    * Reads from the Buffer::Iterator and creates an object instantiation of the buffer.
@@ -126,7 +121,6 @@ public:
    * Constructor for CCNxCodecPerHopHeader
    */
   CCNxCodecPerHopHeader ();
-  CCNxCodecPerHopHeader (uint32_t length);
 
   /**
    * Destructor for CCNxCodecPerHopHeader
@@ -134,33 +128,16 @@ public:
   virtual ~CCNxCodecPerHopHeader ();
 
   /**
-   * Returns the length of all per hop headers
-   */
-  uint32_t GetHeaderLength () const;
-
-  /**
-   * Sets the length of all per hop headers
-   *
-   * @param [in] length Set the combined length of all per hop headers
-   */
-  void SetHeaderLength (uint32_t length);
-
-  /**
-   * Return the codec associated with the TLV type
-   *
-   * @param [in] type Type field in the per hop header TLV
-   * @return Returns a pointer to the corresponding codec
-   */
-  Ptr<CCNxCodecPerHopHeaderEntry> GetTLVtoCodec(uint16_t type) const;
-
-  /**
    * Returns the internal CCNxPerHopHeader
    */
-  CCNxPerHopHeader GetHeader () const;
+  Ptr<CCNxPerHopHeader> GetHeader () const;
 
 protected:
-  CCNxPerHopHeader m_perHopHeader;
-  uint32_t m_length;
+  Ptr<CCNxPerHopHeader> m_perHopHeader;
+  /**
+   * The number of bytes to Deserialize, based on `SetDeserializeLength()`
+   */
+  uint32_t m_deserializeLength;
 };
 
 } // namespace ccnx

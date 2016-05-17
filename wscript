@@ -156,6 +156,7 @@ def build(bld):
         'model/routing/nfp/nfp-prefix-timer-entry.cc',
         'model/routing/nfp/nfp-prefix-timer-heap.cc',
         'model/routing/nfp/nfp-seqnum.cc',
+        'model/routing/nfp/nfp-stats.cc',
         'model/routing/nfp/nfp-routing-helper.cc',
         'model/routing/nfp/nfp-routing-protocol.cc',
         'model/routing/nfp/nfp-withdraw.cc',
@@ -167,6 +168,7 @@ def build(bld):
         'model/routing/ccnx-routing-protocol.cc',
         # packets
         'model/packets/ccnx-packet.cc',
+        'model/packets/standard/ccnx-codec-registry.cc',
         'model/packets/standard/ccnx-codec-contentobject.cc',
         'model/packets/standard/ccnx-codec-fixedheader.cc',
         'model/packets/standard/ccnx-codec-interest.cc',
@@ -284,6 +286,7 @@ def build(bld):
         'model/routing/nfp/nfp-routing-protocol.h',
         'model/routing/nfp/nfp-schema.h',
         'model/routing/nfp/nfp-seqnum.h',
+        'model/routing/nfp/nfp-stats.h',
         'model/routing/nfp/nfp-withdraw.h',
         'model/routing/nfp/nfp-workqueue.h',
         'model/routing/nfp/nfp-workqueue-entry.h',
@@ -293,6 +296,8 @@ def build(bld):
         'model/routing/ccnx-routing-protocol.h',
         # packets
         'model/packets/ccnx-packet.h',
+        'model/packets/standard/ccnx-type-registry.h',
+        'model/packets/standard/ccnx-codec-registry.h',
         'model/packets/standard/ccnx-codec-contentobject.h',
         'model/packets/standard/ccnx-codec-fixedheader.h',
         'model/packets/standard/ccnx-codec-interest.h',
@@ -302,14 +307,13 @@ def build(bld):
         'model/packets/standard/ccnx-codec-perhopheaderentry.h',
         'model/packets/standard/ccnx-codec-perhopheader.h',
         'model/packets/standard/ccnx-codec-interestlifetime.h',
-        # 'model/packets/standard/ccnx-registry.h',
         # Portal
         'model/portal/ccnx-portal.h',
         'model/portal/ccnx-portal-factory.h',
         'model/portal/message/ccnx-message-portal.h',
         'model/portal/message/ccnx-message-portalfactory.h',
         # Helpers
-         'helper/ccnx-ascii-trace-helper.h',
+        'helper/ccnx-ascii-trace-helper.h',
         'helper/ccnx-routing-helper.h',
         'helper/ccnx-layer3-helper.h',
         'helper/ccnx-forwarding-helper.h',

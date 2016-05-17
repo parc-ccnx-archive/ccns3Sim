@@ -53,56 +53,77 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "ccnx-perhopheader.h"
+#ifndef CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_REGISTRY_H_
+#define CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_REGISTRY_H_
 
-using namespace ns3;
-using namespace ns3::ccnx;
+#include <map>
+#include "ns3/simple-ref-count.h"
+#include "ns3/ptr.h"
 
-CCNxPerHopHeader::CCNxPerHopHeader ()
+namespace ns3 {
+namespace ccnx {
+
+template<class TlvType, class RegistryClass>
+class CCNxTypeRegistry : public SimpleRefCount< CCNxTypeRegistry<TlvType, RegistryClass> >
 {
-}
+protected:
 
-CCNxPerHopHeader::~CCNxPerHopHeader ()
-{
-  // empty
-}
+  /**
+   * Typedef for mapping TLV type to codec
+   */
 
-void
-CCNxPerHopHeader::AddHeader(Ptr<CCNxPerHopHeaderEntry> header)
-{
-  m_perhopheaders.push_back(header);
-}
+  typedef typename std::map< TlvType, Ptr<RegistryClass> > RegistryMapType;
+  typedef typename RegistryMapType::const_iterator ConstIteratorType;
+  RegistryMapType m_registry;
 
-size_t
-CCNxPerHopHeader::size(void) const
-{
-  return m_perhopheaders.size ();
-}
+public:
+  /**
+   * A generic registry of TLV type to codec.
+   *
+   * @param description [in] A description of the registry (purely informative)
+   */
 
-void
-CCNxPerHopHeader::clear ()
-{
-  m_perhopheaders.clear ();
-}
-
-Ptr<CCNxPerHopHeaderEntry>
-CCNxPerHopHeader::GetHeader(size_t index) const
-{
-  return m_perhopheaders[index];
-}
-
-void
-CCNxPerHopHeader::RemoveHeader(size_t index)
-{
-  m_perhopheaders.erase (m_perhopheaders.begin() + index);
-}
-
-std::ostream &
-ns3::ccnx::operator<< (std::ostream &os, CCNxPerHopHeader const &headerlist)
-{
-  for (size_t i = 0; i < headerlist.size(); ++i)
+  CCNxTypeRegistry (std::string description) : m_description(description)
   {
-      os << "Per Hop Header" << headerlist.GetHeader(i)->Print(os);
   }
-  return os;
-}
+
+  virtual ~CCNxTypeRegistry () {}
+
+  /**
+   * Create a mapping between TLV type and another class
+   */
+  void Register(TlvType tlvType, Ptr<RegistryClass> registeredClass)
+  {
+    NS_ASSERT_MSG(m_registry[tlvType] == 0, "Can't overwrite the registered class for type " << tlvType);
+    m_registry[tlvType] = registeredClass;
+  }
+
+  /**
+   * Remove the registration for a type.  To replace a registration, you must first remove it
+   * then re-register with a call to `Register()`.
+   *
+   * @param tlvType
+   */
+
+  void UnRegister(TlvType tlvType)
+  {
+    m_registry.erase(tlvType);
+  }
+
+  Ptr<RegistryClass> Lookup(TlvType tlvType)
+  {
+    Ptr<RegistryClass> registeredClass = Ptr<RegistryClass>(0);
+    ConstIteratorType i = m_registry.find(tlvType);
+    if (i != m_registry.end()) {
+	registeredClass = i->second;
+    }
+    return registeredClass;
+  }
+
+private:
+  std::string m_description;
+};
+} /* namespace ccnx */
+} /* namespace ns3 */
+
+#endif /* CCNS3SIM_MODEL_PACKETS_CCNX_TYPE_REGISTRY_H_ */

@@ -53,56 +53,27 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#include "ccnx-perhopheader.h"
+#include "ccnx-codec-registry.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
 
-CCNxPerHopHeader::CCNxPerHopHeader ()
-{
-}
+CCNxCodecRegistry::PerHopRegistryType CCNxCodecRegistry::m_perHopRegistry("PerHop Registry");
 
-CCNxPerHopHeader::~CCNxPerHopHeader ()
+void
+CCNxCodecRegistry::PerHopRegisterCodec(TlvTypeType tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec)
 {
-  // empty
+  m_perHopRegistry.Register(tlvType, codec);
 }
 
 void
-CCNxPerHopHeader::AddHeader(Ptr<CCNxPerHopHeaderEntry> header)
+CCNxCodecRegistry::PerHopUnegisterCodec(TlvTypeType tlvType)
 {
-  m_perhopheaders.push_back(header);
+  m_perHopRegistry.UnRegister(tlvType);
 }
 
-size_t
-CCNxPerHopHeader::size(void) const
+Ptr<CCNxCodecPerHopHeaderEntry>
+CCNxCodecRegistry::PerHopLookupCodec(TlvTypeType tlvType)
 {
-  return m_perhopheaders.size ();
-}
-
-void
-CCNxPerHopHeader::clear ()
-{
-  m_perhopheaders.clear ();
-}
-
-Ptr<CCNxPerHopHeaderEntry>
-CCNxPerHopHeader::GetHeader(size_t index) const
-{
-  return m_perhopheaders[index];
-}
-
-void
-CCNxPerHopHeader::RemoveHeader(size_t index)
-{
-  m_perhopheaders.erase (m_perhopheaders.begin() + index);
-}
-
-std::ostream &
-ns3::ccnx::operator<< (std::ostream &os, CCNxPerHopHeader const &headerlist)
-{
-  for (size_t i = 0; i < headerlist.size(); ++i)
-  {
-      os << "Per Hop Header" << headerlist.GetHeader(i)->Print(os);
-  }
-  return os;
+  return m_perHopRegistry.Lookup(tlvType);
 }

@@ -55,6 +55,7 @@
 
 #include "ns3/log.h"
 #include "ns3/ccnx-tlv.h"
+#include "ccnx-codec-registry.h"
 #include "ccnx-codec-perhopheader.h"
 
 using namespace ns3;
@@ -63,8 +64,6 @@ using namespace ns3::ccnx;
 NS_LOG_COMPONENT_DEFINE ("CCNxCodecPerHopHeader");
 
 NS_OBJECT_ENSURE_REGISTERED (CCNxCodecPerHopHeader);
-
-CCNxCodecPerHopHeader::CodecMapType CCNxCodecPerHopHeader::codecMap;
 
 TypeId
 CCNxCodecPerHopHeader::GetTypeId (void)
@@ -81,108 +80,89 @@ CCNxCodecPerHopHeader::GetInstanceTypeId (void) const
   return GetTypeId ();
 }
 
-Ptr<CCNxCodecPerHopHeaderEntry>
-CCNxCodecPerHopHeader::GetTLVtoCodec(uint16_t type) const
-{
-	Ptr<CCNxCodecPerHopHeaderEntry> codec = Ptr<CCNxCodecPerHopHeaderEntry>(0);
-
-	CodecMapType::const_iterator i = codecMap.find(type);
-	if (i != codecMap.end()) {
-		codec = i->second;
-	}
-	return codec;
-}
-
-void
-CCNxCodecPerHopHeader::RegisterCodec(uint16_t tlvType, Ptr<CCNxCodecPerHopHeaderEntry> codec)
-{
-	NS_ASSERT_MSG(codecMap[tlvType] == 0, "Can't overwrite the codec for specific type");
-	codecMap[tlvType] = codec;
-}
-
 uint32_t
 CCNxCodecPerHopHeader::GetSerializedSize (void) const
 {
-	uint32_t length = 0;
+  uint32_t length = 0;
 
-	CCNxPerHopHeader::HdrListType headerVector = GetHeader().GetHeaderList();
-	for (CCNxPerHopHeader::HdrListType::iterator it = headerVector.begin(); it != headerVector.end(); ++it)
-	{
-		Ptr<CCNxPerHopHeaderEntry> perhopEntry = *it;
-		uint16_t type = perhopEntry->GetInstanceTLVType();
-		Ptr<CCNxCodecPerHopHeaderEntry> codec = GetTLVtoCodec(type);
-		NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
-		length += codec->GetSerializedSize(perhopEntry);
-	}
+  for (size_t i = 0; i < GetHeader()->size(); ++i)
+  {
+    Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetHeader()->GetHeader(i);
+    uint16_t type = perhopEntry->GetInstanceTLVType();
+    Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
+    NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
+    length += codec->GetSerializedSize(perhopEntry);
+  }
 
-	return length;
+  return length;
 }
 
 void
 CCNxCodecPerHopHeader::Serialize (Buffer::Iterator outputIterator) const
 {
-	NS_LOG_FUNCTION (this << &outputIterator);
+  NS_LOG_FUNCTION (this << &outputIterator);
 
-	CCNxPerHopHeader::HdrListType headerVector = GetHeader().GetHeaderList();
-	for (CCNxPerHopHeader::HdrListType::iterator it = headerVector.begin(); it != headerVector.end(); ++it)
-	{
-		Ptr<CCNxPerHopHeaderEntry> perhopEntry = *it;
-		uint16_t type = perhopEntry->GetInstanceTLVType();
-		Ptr<CCNxCodecPerHopHeaderEntry> codec = GetTLVtoCodec(type);
-		NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
-		codec->Serialize(perhopEntry, outputIterator);
-	}
+  for (size_t i = 0; i < GetHeader()->size(); ++i)
+  {
+      Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetHeader()->GetHeader(i);
+      uint16_t type = perhopEntry->GetInstanceTLVType();
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
+      NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
+      codec->Serialize(perhopEntry, outputIterator);
+  }
 }
 
 uint32_t
 CCNxCodecPerHopHeader::Deserialize (Buffer::Iterator inputIterator)
 {
-	uint32_t totalLen = GetHeaderLength() ;
+  uint32_t totalLen = m_deserializeLength;
 
-	Buffer::Iterator iterator = inputIterator;
+  Buffer::Iterator iterator = inputIterator;
 
-	while (totalLen != 0)
-	{
-		NS_ASSERT_MSG(totalLen >= 4, "underrun - not enough bytes for a T and L");
-		uint16_t type = CCNxTlv::ReadType (iterator);
-		uint16_t length = CCNxTlv::ReadLength (iterator);
-		NS_ASSERT_MSG(length < totalLen, "too long");
+  while (totalLen != 0)
+  {
+      NS_ASSERT_MSG(totalLen >= 4, "underrun - not enough bytes for a T and L");
+      uint16_t type = CCNxTlv::ReadType (iterator);
+      uint16_t length = CCNxTlv::ReadLength (iterator);
+      NS_ASSERT_MSG(length < totalLen, "too long");
 
-		// backup to start of TLV
-		iterator.Prev(CCNxTlv::GetTLSize());
+      // backup to start of TLV
+      iterator.Prev(CCNxTlv::GetTLSize());
 
-		Ptr<CCNxCodecPerHopHeaderEntry> codec = GetTLVtoCodec(type);
-		NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
+      NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
 
-		size_t bytesRead = 0;
-		Ptr<CCNxPerHopHeaderEntry> perHopHeaderEntry = codec->Deserialize(iterator, &bytesRead);
+      size_t bytesRead = 0;
+      Ptr<CCNxPerHopHeaderEntry> perHopHeaderEntry = codec->Deserialize(iterator, &bytesRead);
 
-		NS_ASSERT_MSG(bytesRead == length + CCNxTlv::GetTLSize(), "did not read right length");
+      NS_ASSERT_MSG(bytesRead == length + CCNxTlv::GetTLSize(), "did not read right length");
 
-		// Add per Hop header to the vector
-		m_perHopHeader.AddHeader(perHopHeaderEntry);
+      // Add per Hop header to the vector
+      m_perHopHeader->AddHeader(perHopHeaderEntry);
 
-		// Move the iterator pointer forward by bytesRead
-		totalLen = totalLen - bytesRead;
-	}
-	return GetHeaderLength();
+      // Move the iterator pointer forward by bytesRead
+      totalLen = totalLen - bytesRead;
+  }
+  return m_deserializeLength;
 }
 
 void
 CCNxCodecPerHopHeader::Print (std::ostream &os) const
 {
-	// empty
+  for (size_t i = 0; i < GetHeader()->size(); ++i)
+  {
+      Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetHeader()->GetHeader(i);
+      uint16_t type = perhopEntry->GetInstanceTLVType();
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
+      NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
+      codec->Print(perhopEntry, os);
+  }
 }
 
 CCNxCodecPerHopHeader::CCNxCodecPerHopHeader ()
-			: m_length (0)
+			: m_deserializeLength (0)
 {
-  // empty
-}
-
-CCNxCodecPerHopHeader::CCNxCodecPerHopHeader(uint32_t length)
-			: m_length (length)
-{
+  m_perHopHeader = Create<CCNxPerHopHeader>();
 }
 
 CCNxCodecPerHopHeader::~CCNxCodecPerHopHeader ()
@@ -190,20 +170,14 @@ CCNxCodecPerHopHeader::~CCNxCodecPerHopHeader ()
   // empty
 }
 
-uint32_t
-CCNxCodecPerHopHeader::GetHeaderLength () const
-{
-  return m_length;
-}
-
-void
-CCNxCodecPerHopHeader::SetHeaderLength (uint32_t length)
-{
-	m_length = length;
-}
-
-CCNxPerHopHeader
+Ptr<CCNxPerHopHeader>
 CCNxCodecPerHopHeader::GetHeader () const
 {
   return m_perHopHeader;
+}
+
+void
+CCNxCodecPerHopHeader::SetDeserializeLength (uint32_t length)
+{
+  m_deserializeLength = length;
 }

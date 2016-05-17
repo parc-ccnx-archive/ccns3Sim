@@ -111,6 +111,7 @@ NfpPrefix::ReceiveAdvertisement (Ptr<NfpAdvertise> advertisement, Ptr<CCNxConnec
       Ptr<NfpAnchorAdvertisement> aa = i->second;
       if (aa->IsFeasibleAdvertisement (advertisement))
         {
+	  m_computationCost.IncrementEvents();
           Time expiryTime = now + m_advertisementTimeout;
           bool wasReachable = aa->GetNexthopCount () > 0;
           NfpAnchorAdvertisement::CompareResult compareResult = aa->UpdateAdvertisement (advertisement, ingressConnection, expiryTime);

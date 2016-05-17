@@ -92,6 +92,14 @@ public:
    uint32_t GetSerializedSize (Ptr<CCNxPerHopHeaderEntry> perhopEntry);
 
    void Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator output);
+
+   /**
+    * Display this codec's state to the provided output stream.
+    *
+    * @param [in] perhopEntry The Entry to be printed
+    * @param [in] os The output stream to write to
+    */
+   void Print (Ptr<CCNxPerHopHeaderEntry> perhopEntry, std::ostream &os) const;
 };
 
 } // namespace ccnx

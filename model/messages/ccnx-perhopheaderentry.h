@@ -68,6 +68,7 @@ namespace ccnx {
  * Represents a Per Hop header entry. This class is a base class for per hop
  * header representation.
  * Implementation classes: CCNxInterestLifetime
+ * @see CCNxInterestLifetime
  */
 class CCNxPerHopHeaderEntry : public Object {
 public:
@@ -91,6 +92,8 @@ public:
    * header the base class pointer represents
    */
   virtual uint16_t GetInstanceTLVType (void) const = 0;
+
+  virtual std::ostream & Print(std::ostream &os) const = 0;
 };
 
 }

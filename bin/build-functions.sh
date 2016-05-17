@@ -199,7 +199,7 @@ do_debug_purge()
 waf_config()
 {
     OPTS="$@"
-    ARGS="--enable-examples --enable-tests"
+    ARGS="--build-profile=optimized --enable-examples --enable-tests"
     WITH_PYTHON=0
     for opt in $OPTS; do
         case $opt in
