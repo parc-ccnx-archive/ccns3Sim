@@ -296,7 +296,7 @@ def build(bld):
         'model/routing/ccnx-routing-protocol.h',
         # packets
         'model/packets/ccnx-packet.h',
-        'model/packets/ccnx-type-registry.h',
+        'model/packets/standard/ccnx-type-registry.h',
         'model/packets/standard/ccnx-codec-registry.h',
         'model/packets/standard/ccnx-codec-contentobject.h',
         'model/packets/standard/ccnx-codec-fixedheader.h',
