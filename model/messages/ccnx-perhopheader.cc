@@ -100,13 +100,9 @@ CCNxPerHopHeader::RemoveHeader(size_t index)
 std::ostream &
 ns3::ccnx::operator<< (std::ostream &os, CCNxPerHopHeader const &headerlist)
 {
-  os <<"Nothing here yet";
-  /*
-   * Need to figure this out
   for (size_t i = 0; i < headerlist.size(); ++i)
   {
-      os << "Per Hop Header" << *headerlist.GetHeader(i);
+      os << "Per Hop Header" << headerlist.GetHeader(i)->Print(os);
   }
-  */
   return os;
 }

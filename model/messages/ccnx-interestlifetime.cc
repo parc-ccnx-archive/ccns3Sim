@@ -113,8 +113,8 @@ CCNxInterestLifetime::GetInterestLifetime () const
 }
 
 std::ostream &
-ns3::ccnx::operator<< (std::ostream &os, CCNxInterestLifetime const &interestLifetime)
+CCNxInterestLifetime::Print(std::ostream &os) const
 {
-  os << "{ Interest Lifetime timeValue " << interestLifetime.GetInterestLifetime ()->getTime () << " }";
+  os << "{ Interest Lifetime timeValue " << GetInterestLifetime ()->getTime () << " }";
   return os;
 }

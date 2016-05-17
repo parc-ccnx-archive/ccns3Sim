@@ -98,17 +98,17 @@ public:
   Ptr<CCNxTime>   GetInterestLifetime () const;
 
   /**
-   * Outputs a string like this:
+   * Prints a string like this:
    *
    * { Interest Lifetime timeValue T }
    *
    * Where T is the uint64_t value of the CCNxTime.
    *
    * @param [in] os ostream object
-   * @param [in] interestLifetime CCNxInterestLifetime object
    * @return ostream object
    */
-   friend std::ostream &operator<< (std::ostream &os, CCNxInterestLifetime const &interestLifetime);
+
+   virtual std::ostream & Print(std::ostream &os) const;
 
 protected:
 
