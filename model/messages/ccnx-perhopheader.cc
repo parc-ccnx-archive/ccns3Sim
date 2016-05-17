@@ -70,13 +70,19 @@ CCNxPerHopHeader::~CCNxPerHopHeader ()
 void
 CCNxPerHopHeader::AddHeader(Ptr<CCNxPerHopHeaderEntry> header)
 {
-	m_perhopheaders.push_back(header);
+  m_perhopheaders.push_back(header);
 }
 
 size_t
-CCNxPerHopHeader::GetHeaderSize(void) const
+CCNxPerHopHeader::size(void) const
 {
   return m_perhopheaders.size ();
+}
+
+void
+CCNxPerHopHeader::clear ()
+{
+  m_perhopheaders.clear ();
 }
 
 Ptr<CCNxPerHopHeaderEntry>
@@ -88,11 +94,15 @@ CCNxPerHopHeader::GetHeader(size_t index) const
 void
 CCNxPerHopHeader::RemoveHeader(size_t index)
 {
-	m_perhopheaders.erase (m_perhopheaders.begin() + index);
+  m_perhopheaders.erase (m_perhopheaders.begin() + index);
 }
 
-CCNxPerHopHeader::HdrListType
-CCNxPerHopHeader::GetHeaderList(void)
+std::ostream &
+ns3::ccnx::operator<< (std::ostream &os, CCNxPerHopHeader const &headerlist)
 {
-	return m_perhopheaders;
+  for (size_t i = 0; i < headerlist.size(); ++i)
+  {
+      os << "Per Hop Header" << headerlist.GetHeader(i)->Print(os);
+  }
+  return os;
 }

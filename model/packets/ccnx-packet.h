@@ -122,7 +122,7 @@ public:
 
   Ptr<CCNxValidation> GetValidation () const;
 
-  CCNxPerHopHeader GetPerhopHeaders() const;
+  Ptr<CCNxPerHopHeader> GetPerhopHeaders() const;
 
   void AddPerHopHeaderEntry (Ptr<CCNxPerHopHeaderEntry> perHopHeaderEntry);
 
