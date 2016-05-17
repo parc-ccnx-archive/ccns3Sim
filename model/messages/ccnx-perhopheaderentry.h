@@ -92,6 +92,8 @@ public:
    * header the base class pointer represents
    */
   virtual uint16_t GetInstanceTLVType (void) const = 0;
+
+  virtual std::ostream & Print(std::ostream &os) const = 0;
 };
 
 }

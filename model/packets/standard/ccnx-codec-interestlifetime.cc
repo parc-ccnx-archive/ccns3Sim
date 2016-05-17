@@ -205,11 +205,11 @@ CCNxCodecInterestLifetime::Print (Ptr<CCNxPerHopHeaderEntry> perhopEntry, std::o
   if (perhopEntry)
   {
       Ptr<CCNxInterestLifetime> interestLifetime = DynamicCast<CCNxInterestLifetime, CCNxPerHopHeaderEntry> (perhopEntry);
-      os << *interestLifetime;
+      os << interestLifetime->Print(os);
   }
   else
   {
-      os << "NULL header";
+      os << "No interest lifetime header";
   }
 }
 
