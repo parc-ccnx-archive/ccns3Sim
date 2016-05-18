@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -165,7 +165,7 @@ public:
    * @return true if removed
    * @return false If not removed (i.e. not found)
    */
-  virtual bool RemoveContentObject (Ptr<CCNxPacket> cPacket) = 0;
+  virtual bool DeleteContentObject (Ptr<CCNxPacket> cPacket) = 0;
 
   /**
    * Returns the number of content object packets in the content store.

@@ -1,22 +1,20 @@
 /*
- * Copyright (c) 2016, Xerox Corporation (Xerox)and Palo Alto Research Center (PARC)
+ * Copyright (c) 2016, Xerox Corporation (Xerox) and Palo Alto Research Center, Inc (PARC)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Patent rights are not granted under this agreement. Patent rights are
- *       available under FRAND terms.
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL XEROX or PARC BE LIABLE FOR ANY
+ * DISCLAIMED. IN NO EVENT SHALL XEROX OR PARC BE LIABLE FOR ANY
  * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -24,13 +22,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/* ################################################################################
+ * #
+ * # PATENT NOTICE
+ * #
+ * # This software is distributed under the BSD 2-clause License (see LICENSE
+ * # file).  This BSD License does not make any patent claims and as such, does
+ * # not act as a patent grant.  The purpose of this section is for each contributor
+ * # to define their intentions with respect to intellectual property.
+ * #
+ * # Each contributor to this source code is encouraged to state their patent
+ * # claims and licensing mechanisms for any contributions made. At the end of
+ * # this section contributors may each make their own statements.  Contributor's
+ * # claims and grants only apply to the pieces (source code, programs, text,
+ * # media, etc) that they have contributed directly to this software.
+ * #
+ * # There is no guarantee that this section is complete, up to date or accurate. It
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
+ * #
+ * # Do not remove this header notification.  The contents of this section must be
+ * # present in all distributions of the software.  You may only modify your own
+ * # intellectual property statements.  Please provide contact information.
+ *
+ * - Palo Alto Research Center, Inc
+ * This software distribution does not grant any rights to patents owned by Palo
+ * Alto Research Center, Inc (PARC). Rights to these patents are available via
+ * various mechanisms. As of January 2016 PARC has committed to FRAND licensing any
+ * intellectual property used by its contributions to this software. You may
+ * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
+ */
 
 #include "ns3/assert.h"
 #include "ns3/log.h"
 #include "ns3/integer.h"
 #include "ns3/ccnx-delay-queue.h"
 #include "ns3/object.h"
-
 #include "ccnx-standard-content-store.h"
 
 using namespace ns3;
@@ -116,7 +143,7 @@ CCNxStandardContentStore::DoInitialize ()
 {
   m_inputQueue = Create<DelayQueueType> (m_layerDelayServers,
                                          MakeCallback (&CCNxStandardContentStore::GetServiceTime, this),
-                                         MakeCallback (&CCNxStandardContentStore::ServiceInputQueue, this));
+                                         MakeCallback (&CCNxStandardContentStore::DequeueCallback, this));
 }
 
 void
@@ -137,22 +164,33 @@ CCNxStandardContentStore::GetServiceTime (Ptr<CCNxStandardForwarderWorkItem> wor
 {
 
   NS_ASSERT_MSG ( workItem!=0, "Got null casting CCNxForwarderMessage to CCNxStandardForwarderWorkItem");
-
-
   Time delay = m_layerDelayConstant;
+  bool result;
 
-  Ptr<const CCNxName> name = workItem->GetPacket ()->GetMessage ()->GetName ();
-  if (name)
-    {
-      size_t nameBytes = 0;
-      for (int i = 0; i < name->GetSegmentCount (); ++i)
-        {
-          Ptr<const CCNxNameSegment> segment = name->GetSegment (i);
-          nameBytes += segment->GetValue ().size ();
-        }
+  switch (workItem->GetPacket ()->GetFixedHeader ()->GetPacketType () )
+     {
+     case CCNxFixedHeaderType_Interest:
+       result = ServiceMatchInterest (workItem);
+       if (result) //match! delay proportion to size of packet returned
+	 {
+	   delay += m_layerDelaySlope * workItem->GetContentStorePacket()->GetMessage()->GetPayloadSize();
+	 }
+       break;
 
-      delay += m_layerDelaySlope * nameBytes;
-    }
+     case CCNxFixedHeaderType_Object:
+       result = ServiceAddContentObject (workItem);
+       if (result) //added! delay proportion to size of packet stored
+	 {
+	   delay += m_layerDelaySlope * workItem->GetPacket()->GetMessage()->GetPayloadSize();
+	 }
+       break;
+
+     default:
+       NS_ASSERT_MSG (false, "GetServiceTime got unsupported packet type: " << *workItem->GetPacket ());
+       break;
+     }
+
+
 
   return delay;
 }
@@ -173,7 +211,7 @@ CCNxStandardContentStore::AddContentObject (Ptr<CCNxForwarderMessage> message, P
 {
   Ptr<CCNxStandardForwarderWorkItem> workItem = DynamicCast<CCNxStandardForwarderWorkItem, CCNxForwarderMessage> (message);
   NS_ASSERT_MSG (message->GetPacket()->GetFixedHeader ()->GetPacketType () == CCNxFixedHeaderType_Object,
-                 "Lookup given a non-content packet: " << *message->GetPacket ());
+                 "AddContentObject given a non-content packet: " << *message->GetPacket ());
   workItem->SetConnectionsList(egressConnections); //will fwd packet after this, so must retain egressConnections
   m_inputQueue->push_back (workItem);
 }
@@ -184,7 +222,7 @@ CCNxStandardContentStore::AddContentObject (Ptr<CCNxForwarderMessage> message, P
  * @param item [in] The work item to service
  */
 void
-CCNxStandardContentStore::ServiceInputQueue (Ptr<CCNxStandardForwarderWorkItem> workItem)
+CCNxStandardContentStore::DequeueCallback (Ptr<CCNxStandardForwarderWorkItem> workItem)
 {
   // Interests are input via MatchInterst and ContentObjects are input via AddContentObject.
   // Because we ensure this invariant before queuing a CCNxStandardWorkItem, we use that
@@ -194,24 +232,24 @@ CCNxStandardContentStore::ServiceInputQueue (Ptr<CCNxStandardForwarderWorkItem> 
   switch (workItem->GetPacket ()->GetFixedHeader ()->GetPacketType () )
     {
     case CCNxFixedHeaderType_Interest:
-      ServiceMatchInterest (workItem);
+      m_matchInterestCallback (workItem ); //overloading CCNxForwarderMessage with workItem since this callback cant use workItem
       break;
 
     case CCNxFixedHeaderType_Object:
-      ServiceAddContentObject (workItem);
+      m_addContentObjectCallback (workItem); //overloading CCNxForwarderMessage with workItem since this callback cant use workItem
       break;
 
     default:
-      NS_ASSERT_MSG (false, "ServiceInputQueue got unsupported packet type: " << *workItem->GetPacket ());
+      NS_ASSERT_MSG (false, "DequeueCallback got unsupported packet type: " << *workItem->GetPacket ());
       break;
     }
 }
 
-void
+bool
 CCNxStandardContentStore::ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkItem> workItem)
 {
   NS_LOG_FUNCTION (this);
-
+  bool match = false;
   Ptr<CCNxInterest> interest = DynamicCast<CCNxInterest, CCNxMessage> (workItem->GetPacket()->GetMessage ());
   NS_ASSERT_MSG (workItem->GetPacket()->GetFixedHeader ()->GetPacketType () == CCNxFixedHeaderType_Interest,
                  "ServiceMatchInterest given a non-Interest packet: " << *workItem->GetPacket ());
@@ -264,17 +302,18 @@ CCNxStandardContentStore::ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkIte
     {
      if (IsEntryValid(entry))
        {
+	 match = true;
 	//increment it's use count
 	 entry->IncrementUseCount();
 
-	 m_lruList->RefreshEntry(entry);
+	 m_lruList->AddEntry(entry); //This is a Refresh which has same logic as Add
 
 	 workItem->SetContentStorePacket(entry->GetPacket());
        }
      else
        { //entry not valid, remove it and dont add a content store packet
 	NS_LOG_INFO ("removing expired or stale content in CS matching this interest - no content returned");
-	RemoveContentObject(entry->GetPacket());
+	DeleteContentObject(entry->GetPacket());
        }
     }
  else
@@ -283,11 +322,10 @@ CCNxStandardContentStore::ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkIte
      NS_LOG_INFO ("unable to find content for this interest in CS");
    }
 
- m_matchInterestCallback (workItem ); //overloading CCNxForwarderMessage with workItem since this callback cant use workItem
-
+ return match;
 }
 
-void
+bool
 CCNxStandardContentStore::ServiceAddContentObject (Ptr<CCNxStandardForwarderWorkItem> workItem)
 {
   NS_LOG_FUNCTION (this);
@@ -295,27 +333,27 @@ CCNxStandardContentStore::ServiceAddContentObject (Ptr<CCNxStandardForwarderWork
   Ptr<CCNxPacket> cPacket = workItem->GetPacket();
 
   //check if object already in content store
-  if (!FindEntryInHashMap(cPacket))
+  if (m_csByHash.find(cPacket) == m_csByHash.end() )
   {
+      if (GetObjectCount()>=GetObjectCapacity())
+	{
+	  Ptr<CCNxStandardContentStoreEntry> oldestEntry = m_lruList->GetBackEntry();
+	  DeleteContentObject(oldestEntry->GetPacket());
+	}
       //create new entry
       Ptr<CCNxStandardContentStoreEntry> newEntry = Create<CCNxStandardContentStoreEntry> (cPacket);
-      result = GetObjectCount() < GetObjectCapacity();
 
-      if (!result)
-        {
-	  result=RemoveContentObject(m_lruList->GetTailPacket());
-        }
-      if (result)
-	{
-	  result = m_lruList->AddEntry(newEntry);
-	}
+      result = m_lruList->AddEntry(newEntry);
+
       if (result)
 	{
 	  result = AddMapEntry(cPacket,newEntry);
 	}
 
   }
-  m_addContentObjectCallback (workItem); //overloading CCNxForwarderMessage with workItem since this callback cant use workItem
+  workItem->SetContentAddedFlag(result);
+
+  return result;
 }
 
 bool
@@ -328,6 +366,8 @@ CCNxStandardContentStore::IsEntryValid(Ptr<CCNxStandardContentStoreEntry> entry)
     if (dead)
       {
       Ptr<CCNxContentObject> object = DynamicCast<CCNxContentObject,CCNxMessage>(entry->GetPacket()->GetMessage());
+      NS_ASSERT_MSG (entry->GetPacket()->GetFixedHeader ()->GetPacketType () == CCNxFixedHeaderType_Object,
+                     "IsEntryValid given a non-Content Object packet: " << *entry->GetPacket ());
       NS_LOG_INFO("content in CS named " << *object->GetName() << " has expired");
       }
 
@@ -335,8 +375,7 @@ CCNxStandardContentStore::IsEntryValid(Ptr<CCNxStandardContentStoreEntry> entry)
 }
 
 
-
-
+//external method for unit test
 Ptr<CCNxStandardContentStoreEntry>
 CCNxStandardContentStore::FindEntryInHashMap(Ptr<CCNxPacket> cPacket)
 {
@@ -346,34 +385,55 @@ CCNxStandardContentStore::FindEntryInHashMap(Ptr<CCNxPacket> cPacket)
   CSByHashType::iterator it = m_csByHash.find(cPacket);
   return (it != m_csByHash.end () ? it->second :Ptr<CCNxStandardContentStoreEntry>(0) );
 
+
 }
 
+//TODO verify CS has no memory leak, ie that the entry memory is dealloc'd once all it's Ptrs are deleted.
+
+
 bool
-CCNxStandardContentStore::RemoveContentObject(Ptr<CCNxPacket> cPacket)
+CCNxStandardContentStore::DeleteContentObject(Ptr<CCNxPacket> cPacket)
 {
-  bool result = false;
-  Ptr<CCNxStandardContentStoreEntry> entry;
-
-
+  //remove packet from all maps and Lru
   NS_LOG_FUNCTION (this);
 
-  //remove packet from all maps
-  result=m_csByHash.erase(cPacket); //hash map erase should always return 1 or higher
-
+  CSByHashType::iterator it=m_csByHash.find(cPacket);
+  bool result = (it != m_csByHash.end()) ? true:false;
+  if (!result)
+	{
+	      NS_LOG_ERROR("could not find cPacket in m_csByHash.");
+	}
   if (result)
     {
+      if (!m_lruList->DeleteEntry(it->second))
+	{
+	      NS_LOG_ERROR("could not delete Entry from m_lruList.");
+	}
+
+      m_csByHash.erase(it);
+
+
 	if (cPacket->GetMessage()->GetName())
         {
-	    result=m_csByName.erase(cPacket);
+	    result&=m_csByName.erase(cPacket);
+	    if (!result)
+	      {
+		NS_LOG_ERROR("could not erase cPacket from m_csByName.");
+	      }
+
 #ifdef KEYIDHACK
           if (1) //always erase this map, since all content is given a keyid
 #else
 	    if (cPacket->m_message->HasKeyid())
 #endif
             {
-		result=m_csByNameKeyid.erase(cPacket);
+		result&=m_csByNameKeyid.erase(cPacket);
+		if (!result)
+		  {
+		    NS_LOG_ERROR("could not erase cPacket from m_csByNameKeyid.");
+		  }
             }
-        }   //name map
+        }   //name maps
 	else
 	  {
 #ifdef KEYIDHACK
@@ -382,21 +442,15 @@ CCNxStandardContentStore::RemoveContentObject(Ptr<CCNxPacket> cPacket)
 	    if (cPacket->m_message->HasKeyid())
 #endif
             {
-		result=m_csByHashKeyid.erase(cPacket);
+		result&=m_csByHashKeyid.erase(cPacket);
+		if (!result)
+		  {
+		    NS_LOG_ERROR("could not erase cPacket from m_csByHashKeyid.");
+		  }
             }
 
-	  }
-
-    }   //hash map
-
-
-  if (result) //dont delete it if it was not found in the maps
-    {
-      m_lruList->DeletePacket(cPacket);
-        {
-        }
-    }
-
+	  } //hash maps
+    } // found packet
   return result;
 }
 
@@ -407,6 +461,8 @@ CCNxStandardContentStore::AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardC
 {
 
   Ptr<CCNxContentObject> content = DynamicCast<CCNxContentObject, CCNxMessage>(cPacket->GetMessage());
+  NS_ASSERT_MSG (newEntry->GetPacket()->GetFixedHeader ()->GetPacketType () == CCNxFixedHeaderType_Object,
+                 "IsEntryValid given a non-Content Object packet: " << *newEntry->GetPacket ());
 
   m_csByHash[cPacket] = newEntry;
 

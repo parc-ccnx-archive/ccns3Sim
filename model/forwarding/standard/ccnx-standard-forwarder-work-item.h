@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -144,6 +144,20 @@ public:
   Ptr<CCNxPacket> GetContentStorePacket () const;
 
 
+  /**
+  * set this flag to indicate if content was added successfully.
+  *
+  */
+ void SetContentAddedFlag (bool added) ;
+
+ /**
+  * get this flag to see if content was added successfully.
+  *
+  * @return true if content was added successfully.
+  */
+ bool GetContentAddedFlag () const;
+
+
 private:
   Ptr<CCNxConnection> m_egressConnection;
   CCNxRoutingError::RoutingErrno m_routingErrno;
@@ -151,6 +165,8 @@ private:
   Ptr<CCNxConnectionList> m_connectionsList;
 
   Ptr<CCNxPacket> m_contentStorePacket;
+
+  bool m_contentAddedFlag;
 };
 
 }   /* namespace ccnx */

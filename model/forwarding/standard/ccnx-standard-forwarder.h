@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -148,9 +148,13 @@ private:
     size_t interestsFibForwarded;	/*!< Number of interests with positive size connection list */
     size_t interestsFibNotForwarded;	/*!< Number of interests with zero size connection list */
 
-    size_t contentObjectsToPit;		/*!< number of content objects sent to PIT */
-    size_t contentObjectsMatched;	/*!< Number of content objects matched (positive size connection list) */
-    size_t contentObjectsNotMatched;	/*!< Number of content objects not matched (zero size connection list) */
+    size_t contentObjectsToPit;			/*!< number of content objects sent to PIT */
+    size_t contentObjectsMatchedInPit;		/*!< Number of content objects matched (positive size connection list) */
+    size_t contentObjectsNotMatchedInPit;	/*!< Number of content objects not matched (zero size connection list) */
+
+    size_t contentObjectsToContentStore;  	/*!< Number of content objects sent to Content Store */
+    size_t contentObjectsAddedToContentStore;	/*!< Number of content objects added to Content Store */
+    size_t contentObjectsNotAddedToContentStore; /*!< Number of content objects Not Added to Content Store */
   } ForwarderStats;
 
   ForwarderStats m_forwarderStats;

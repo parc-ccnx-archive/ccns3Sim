@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -95,7 +95,7 @@ MockupRouteCallback (Ptr<CCNxPacket> packet, Ptr<CCNxConnection> ingress, enum C
   _routeCallbackFired = true;
 }
 
-Ptr<CCNxStandardForwarder> CreateForwarder ()
+Ptr<CCNxStandardForwarder> CreateForwarder (bool WithContentStore=true)
 {
 #if 0
   LogComponentEnable ("CCNxStandardForwarder", (LogLevel) (LOG_LEVEL_FUNCTION | LOG_PREFIX_ALL));
@@ -106,9 +106,11 @@ Ptr<CCNxStandardForwarder> CreateForwarder ()
 #endif
 
   Ptr<CCNxStandardForwarder> forwarder = CreateObject<CCNxStandardForwarder> ();
-
-  static CCNxStandardContentStoreFactory factory;
-  forwarder->SetAttribute ("ContentStoreFactory", ObjectFactoryValue (factory));
+  if (WithContentStore)
+    {
+      static CCNxStandardContentStoreFactory factory;
+      forwarder->SetAttribute ("ContentStoreFactory", ObjectFactoryValue (factory));
+    }
 
   forwarder->SetAttribute ("LayerDelayConstant", TimeValue (_layerDelay));
   forwarder->SetAttribute ("LayerDelaySlope", TimeValue (Seconds (0)));
@@ -572,7 +574,7 @@ BeginTest (NoContentStore)
 {
   //route one interest one content then same interest which returns content from CS
 
-  Ptr<CCNxStandardForwarder> forwarder = CreateForwarder ();
+  Ptr<CCNxStandardForwarder> forwarder = CreateForwarder (false);  //false => no content store
   TestData data = CreateTestData ();
   SetupRoutes (forwarder, data);
 
@@ -617,6 +619,8 @@ BeginTest (NoContentStore)
 }
 EndTest ()
 
+
+
 //#TODO CCN test forwarder stats
 //#TODO CCN test no content store option set by attribute
 //#TODO CCN fix delay model for content store
@@ -644,7 +648,7 @@ public:
     AddTestCase (new RouteOutputOneInterestOneContent (), TestCase::QUICK);
     AddTestCase (new RouteExactName (), TestCase::QUICK);
     AddTestCase (new ContentStore (), TestCase::QUICK);
-//    AddTestCase (new NoContentStore (), TestCase::QUICK);   TODO CCN: Marc: how to disable content store?
+    AddTestCase (new NoContentStore (), TestCase::QUICK);
 
   }
 } g_TestSuiteCCNxStandardForwarder;
