@@ -95,7 +95,7 @@ public:
   /**
    * Removes all elements of the vector
    */
-  void clear();
+  void clear(void);
 
   /**
    * Returns the CCNxPerHopHeaderEntry at the given index

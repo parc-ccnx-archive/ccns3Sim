@@ -80,7 +80,7 @@ CCNxPerHopHeader::size(void) const
 }
 
 void
-CCNxPerHopHeader::clear ()
+CCNxPerHopHeader::clear (void)
 {
   m_perhopheaders.clear ();
 }
@@ -100,9 +100,11 @@ CCNxPerHopHeader::RemoveHeader(size_t index)
 std::ostream &
 ns3::ccnx::operator<< (std::ostream &os, CCNxPerHopHeader const &headerlist)
 {
+  os << "{ Per Hop Headers ";
   for (size_t i = 0; i < headerlist.size(); ++i)
   {
-      os << "Per Hop Header" << headerlist.GetHeader(i)->Print(os);
+      headerlist.GetHeader(i)->Print(os);
   }
+  os << " }";
   return os;
 }

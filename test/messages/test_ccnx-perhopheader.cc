@@ -55,6 +55,7 @@
 
 #include "ns3/test.h"
 #include "ns3/ccnx-perhopheader.h"
+#include "ns3/ccnx-interestlifetime.h"
 
 #include "../TestMacros.h"
 
@@ -65,6 +66,78 @@ namespace TestSuiteCCNxPerHopHeader {
 
 BeginTest (Constructor)
 {
+  Ptr<CCNxPerHopHeader> perHopHeader = Create<CCNxPerHopHeader>();
+  bool exists = (perHopHeader);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+}
+EndTest ()
+
+BeginTest (AddHeader)
+{
+  Ptr<CCNxPerHopHeader> perHopHeader = Create<CCNxPerHopHeader>();
+  Ptr<CCNxTime> time1 = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (time1);
+  perHopHeader->AddHeader(interestLifetime1);
+  bool truth1 = perHopHeader->size() == 1;
+  NS_TEST_EXPECT_MSG_EQ (truth1, true, "The values should match");
+
+  Ptr<CCNxTime> time2 = Create<CCNxTime>(1200);
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (time2);
+  perHopHeader->AddHeader(interestLifetime2);
+  bool truth2 = perHopHeader->size() == 2;
+  NS_TEST_EXPECT_MSG_EQ (truth2, true, "The values should match");
+
+  std::cout << *perHopHeader << std::endl;
+}
+EndTest ()
+
+BeginTest (RemoveHeader)
+{
+  Ptr<CCNxPerHopHeader> perHopHeader = Create<CCNxPerHopHeader>();
+  Ptr<CCNxTime> time1 = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (time1);
+  perHopHeader->AddHeader(interestLifetime1);
+
+  Ptr<CCNxTime> time2 = Create<CCNxTime>(1200);
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (time2);
+  perHopHeader->AddHeader(interestLifetime2);
+
+  perHopHeader->RemoveHeader(0);
+  bool truth = perHopHeader->size() == 1;
+  NS_TEST_EXPECT_MSG_EQ (truth, true, "The values should match");
+}
+EndTest ()
+
+BeginTest (GetHeader)
+{
+  Ptr<CCNxPerHopHeader> perHopHeader = Create<CCNxPerHopHeader>();
+  Ptr<CCNxTime> time1 = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (time1);
+  perHopHeader->AddHeader(interestLifetime1);
+
+  Ptr<CCNxTime> time2 = Create<CCNxTime>(1200);
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (time2);
+  perHopHeader->AddHeader(interestLifetime2);
+
+  bool truth = perHopHeader->GetHeader(0) == interestLifetime1;
+  NS_TEST_EXPECT_MSG_EQ (truth, true, "The values should match");
+}
+EndTest ()
+
+BeginTest (Clear)
+{
+  Ptr<CCNxPerHopHeader> perHopHeader = Create<CCNxPerHopHeader>();
+  Ptr<CCNxTime> time1 = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (time1);
+  perHopHeader->AddHeader(interestLifetime1);
+
+  Ptr<CCNxTime> time2 = Create<CCNxTime>(1200);
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (time2);
+  perHopHeader->AddHeader(interestLifetime2);
+
+  perHopHeader->clear();
+  bool truth = perHopHeader->size() == 0;
+  NS_TEST_EXPECT_MSG_EQ (truth, true, "The values should match");
 }
 EndTest ()
 
@@ -76,9 +149,13 @@ EndTest ()
 static class TestSuiteCCNxPerHopHeader : public TestSuite
 {
 public:
-	TestSuiteCCNxPerHopHeader () : TestSuite ("ccnx-perhopheader", UNIT)
+  TestSuiteCCNxPerHopHeader () : TestSuite ("ccnx-perhopheader", UNIT)
   {
     AddTestCase (new Constructor (), TestCase::QUICK);
+    AddTestCase (new AddHeader (), TestCase::QUICK);
+    AddTestCase (new RemoveHeader (), TestCase::QUICK);
+    AddTestCase (new GetHeader (), TestCase::QUICK);
+    AddTestCase (new Clear (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxPerHop;
 

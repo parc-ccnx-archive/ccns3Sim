@@ -95,7 +95,7 @@ public:
   /**
    * Returns the Interest Lifetime associated with this TLV
    */
-  Ptr<CCNxTime>   GetInterestLifetime () const;
+  Ptr<CCNxTime>   GetInterestLifetime (void) const;
 
   /**
    * Prints a string like this:

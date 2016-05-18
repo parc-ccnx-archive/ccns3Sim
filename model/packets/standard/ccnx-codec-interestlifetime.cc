@@ -74,7 +74,7 @@ RegisterCodec()
 {
     if (!_registered) {
 	_registered = true;
-	    Ptr<CCNxCodecInterestLifetime> codec = CreateObject<CCNxCodecInterestLifetime>();
+	Ptr<CCNxCodecInterestLifetime> codec = CreateObject<CCNxCodecInterestLifetime>();
 	CCNxCodecRegistry::PerHopRegisterCodec(CCNxInterestLifetime::GetTLVType(), codec);
     }
 }

@@ -107,7 +107,7 @@ CCNxInterestLifetime :: GetInstanceTLVType (void) const
 }
 
 Ptr<CCNxTime>
-CCNxInterestLifetime::GetInterestLifetime () const
+CCNxInterestLifetime::GetInterestLifetime (void) const
 {
   return m_interestLifetime;
 }
@@ -115,6 +115,6 @@ CCNxInterestLifetime::GetInterestLifetime () const
 std::ostream &
 CCNxInterestLifetime::Print(std::ostream &os) const
 {
-  os << "{ Interest Lifetime timeValue " << GetInterestLifetime ()->getTime () << " }";
+  os << "{ Interest Lifetime " << GetInterestLifetime ()->getTime () << " }";
   return os;
 }

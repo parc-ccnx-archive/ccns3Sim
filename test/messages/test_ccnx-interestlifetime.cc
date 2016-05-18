@@ -65,6 +65,67 @@ namespace TestSuiteCCNxInterestLifetime {
 
 BeginTest (Constructor)
 {
+
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+}
+EndTest()
+
+BeginTest (GetInterestLifetime)
+{
+
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+
+  Ptr<CCNxTime> lifetimeValue = interestLifetime->GetInterestLifetime();
+  bool timeExists = (lifetimeValue);
+  NS_TEST_EXPECT_MSG_EQ (timeExists, true, "Gut null pointer");
+
+  bool truth = lifetimeValue->getTime() == 3600;
+  NS_TEST_EXPECT_MSG_EQ (truth, true, "Values should match");
+}
+EndTest()
+
+BeginTest (Print)
+{
+
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+
+  interestLifetime->Print(std::cout);
+}
+EndTest()
+
+BeginTest (GetInstanceTLVType)
+{
+
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+
+  uint16_t result = interestLifetime->GetInstanceTLVType ();
+  NS_TEST_EXPECT_MSG_EQ (result, 1, "Got wrong value");
+}
+EndTest()
+
+BeginTest (GetInstanceTypeId)
+{
+
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+
+  TypeId type = interestLifetime->GetInstanceTypeId ();
+  bool truth = type.GetName() == "ns3::ccnx::CCNxInterestLifetime";
+  NS_TEST_EXPECT_MSG_EQ (truth, true, "Names should match");
 }
 EndTest()
 
@@ -79,6 +140,10 @@ public:
   TestSuiteCCNxInterestLifetime () : TestSuite ("ccnx-interestlifetime", UNIT)
   {
     AddTestCase (new Constructor (), TestCase::QUICK);
+    AddTestCase (new GetInterestLifetime (), TestCase::QUICK);
+    AddTestCase (new Print (), TestCase::QUICK);
+    AddTestCase (new GetInstanceTLVType (), TestCase::QUICK);
+    AddTestCase (new GetInstanceTypeId (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxInterestLifetime;
 
