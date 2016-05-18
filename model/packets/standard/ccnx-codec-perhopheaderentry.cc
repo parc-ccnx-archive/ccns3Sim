@@ -73,13 +73,6 @@ CCNxCodecPerHopHeaderEntry::GetTypeId (void)
   return tid;
 }
 
-TypeId
-CCNxCodecPerHopHeaderEntry::GetInstanceTypeId (void) const
-{
-  return GetTypeId ();
-}
-
-
 CCNxCodecPerHopHeaderEntry::CCNxCodecPerHopHeaderEntry ()
 {
   // empty

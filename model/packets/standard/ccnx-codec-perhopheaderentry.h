@@ -74,7 +74,7 @@ class CCNxCodecPerHopHeaderEntry : public Object
 public:
   static TypeId GetTypeId (void);
 
-  virtual TypeId GetInstanceTypeId (void) const;
+  virtual TypeId GetInstanceTypeId (void) const = 0;
 
   /**
    * Constructor for CCNxCodecPerHopHeaderEntry

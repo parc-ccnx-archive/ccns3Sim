@@ -55,6 +55,7 @@
 
 #include "ns3/test.h"
 #include "ns3/ccnx-codec-perhopheaderentry.h"
+#include "ns3/ccnx-codec-interestlifetime.h"
 
 #include "../../TestMacros.h"
 
@@ -65,6 +66,23 @@ namespace TestSuiteCCNxCodecPerHopHeaderEntry {
 
 BeginTest (Constructor)
 {
+  Ptr<CCNxCodecInterestLifetime> codec = CreateObject<CCNxCodecInterestLifetime>();
+  bool exists = (codec);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+}
+EndTest()
+
+
+BeginTest (GetInstanceTypeId)
+{
+
+  Ptr<CCNxCodecInterestLifetime> codec = CreateObject<CCNxCodecInterestLifetime>();
+  bool exists = (codec);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+
+  TypeId type = codec->GetInstanceTypeId ();
+  bool truth = type.GetName() == "ns3::ccnx::CCNxCodecInterestLifetime";
+  NS_TEST_EXPECT_MSG_EQ (truth, true, "Names should match");
 }
 EndTest()
 
@@ -79,6 +97,7 @@ public:
   TestSuiteCCNxCodecPerHopHeaderEntry () : TestSuite ("ccnx-codec-perhopheaderentry", UNIT)
   {
     AddTestCase (new Constructor (), TestCase::QUICK);
+    AddTestCase (new GetInstanceTypeId (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxCodecPerHopHeaderEntry;
 
