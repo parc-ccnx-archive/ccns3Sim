@@ -56,7 +56,7 @@
 #ifndef CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
 #define CCNS3SIM_MODEL_PACKETS_CCNX_CODEC_REGISTRY_H_
 
-#include "ccnx-type-registry.h"
+#include "ns3/ccnx-type-registry.h"
 #include "ccnx-codec-perhopheaderentry.h"
 
 namespace ns3 {
