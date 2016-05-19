@@ -89,11 +89,11 @@ public:
   /**
    * Implemented in CCNxCodecInterestLifetime
    */
-  virtual Ptr<CCNxPerHopHeaderEntry> Deserialize (Buffer::Iterator input, size_t *bytesRead) = 0;
+  virtual Ptr<CCNxPerHopHeaderEntry> Deserialize (Buffer::Iterator *input, size_t *bytesRead) = 0;
 
   virtual uint32_t GetSerializedSize (Ptr<CCNxPerHopHeaderEntry> perhopEntry) = 0;
 
-  virtual void Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator output) = 0;
+  virtual void Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator *output) = 0;
 
   virtual void Print (Ptr<CCNxPerHopHeaderEntry> perhopEntry, std::ostream &os) const = 0;
 };

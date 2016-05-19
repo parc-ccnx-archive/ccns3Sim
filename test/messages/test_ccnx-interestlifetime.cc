@@ -65,7 +65,6 @@ namespace TestSuiteCCNxInterestLifetime {
 
 BeginTest (Constructor)
 {
-
   Ptr<CCNxTime> time = Create<CCNxTime>(3600);
   Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
   bool exists = (interestLifetime);
@@ -75,7 +74,6 @@ EndTest()
 
 BeginTest (GetInterestLifetime)
 {
-
   Ptr<CCNxTime> time = Create<CCNxTime>(3600);
   Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
   bool exists = (interestLifetime);
@@ -92,7 +90,6 @@ EndTest()
 
 BeginTest (Print)
 {
-
   Ptr<CCNxTime> time = Create<CCNxTime>(3600);
   Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
   bool exists = (interestLifetime);
@@ -104,7 +101,6 @@ EndTest()
 
 BeginTest (GetInstanceTLVType)
 {
-
   Ptr<CCNxTime> time = Create<CCNxTime>(3600);
   Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
   bool exists = (interestLifetime);
@@ -117,7 +113,6 @@ EndTest()
 
 BeginTest (GetInstanceTypeId)
 {
-
   Ptr<CCNxTime> time = Create<CCNxTime>(3600);
   Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
   bool exists = (interestLifetime);
@@ -128,6 +123,28 @@ BeginTest (GetInstanceTypeId)
   NS_TEST_EXPECT_MSG_EQ (truth, true, "Names should match");
 }
 EndTest()
+
+BeginTest (Equals)
+{
+  Ptr<CCNxInterestLifetime> a = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  Ptr<CCNxInterestLifetime> b = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  Ptr<CCNxInterestLifetime> c = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+
+  Ptr<CCNxInterestLifetime> w = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+
+  // transitivity of equals
+  NS_TEST_EXPECT_MSG_EQ (a->Equals (b), true, "not equal");
+  NS_TEST_EXPECT_MSG_EQ (b->Equals (c), true, "not equal");
+  NS_TEST_EXPECT_MSG_EQ (c->Equals (a), true, "not equal");
+
+  // and the counter case
+  NS_TEST_EXPECT_MSG_EQ (a->Equals (w), false, "not equal");
+
+  // Negative test
+  NS_TEST_EXPECT_MSG_EQ (a->Equals (0), false, "null value");
+}
+EndTest ()
+
 
 /**
  * @ingroup ccnx-test
@@ -144,6 +161,7 @@ public:
     AddTestCase (new Print (), TestCase::QUICK);
     AddTestCase (new GetInstanceTLVType (), TestCase::QUICK);
     AddTestCase (new GetInstanceTypeId (), TestCase::QUICK);
+    AddTestCase (new Equals (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxInterestLifetime;
 

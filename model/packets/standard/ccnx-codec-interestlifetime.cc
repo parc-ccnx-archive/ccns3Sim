@@ -107,26 +107,28 @@ CCNxCodecInterestLifetime::~CCNxCodecInterestLifetime ()
 }
 
 Ptr<CCNxPerHopHeaderEntry>
-CCNxCodecInterestLifetime::Deserialize (Buffer::Iterator inputIterator, size_t *bytesRead)
+CCNxCodecInterestLifetime::Deserialize (Buffer::Iterator *inputIterator, size_t *bytesRead)
 {
     NS_LOG_FUNCTION (this << &inputIterator);
-    NS_ASSERT_MSG (inputIterator.GetSize () >= CCNxTlv::GetTLSize(), "Need to have at least 4 bytes to read");
-    Buffer::Iterator iterator = inputIterator;
+    NS_ASSERT_MSG (inputIterator->GetSize () >= CCNxTlv::GetTLSize(), "Need to have at least 4 bytes to read");
+    Buffer::Iterator *iterator = inputIterator;
 
     uint32_t numBytes = 0;
-    uint16_t type = CCNxTlv::ReadType (iterator);
-    uint16_t length = CCNxTlv::ReadLength (iterator);
+    uint16_t type = CCNxTlv::ReadType (*iterator);
+    uint16_t length = CCNxTlv::ReadLength (*iterator);
     numBytes += CCNxTlv::GetTLSize();
 
     NS_LOG_DEBUG ("Type " << type << " length " << length << " bytesRead " << numBytes);
 
     uint64_t value = 0;
     uint16_t tempLen = length;
+
     while (tempLen > 0)
     {
-	    value |= iterator.ReadU8();
-	    value <<= 8;
-	    tempLen--;
+      value |= iterator->ReadU8();
+      tempLen--;
+      if (tempLen != 0)
+	value <<= 8;
     }
 
     NS_LOG_DEBUG ("De-serialized Interest Lifetime" << value);
@@ -176,7 +178,7 @@ CCNxCodecInterestLifetime::GetSerializedSize (Ptr<CCNxPerHopHeaderEntry> perhopE
 }
 
 void
-CCNxCodecInterestLifetime::Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator outputIterator)
+CCNxCodecInterestLifetime::Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator *outputIterator)
 {
     NS_LOG_FUNCTION (this << &outputIterator);
 
@@ -184,7 +186,7 @@ CCNxCodecInterestLifetime::Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Bu
     NS_ASSERT_MSG (bytes >= CCNxTlv::GetTLSize(), "Serialized size must be at least 4 bytes");
 
     // -4 because it includes the T_INTEREST TLV.
-    CCNxTlv::WriteTypeLength (outputIterator, CCNxSchemaV1::T_INT_LIFE, bytes - CCNxTlv::GetTLSize ());
+    CCNxTlv::WriteTypeLength (*outputIterator, CCNxSchemaV1::T_INT_LIFE, bytes - CCNxTlv::GetTLSize ());
 
     Ptr<CCNxInterestLifetime> interestLifetime = DynamicCast<CCNxInterestLifetime, CCNxPerHopHeaderEntry> (perhopEntry);
     Ptr<CCNxTime> time = interestLifetime->GetInterestLifetime();
@@ -195,7 +197,7 @@ CCNxCodecInterestLifetime::Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Bu
     for (int byte = 7; byte >= 0; byte--) {
     	uint8_t b = (value >> (byte * 8)) & 0xFF;
     	if (b != 0 || byte == 0 || mustContinue) {
-    		outputIterator.WriteU8 (b);
+    		outputIterator->WriteU8 (b);
 			mustContinue = true;
         }
     }
@@ -207,11 +209,11 @@ CCNxCodecInterestLifetime::Print (Ptr<CCNxPerHopHeaderEntry> perhopEntry, std::o
   if (perhopEntry)
   {
       Ptr<CCNxInterestLifetime> interestLifetime = DynamicCast<CCNxInterestLifetime, CCNxPerHopHeaderEntry> (perhopEntry);
-      os << interestLifetime->Print(os);
+      interestLifetime->Print(os);
   }
   else
   {
-      os << "No interest lifetime header";
+      os << "\nNo interest lifetime header";
   }
 }
 

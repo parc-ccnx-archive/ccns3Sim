@@ -87,11 +87,11 @@ public:
   /**
     * Deserialize Interest Lifetime TLV
     */
-   Ptr<CCNxPerHopHeaderEntry> Deserialize (Buffer::Iterator input, size_t *bytesRead);
+   Ptr<CCNxPerHopHeaderEntry> Deserialize (Buffer::Iterator *input, size_t *bytesRead);
 
    uint32_t GetSerializedSize (Ptr<CCNxPerHopHeaderEntry> perhopEntry);
 
-   void Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator output);
+   void Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator *output);
 
    /**
     * Display this codec's state to the provided output stream.

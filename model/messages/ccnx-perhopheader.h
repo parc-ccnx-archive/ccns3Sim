@@ -113,6 +113,22 @@ public:
   void RemoveHeader(size_t index);
 
   /**
+   * Determines if all perhopheaders are equivalent to the given perhopheaders.
+   *
+   * Two perhopheaders are equivalent if each per hop header entry is exactly equal
+   * and in same order
+   */
+  bool Equals (const Ptr<CCNxPerHopHeader> other) const;
+
+  /**
+   * Determines if all perhopheaders are equivalent to the given perhopheaders.
+   *
+   * Two perhopheaders are equivalent if each per hop header entry is exactly equal
+   * and in same order
+   */
+  bool Equals (CCNxPerHopHeader const &other) const;
+
+  /**
    * Typedef defining a vector of CCNxPerHopHeaderEntry
    */
   typedef std::vector< Ptr<CCNxPerHopHeaderEntry> > HdrListType;

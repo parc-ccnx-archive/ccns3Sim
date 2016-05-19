@@ -97,6 +97,42 @@ CCNxPerHopHeader::RemoveHeader(size_t index)
   m_perhopheaders.erase (m_perhopheaders.begin() + index);
 }
 
+bool
+CCNxPerHopHeader::Equals (const Ptr<CCNxPerHopHeader> other) const
+{
+  if (other)
+    {
+      return Equals (*other);
+    }
+  else
+    {
+      return false;
+    }
+}
+
+bool
+CCNxPerHopHeader::Equals (CCNxPerHopHeader const &other) const
+{
+  bool result = false;
+
+  if (size() == other.size())
+  {
+    for (size_t i = 0; i < other.size(); ++i)
+    {
+      if (GetHeader(i)->Equals (*other.GetHeader(i)))
+      {
+	result = true;
+      }
+      else
+      {
+	result = false;
+	break;
+      }
+    }
+  }
+  return result;
+}
+
 std::ostream &
 ns3::ccnx::operator<< (std::ostream &os, CCNxPerHopHeader const &headerlist)
 {
