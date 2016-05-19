@@ -93,6 +93,9 @@ public:
    */
   virtual uint16_t GetInstanceTLVType (void) const = 0;
 
+  virtual bool Equals (const Ptr<CCNxPerHopHeaderEntry> other) const = 0;
+  virtual bool Equals (CCNxPerHopHeaderEntry const &other) const = 0;
+
   virtual std::ostream & Print(std::ostream &os) const = 0;
 };
 

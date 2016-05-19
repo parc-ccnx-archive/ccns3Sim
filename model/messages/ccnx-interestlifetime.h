@@ -98,6 +98,20 @@ public:
   Ptr<CCNxTime>   GetInterestLifetime (void) const;
 
   /**
+   * Determines if the given InterestLifetime is equivalent to this InterestLifetime.
+   *
+   * Two InterestLifetimes are equivalent if the time values are exactly equal
+   */
+  bool Equals (const Ptr<CCNxPerHopHeaderEntry> other) const;
+
+  /**
+   * Determines if the given InterestLifetime is equivalent to this InterestLifetime.
+   *
+   * Two InterestLifetimes are equivalent if time values are exactly equal
+   */
+  bool Equals (CCNxPerHopHeaderEntry const &other) const;
+
+  /**
    * Prints a string like this:
    *
    * { Interest Lifetime timeValue T }

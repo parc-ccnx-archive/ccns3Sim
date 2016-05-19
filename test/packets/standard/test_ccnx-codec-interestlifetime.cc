@@ -63,8 +63,98 @@ using namespace ns3::ccnx;
 
 namespace TestSuiteCCNxCodecInterestLifetime {
 
-BeginTest (Constructor)
+BeginTest (GetSerializedSize)
 {
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+
+  // expected size = 4 (TL) + 2 (bytes needed to accommodate time value)
+  size_t expectedSize = 4 + 2;
+
+  CCNxCodecInterestLifetime ci;
+  size_t test = ci.GetSerializedSize (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (test, expectedSize, "wrong size");
+}
+EndTest()
+
+BeginTest (Serialize)
+{
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+
+  CCNxCodecInterestLifetime ci;
+
+  Buffer buffer (0);
+  buffer.AddAtStart (ci.GetSerializedSize (interestLifetime));
+  Buffer::Iterator iterator = buffer.Begin ();
+  ci.Serialize (interestLifetime, &iterator);
+
+  NS_TEST_EXPECT_MSG_EQ (buffer.GetSize (), ci.GetSerializedSize (interestLifetime), "Wrong size");
+
+  const uint8_t truth[] = {
+    // T_INT_LIFE
+    0, 1, 0, 2,
+    0xE, 0x10
+  };
+
+  uint8_t test[sizeof(truth)];
+  buffer.CopyData (test, sizeof(truth));
+
+  hexdump ("truth", sizeof(truth), truth);
+  hexdump ("test ", sizeof(test), test);
+
+  NS_TEST_EXPECT_MSG_EQ (memcmp (truth, test, sizeof(truth)), 0, "Data in buffer wrong");
+}
+EndTest()
+
+BeginTest (Deserialize)
+{
+  // serialize it into a buffer
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+
+  CCNxCodecInterestLifetime ci;
+
+  Buffer buffer (0);
+  buffer.AddAtStart (ci.GetSerializedSize (interestLifetime));
+  Buffer::Iterator iterator = buffer.Begin ();
+  ci.Serialize (interestLifetime, &iterator);
+
+  ci.Print(interestLifetime, std::cout);
+
+  // now de-serialize and compare
+  CCNxCodecInterestLifetime citest;
+  size_t bytesRead = 0;
+  Buffer::Iterator iter = buffer.Begin ();
+  Ptr<CCNxPerHopHeaderEntry> perHopEntry = citest.Deserialize (&iter, &bytesRead);
+  Ptr<CCNxInterestLifetime> test = DynamicCast<CCNxInterestLifetime, CCNxPerHopHeaderEntry> (perHopEntry);
+
+  bool equal = interestLifetime->Equals (test);
+  NS_TEST_EXPECT_MSG_EQ (equal, true, "Data in buffer wrong");
+}
+EndTest()
+
+BeginTest (ComputeVarIntLength)
+{
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1152921504606846976));
+  // expected size = 4 (TL) + 8 (bytes needed to accommodate time value)
+  size_t expectedSize1 = 4 + 8;
+  CCNxCodecInterestLifetime c1;
+  size_t test1 = c1.GetSerializedSize (interestLifetime1);
+  NS_TEST_EXPECT_MSG_EQ (test1, expectedSize1, "wrong size");
+
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (Create<CCNxTime>(17592186044416));
+  // expected size = 4 (TL) + 6 (bytes needed to accommodate time value)
+  size_t expectedSize2 = 4 + 6;
+  CCNxCodecInterestLifetime c2;
+  size_t test2 = c2.GetSerializedSize (interestLifetime2);
+  NS_TEST_EXPECT_MSG_EQ (test2, expectedSize2, "wrong size");
+}
+EndTest()
+
+BeginTest (PrintEmpty)
+{
+  CCNxCodecInterestLifetime ci;
+  ci.Print(0, std::cout);
 }
 EndTest()
 
@@ -76,9 +166,13 @@ EndTest()
 static class TestSuiteCCNxCodecInterestLifetime : public TestSuite
 {
 public:
-	TestSuiteCCNxCodecInterestLifetime () : TestSuite ("ccnx-codec-interestlifetime", UNIT)
+  TestSuiteCCNxCodecInterestLifetime () : TestSuite ("ccnx-codec-interestlifetime", UNIT)
   {
-    AddTestCase (new Constructor (), TestCase::QUICK);
+    AddTestCase (new GetSerializedSize (), TestCase::QUICK);
+    AddTestCase (new Serialize (), TestCase::QUICK);
+    AddTestCase (new Deserialize (), TestCase::QUICK);
+    AddTestCase (new ComputeVarIntLength (), TestCase::QUICK);
+    AddTestCase (new PrintEmpty (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxCodecInterestLifetime;
 

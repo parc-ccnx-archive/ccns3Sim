@@ -141,6 +141,54 @@ BeginTest (Clear)
 }
 EndTest ()
 
+BeginTest (Equals)
+{
+  Ptr<CCNxPerHopHeader> perHopHeader1 = Create<CCNxPerHopHeader>();
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  perHopHeader1->AddHeader(interestLifetime1);
+
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  perHopHeader1->AddHeader(interestLifetime2);
+
+  Ptr<CCNxPerHopHeader> perHopHeader2 = Create<CCNxPerHopHeader>();
+  Ptr<CCNxInterestLifetime> interestLifetime3 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  perHopHeader2->AddHeader(interestLifetime3);
+
+  Ptr<CCNxInterestLifetime> interestLifetime4 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  perHopHeader2->AddHeader(interestLifetime4);
+
+  Ptr<CCNxPerHopHeader> perHopHeader3 = Create<CCNxPerHopHeader>();
+  Ptr<CCNxInterestLifetime> interestLifetime5 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  perHopHeader3->AddHeader(interestLifetime5);
+
+  Ptr<CCNxInterestLifetime> interestLifetime6 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  perHopHeader3->AddHeader(interestLifetime6);
+
+  Ptr<CCNxPerHopHeader> perHopHeader4 = Create<CCNxPerHopHeader>();
+  Ptr<CCNxInterestLifetime> interestLifetime7 = Create<CCNxInterestLifetime> (Create<CCNxTime>(2400));
+  perHopHeader4->AddHeader(interestLifetime7);
+
+  Ptr<CCNxInterestLifetime> interestLifetime8 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  perHopHeader4->AddHeader(interestLifetime8);
+
+  Ptr<CCNxPerHopHeader> perHopHeader5 = Create<CCNxPerHopHeader>();
+  Ptr<CCNxInterestLifetime> interestLifetime9 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  perHopHeader5->AddHeader(interestLifetime9);
+
+  // transitivity of equals
+  NS_TEST_EXPECT_MSG_EQ (perHopHeader1->Equals (perHopHeader2), true, "not equal");
+  NS_TEST_EXPECT_MSG_EQ (perHopHeader2->Equals (perHopHeader3), true, "not equal");
+  NS_TEST_EXPECT_MSG_EQ (perHopHeader3->Equals (perHopHeader1), true, "not equal");
+
+  // and the counter case
+  NS_TEST_EXPECT_MSG_EQ (perHopHeader1->Equals (perHopHeader4), false, "not equal");
+  NS_TEST_EXPECT_MSG_EQ (perHopHeader1->Equals (perHopHeader5), false, "not equal");
+
+  // Negative test
+  NS_TEST_EXPECT_MSG_EQ (perHopHeader1->Equals (0), false, "null value");
+}
+EndTest ()
+
 /**
  * @ingroup ccnx-test
  *
@@ -156,6 +204,7 @@ public:
     AddTestCase (new RemoveHeader (), TestCase::QUICK);
     AddTestCase (new GetHeader (), TestCase::QUICK);
     AddTestCase (new Clear (), TestCase::QUICK);
+    AddTestCase (new Equals (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxPerHop;
 

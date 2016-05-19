@@ -55,6 +55,7 @@
 
 #include "ns3/log.h"
 #include "ccnx-interestlifetime.h"
+#include "ns3/ccnx-perhopheaderentry.h"
 
 #include "ns3/ccnx-tlv.h"
 #include "ns3/ccnx-schema-v1.h"
@@ -110,6 +111,31 @@ Ptr<CCNxTime>
 CCNxInterestLifetime::GetInterestLifetime (void) const
 {
   return m_interestLifetime;
+}
+
+bool
+CCNxInterestLifetime::Equals (const Ptr<CCNxPerHopHeaderEntry> other) const
+{
+  if (other)
+    {
+      return Equals (*other);
+    }
+  else
+    {
+      return false;
+    }
+}
+
+bool
+CCNxInterestLifetime::Equals (CCNxPerHopHeaderEntry const &other) const
+{
+  bool result = false;
+  const CCNxInterestLifetime *lifetimePtr = dynamic_cast<const CCNxInterestLifetime *>(&other);
+  if (m_interestLifetime->Equals (lifetimePtr->GetInterestLifetime()))
+  {
+    result = true;
+  }
+  return result;
 }
 
 std::ostream &
