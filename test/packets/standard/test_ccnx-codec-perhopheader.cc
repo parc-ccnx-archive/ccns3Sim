@@ -81,6 +81,7 @@ BeginTest (GetSerializedSize)
   NS_TEST_EXPECT_MSG_EQ (test, expectedSize, "wrong size");
 
   codec.Print(std::cout);
+  std::cout<<"\n"<<std::endl;
 }
 EndTest()
 
