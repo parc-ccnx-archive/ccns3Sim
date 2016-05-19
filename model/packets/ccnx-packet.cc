@@ -109,6 +109,7 @@ CCNxPacket::CreateFromNs3Packet (Ptr<const Packet> ns3Packet)
   // We cannot use Create<CCNxPacket>() because the call to the protected method needs to be here.
   Ptr<CCNxPacket> packet = Ptr<CCNxPacket> (new CCNxPacket (), false);
   packet->m_ns3Packet = ns3Packet->Copy ();
+
   packet->Deserialize ();
   return packet;
 }
@@ -232,6 +233,7 @@ CCNxPacket::GenerateNs3Packet ()
   // The fixed header goes outside the message header
   p->AddHeader (m_codecFixedHeader);
 
+
   size_t expectedSize = ComputePacketSize ();
   size_t actualSize = p->GetSize ();
   NS_ASSERT_MSG (expectedSize == actualSize, "Packet size " << actualSize << " does not match expected size " << expectedSize);
@@ -313,28 +315,27 @@ CCNxPacket::TrimNs3Packet ()
 void
 CCNxPacket::Deserialize ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
-
-  NS_LOG_DEBUG ("Deserialize " << *m_ns3Packet);
-
   /*
    * We want to work on a copy so we leave the headers in m_ns3Packet.
    * That way, we do not need to re-serialize.  The only thing that will change
    * here is we'll trim the packet if layer 2 added trailers.
    */
   Ptr<Packet> copy = m_ns3Packet->Copy ();
+
   uint32_t hdrSize = copy->RemoveHeader (m_codecFixedHeader);
   NS_LOG_DEBUG ("Deserialize: hdrSize = " << hdrSize);
 
+  /* This is the complete header length, including per hop header length (if any) */
+  uint32_t headerLen = m_codecFixedHeader.GetHeader()->GetHeaderLength();
   /*
    * Check for Per hop headers. If the length is more than the length of fixed header (=8),
    * then there is atleast one per hop header
    */
-  if (hdrSize >= 8)
+  if (headerLen > 8)
   {
-      m_codecPerHopHeader.SetDeserializeLength(hdrSize-8);
-      uint32_t msgSize = copy->RemoveHeader (m_codecPerHopHeader);
-      NS_LOG_DEBUG ("Deserialize: per hop headers = " << msgSize);
+      m_codecPerHopHeader.SetDeserializeLength(headerLen-8);
+      uint32_t phhSize = copy->RemoveHeader (m_codecPerHopHeader);
+      NS_LOG_DEBUG ("Deserialize: per hop headers = " << phhSize);
   }
 
   switch (m_codecFixedHeader.GetHeader ()->GetPacketType ())

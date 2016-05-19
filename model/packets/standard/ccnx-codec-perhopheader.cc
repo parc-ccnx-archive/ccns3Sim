@@ -70,7 +70,8 @@ CCNxCodecPerHopHeader::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::ccnx::CCNxCodecPerHopHeader")
     .SetParent<Header> ()
-    .SetGroupName ("CCNx");
+    .SetGroupName ("CCNx")
+    .AddConstructor<CCNxCodecPerHopHeader> ();
   return tid;
 }
 

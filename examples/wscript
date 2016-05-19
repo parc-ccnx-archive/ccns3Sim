@@ -120,4 +120,8 @@ def build(bld):
     obj = bld.create_ns3_program('ccnx-layer-delays',
                                  ['network', 'ccns3Sim', 'applications', 'point-to-point'])
     obj.source = 'ccnx-layer-delays.cc'
+####
+    obj = bld.create_ns3_program('ccnx-2node-withperhopheaders',
+                                 ['network', 'ccns3Sim', 'applications', 'point-to-point'])
+    obj.source = 'ccnx-2node-withperhopheaders.cc'
     
