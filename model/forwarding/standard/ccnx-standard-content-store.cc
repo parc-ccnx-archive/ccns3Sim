@@ -75,6 +75,7 @@ static const long long _defaultObjectCapacity = 10000;  //size_t and uint64_t do
 static const Time _defaultLayerDelayConstant = MicroSeconds (1);
 static const Time _defaultLayerDelaySlope = NanoSeconds (10);
 static unsigned _defaultLayerDelayServers = 1;
+Ptr<CCNxHashValue> CCNxStandardContentStore::nullHashValue = Create<CCNxHashValue> (0);
 
 /**
  * Used as a default callback for m_recieveInterestCallback in case the user does not set it.
@@ -141,6 +142,8 @@ CCNxStandardContentStore::~CCNxStandardContentStore ()
 void
 CCNxStandardContentStore::DoInitialize ()
 {
+  NS_LOG_FUNCTION (this);
+
   m_inputQueue = Create<DelayQueueType> (m_layerDelayServers,
                                          MakeCallback (&CCNxStandardContentStore::GetServiceTime, this),
                                          MakeCallback (&CCNxStandardContentStore::DequeueCallback, this));
@@ -149,12 +152,14 @@ CCNxStandardContentStore::DoInitialize ()
 void
 CCNxStandardContentStore::SetMatchInterestCallback (MatchInterestCallback matchInterestCallback)
 {
+  NS_LOG_FUNCTION (this);
   m_matchInterestCallback = matchInterestCallback;
 }
 
 void
 CCNxStandardContentStore::SetAddContentObjectCallback (AddContentObjectCallback addContentObjectCallback)
 {
+  NS_LOG_FUNCTION (this);
   m_addContentObjectCallback = addContentObjectCallback;
 }
 
@@ -162,6 +167,7 @@ CCNxStandardContentStore::SetAddContentObjectCallback (AddContentObjectCallback 
 Time
 CCNxStandardContentStore::GetServiceTime (Ptr<CCNxStandardForwarderWorkItem> workItem)
 {
+  NS_LOG_FUNCTION (this);
 
   NS_ASSERT_MSG ( workItem!=0, "Got null casting CCNxForwarderMessage to CCNxStandardForwarderWorkItem");
   Time delay = m_layerDelayConstant;
@@ -199,6 +205,7 @@ CCNxStandardContentStore::GetServiceTime (Ptr<CCNxStandardForwarderWorkItem> wor
 void
 CCNxStandardContentStore::MatchInterest (Ptr<CCNxForwarderMessage> message)
 {
+  NS_LOG_FUNCTION (this);
   Ptr<CCNxStandardForwarderWorkItem> workItem = DynamicCast<CCNxStandardForwarderWorkItem, CCNxForwarderMessage> (message);
   NS_ASSERT_MSG (message->GetPacket()->GetFixedHeader ()->GetPacketType () == CCNxFixedHeaderType_Interest,
                  "Lookup given a non-Interest packet: " << *message->GetPacket ());
@@ -209,6 +216,7 @@ CCNxStandardContentStore::MatchInterest (Ptr<CCNxForwarderMessage> message)
 void
 CCNxStandardContentStore::AddContentObject (Ptr<CCNxForwarderMessage> message, Ptr<CCNxConnectionList> egressConnections)
 {
+  NS_LOG_FUNCTION (this);
   Ptr<CCNxStandardForwarderWorkItem> workItem = DynamicCast<CCNxStandardForwarderWorkItem, CCNxForwarderMessage> (message);
   NS_ASSERT_MSG (message->GetPacket()->GetFixedHeader ()->GetPacketType () == CCNxFixedHeaderType_Object,
                  "AddContentObject given a non-content packet: " << *message->GetPacket ());
@@ -227,6 +235,7 @@ CCNxStandardContentStore::DequeueCallback (Ptr<CCNxStandardForwarderWorkItem> wo
   // Interests are input via MatchInterst and ContentObjects are input via AddContentObject.
   // Because we ensure this invariant before queuing a CCNxStandardWorkItem, we use that
   // invariant here to de-multiplex work items to the proper handler.
+  NS_LOG_FUNCTION (this);
 
 
   switch (workItem->GetPacket ()->GetFixedHeader ()->GetPacketType () )
@@ -309,6 +318,7 @@ CCNxStandardContentStore::ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkIte
 	 m_lruList->AddEntry(entry); //This is a Refresh which has same logic as Add
 
 	 workItem->SetContentStorePacket(entry->GetPacket());
+	 NS_LOG_INFO ("found content for this interest in CS");
        }
      else
        { //entry not valid, remove it and dont add a content store packet
@@ -319,7 +329,7 @@ CCNxStandardContentStore::ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkIte
  else
    {
      //no entry found
-     NS_LOG_INFO ("unable to find content for this interest in CS");
+     NS_LOG_INFO ("unable to find content matching interest=" << *workItem->GetPacket() << " in CS");
    }
 
  return match;
@@ -332,9 +342,16 @@ CCNxStandardContentStore::ServiceAddContentObject (Ptr<CCNxStandardForwarderWork
   bool result = false;
   Ptr<CCNxPacket> cPacket = workItem->GetPacket();
 
+  NS_LOG_INFO("cPacket="<< *cPacket);
+
   //check if object already in content store
-  if (m_csByHash.find(cPacket) == m_csByHash.end() )
-  {
+  //if (m_csByHash.find(cPacket) == m_csByHash.end() )
+  if (GetEntryFromPacket(cPacket))
+    {
+      NS_LOG_INFO ("content object already present in CS packet with hash=" << *workItem->GetPacket()->GetContentObjectHash()->GetValue() << " and name=" << *workItem->GetPacket()->GetMessage()->GetName() );
+    }
+  else
+    {
       if (GetObjectCount()>=GetObjectCapacity())
 	{
 	  Ptr<CCNxStandardContentStoreEntry> oldestEntry = m_lruList->GetBackEntry();
@@ -351,14 +368,24 @@ CCNxStandardContentStore::ServiceAddContentObject (Ptr<CCNxStandardForwarderWork
 	}
 
   }
-  workItem->SetContentAddedFlag(result);
 
+  workItem->SetContentAddedFlag(result);
+  if (result)
+    {
+      NS_LOG_INFO ("added content object=" << *workItem->GetPacket() << " to CS");
+    }
+  else
+    {
+      NS_LOG_INFO ("unable to add content object=" << *workItem->GetPacket() << " to CS");
+
+    }
   return result;
 }
 
 bool
 CCNxStandardContentStore::IsEntryValid(Ptr<CCNxStandardContentStoreEntry> entry) const
 {
+  NS_LOG_FUNCTION (this);
   bool dead = false;
 
     dead = entry->IsExpired() or entry->IsStale();
@@ -374,17 +401,41 @@ CCNxStandardContentStore::IsEntryValid(Ptr<CCNxStandardContentStoreEntry> entry)
     return (not dead);
 }
 
+Ptr<CCNxStandardContentStoreEntry>
+CCNxStandardContentStore::GetEntryFromPacket(Ptr<CCNxPacket> cPacket)
+{
+  if (*cPacket->GetContentObjectHash()->GetValue() != *nullHashValue->GetValue())
+    {
+	  NS_LOG_INFO("cPacket has non-zero hash =" << *cPacket->GetContentObjectHash()->GetValue() << ". looking in hash map");
+	  return(FindEntryInHashMap(cPacket));
+    }
+  else
+    if (cPacket->GetMessage()->GetName()->GetSegmentCount())
+      {
+	  NS_LOG_INFO("cPacket has null hash. looking in name map");
+	  return(FindEntryInNameMap(cPacket));
+      }
+  return (Ptr<CCNxStandardContentStoreEntry>(0));
+}
 
-//external method for unit test
+
 Ptr<CCNxStandardContentStoreEntry>
 CCNxStandardContentStore::FindEntryInHashMap(Ptr<CCNxPacket> cPacket)
 {
   NS_LOG_FUNCTION (this);
+  CSByHashType::iterator it= m_csByHash.find(cPacket);
 
-  //check the hash map only - all objects should be in this map
-  CSByHashType::iterator it = m_csByHash.find(cPacket);
-  return (it != m_csByHash.end () ? it->second :Ptr<CCNxStandardContentStoreEntry>(0) );
+  return (it!=m_csByHash.end()? it->second : Ptr<CCNxStandardContentStoreEntry>(0)) ;
 
+}
+
+Ptr<CCNxStandardContentStoreEntry>
+CCNxStandardContentStore::FindEntryInNameMap(Ptr<CCNxPacket> cPacket)
+{
+  NS_LOG_FUNCTION (this);
+  CSByNameType::iterator it = m_csByName.find(cPacket);
+
+  return (it!=m_csByName.end()? it->second : Ptr<CCNxStandardContentStoreEntry>(0)) ;
 
 }
 
@@ -397,60 +448,64 @@ CCNxStandardContentStore::DeleteContentObject(Ptr<CCNxPacket> cPacket)
   //remove packet from all maps and Lru
   NS_LOG_FUNCTION (this);
 
-  CSByHashType::iterator it=m_csByHash.find(cPacket);
-  bool result = (it != m_csByHash.end()) ? true:false;
-  if (!result)
-	{
-	      NS_LOG_ERROR("could not find cPacket in m_csByHash.");
-	}
+  Ptr<CCNxStandardContentStoreEntry> entry =   GetEntryFromPacket(cPacket);
+  bool result = entry!=Ptr<CCNxStandardContentStoreEntry>(0) ? true:false;
+
   if (result)
     {
-      if (!m_lruList->DeleteEntry(it->second))
+      if (!m_lruList->DeleteEntry(entry))
 	{
 	      NS_LOG_ERROR("could not delete Entry from m_lruList.");
 	}
 
-      m_csByHash.erase(it);
 
-
-	if (cPacket->GetMessage()->GetName())
-        {
-	    result&=m_csByName.erase(cPacket);
+      if (*cPacket->GetContentObjectHash()->GetValue() != *nullHashValue->GetValue())
+	{
+	    result&=m_csByHash.erase(cPacket);
 	    if (!result)
 	      {
-		NS_LOG_ERROR("could not erase cPacket from m_csByName.");
+		NS_LOG_ERROR("could not erase cPacket from m_csByHash.");
 	      }
+	    #ifdef KEYIDHACK
+	        if (1)  //for now, all content will treated as if it has a keyid
+	    #else
+	        if (cPacket->m_message->HasKeyid())
+	    #endif
+		{
+		    result&=m_csByHashKeyid.erase(cPacket);
+		    if (!result)
+		      {
+			NS_LOG_ERROR("could not erase cPacket from m_csByHashKeyid.");
+		      }
+		}
+	} //hash maps
 
-#ifdef KEYIDHACK
-          if (1) //always erase this map, since all content is given a keyid
-#else
-	    if (cPacket->m_message->HasKeyid())
-#endif
-            {
-		result&=m_csByNameKeyid.erase(cPacket);
-		if (!result)
-		  {
-		    NS_LOG_ERROR("could not erase cPacket from m_csByNameKeyid.");
-		  }
-            }
-        }   //name maps
-	else
+      if (cPacket->GetMessage()->GetName()->GetSegmentCount())
+      {
+	  result&=m_csByName.erase(cPacket);
+	  if (!result)
+	    {
+	      NS_LOG_ERROR("could not erase cPacket from m_csByName.");
+	    }
+	  #ifdef KEYIDHACK
+	      if (1)  //for now, all content will treated as if it has a keyid
+	  #else
+	      if (cPacket->m_message->HasKeyid())
+	  #endif
 	  {
-#ifdef KEYIDHACK
-          if (1) //always erase this map, since all content is given a keyid
-#else
-	    if (cPacket->m_message->HasKeyid())
-#endif
-            {
-		result&=m_csByHashKeyid.erase(cPacket);
-		if (!result)
-		  {
-		    NS_LOG_ERROR("could not erase cPacket from m_csByHashKeyid.");
-		  }
-            }
-
-	  } //hash maps
+	      result&=m_csByNameKeyid.erase(cPacket);
+	      if (!result)
+		{
+		  NS_LOG_ERROR("could not erase cPacket from m_csByNameKeyid.");
+		}
+	  }
+      }   //name  maps
     } // found packet
+  else
+	{
+	      NS_LOG_ERROR("could not find cPacket in Content Store.");
+	}
+
   return result;
 }
 
@@ -459,36 +514,38 @@ CCNxStandardContentStore::DeleteContentObject(Ptr<CCNxPacket> cPacket)
 bool
 CCNxStandardContentStore::AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardContentStoreEntry> newEntry)
 {
+  NS_LOG_FUNCTION (this);
 
   Ptr<CCNxContentObject> content = DynamicCast<CCNxContentObject, CCNxMessage>(cPacket->GetMessage());
   NS_ASSERT_MSG (newEntry->GetPacket()->GetFixedHeader ()->GetPacketType () == CCNxFixedHeaderType_Object,
                  "IsEntryValid given a non-Content Object packet: " << *newEntry->GetPacket ());
 
-  m_csByHash[cPacket] = newEntry;
-
-
-  if (content->GetName())
+  if (*cPacket->GetContentObjectHash()->GetValue() != *nullHashValue->GetValue())
     {
-    m_csByName[cPacket] = newEntry;
+      m_csByHash[cPacket] = newEntry;
+      #ifdef KEYIDHACK
+	 if (1)  //for now, all content will treated as if it has a keyid
+       #else
+	 if (content->HasKeyid())
+       #endif
+         {
+           m_csByHashKeyid[cPacket] = newEntry;
+         }
+    } //hash
 
-  #ifdef KEYIDHACK
-    if (1)  //for now, all content will treated as if it has a keyid
-  #else
-    if (content->HasKeyid())
-  #endif
-      {
-        m_csByNameKeyid[cPacket] = newEntry;
-      }
-    }
-  else
-#ifdef KEYIDHACK
-   if (1)  //for now, all content will treated as if it has a keyid
- #else
-   if (content->HasKeyid())
- #endif
-     {
-       m_csByNameKeyid[cPacket] = newEntry;
-     }
+  if (content->GetName()->GetSegmentCount())
+    {
+      m_csByName[cPacket] = newEntry;
+      #ifdef KEYIDHACK
+	if (1)  //for now, all content will treated as if it has a keyid
+      #else
+	if (content->HasKeyid())
+      #endif
+	  {
+	    m_csByNameKeyid[cPacket] = newEntry;
+	  }
+    } //name
+
 
   return true;
 }
@@ -502,16 +559,15 @@ CCNxStandardContentStore::AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardC
 size_t
 CCNxStandardContentStore::GetObjectCount () const
 {
-  // since we have other methods to check the map sizes, we will do this count using the LRU list
-  if (m_lruList->GetSize() != m_csByHash.size()){
-      NS_LOG_ERROR("LRU list Size=" << m_lruList->GetSize() << " but Hash map size=" << m_csByHash.size() << ". These should be equal." );
-  }
+  NS_LOG_FUNCTION (this);
+// since we have other methods to check the map sizes, we will do this count using the LRU list
   return m_lruList->GetSize ();
 }
 
 size_t
 CCNxStandardContentStore::GetObjectCapacity () const
 {
+  NS_LOG_FUNCTION (this);
   return m_objectCapacity;
 }
 

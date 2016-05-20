@@ -131,7 +131,8 @@ public:
 private:
 
   typedef struct _stats {
-    size_t packetsIn;			/*!< total number of packets from CCNxL3Protocol */
+    size_t RouteInputPacketsIn;		/*!< total number of packets from Layer 2 */
+    size_t RouteOutputPacketsIn;	/*!< total number of packets from CCNxL3Protocol */
     size_t packetsOut;			/*!< total number of packets returned to CCNxL3Protocol */
 
     size_t dropUnsupportedPacketType;	/*!< packets dropped due to unsupported PacketType */

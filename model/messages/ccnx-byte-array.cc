@@ -121,6 +121,12 @@ CCNxByteArray::operator == (const CCNxByteArray &other) const
 }
 
 bool
+CCNxByteArray::operator != (const CCNxByteArray &other) const
+{
+  return m_bytes != other.m_bytes;
+}
+
+bool
 CCNxByteArray::operator < (const CCNxByteArray &other) const
 {
   return m_bytes < other.m_bytes;
