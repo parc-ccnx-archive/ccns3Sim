@@ -44,8 +44,8 @@ namespace TestSuiteCCNxStandardContentStore {
 BeginTest (Constructor)
 {
   printf ("TestCCNxStandardContentStoreConstructor DoRun\n");
-  LogComponentEnable ("CCNxStandardContentStore", LOG_LEVEL_DEBUG);
-  LogComponentEnable ("CCNxStandardContentStoreLruList", LOG_LEVEL_DEBUG);
+   LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_ALL | LOG_PREFIX_ALL));
+   LogComponentEnable ("CCNxStandardContentStoreLruList", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_ALL ));
 }
 EndTest ()
 

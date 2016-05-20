@@ -145,11 +145,14 @@ public:
 
   Ptr<CCNxStandardContentStoreEntry> FindEntryInHashMap(Ptr<CCNxPacket> cPacket);
 
+  Ptr<CCNxStandardContentStoreEntry> FindEntryInNameMap(Ptr<CCNxPacket> cPacket);
+
+  Ptr<CCNxStandardContentStoreEntry> GetEntryFromPacket(Ptr<CCNxPacket> cPacket);
 
 
   virtual bool IsEntryValid(Ptr<CCNxStandardContentStoreEntry> entry) const;
 
-
+  static  Ptr<CCNxHashValue> nullHashValue;
 
   virtual bool AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardContentStoreEntry> newEntry);
 

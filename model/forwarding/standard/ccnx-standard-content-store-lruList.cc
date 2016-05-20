@@ -30,7 +30,7 @@
 #include "ccnx-standard-content-store-lruList.h"
 #include "ns3/ccnx-standard-content-store-entry.h"
 #include <list>
-#include <unordered_map>
+
 #include <assert.h>
 
 using namespace ns3;

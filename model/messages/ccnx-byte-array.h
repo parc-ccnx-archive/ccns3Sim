@@ -92,6 +92,7 @@ public:
   Ptr<CCNxBuffer> CreateBuffer () const;
 
   bool operator == (const CCNxByteArray &other) const;
+  bool operator != (const CCNxByteArray &other) const;
   bool operator < (const CCNxByteArray &other) const;
 
   friend std::ostream & operator << (std::ostream &os, CCNxByteArray const &array);

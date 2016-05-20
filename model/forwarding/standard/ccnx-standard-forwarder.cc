@@ -287,7 +287,7 @@ CCNxStandardForwarder::RouteOutput (Ptr<CCNxPacket> packet,
                                     Ptr<CCNxConnection> egressConnection)
 {
   NS_LOG_FUNCTION (this << packet << ingressConnection);
-  m_forwarderStats.packetsIn++;
+  m_forwarderStats.RouteOutputPacketsIn++;
 
   Ptr<CCNxStandardForwarderWorkItem> item = Create<CCNxStandardForwarderWorkItem> (packet, ingressConnection, egressConnection);
   m_inputQueue->push_back (item);
@@ -298,7 +298,7 @@ CCNxStandardForwarder::RouteInput (Ptr<CCNxPacket> packet,
                                    Ptr<CCNxConnection> ingressConnection)
 {
   NS_LOG_FUNCTION (this << packet << ingressConnection);
-  m_forwarderStats.packetsIn++;
+  m_forwarderStats.RouteInputPacketsIn++;
 
   Ptr<CCNxStandardForwarderWorkItem> item = Create<CCNxStandardForwarderWorkItem> (packet, ingressConnection, Ptr<CCNxConnection> (0));
   m_inputQueue->push_back (item);
@@ -311,7 +311,6 @@ void
 CCNxStandardForwarder::PitReceiveInterestCallback (Ptr<CCNxForwarderMessage> message, enum CCNxPit::Verdict verdict)
 {
   NS_LOG_FUNCTION (message->GetPacket () << message->GetIngressConnection () << verdict);
-  m_forwarderStats.packetsIn++;
   if (verdict == CCNxPit::Forward)
     {
       m_forwarderStats.interestsVerdictForward++;
@@ -403,6 +402,7 @@ CCNxStandardForwarder::ContentStoreMatchInterestCallback (Ptr<CCNxForwarderMessa
       NS_LOG_DEBUG ("INTEREST sent to content store, found match.  Sending Content back to pit.");
       Ptr<CCNxStandardForwarderWorkItem> newWorkItem =
 	  Create<CCNxStandardForwarderWorkItem> (workItem->GetContentStorePacket(),Ptr<CCNxConnection>(0),Ptr<CCNxConnection>(0));
+      m_forwarderStats.contentObjectsToPit++;
       m_pit->SatisfyInterest (newWorkItem);
     }
   else
@@ -563,7 +563,8 @@ CCNxStandardForwarder::PrintForwardingStatistics (Ptr<OutputStreamWrapper> strea
   (*timePrinter)(*stream);
   *stream << std::setw (5) << m_node->GetId () << std::setw (0) << " StandardForwarder ";
   *stream << std::setw(10) << "Packets" << std::setw(0);
-  *stream << " In " << m_forwarderStats.packetsIn;
+  *stream << " In L2 " << m_forwarderStats.RouteInputPacketsIn;
+  *stream << " In L4 " << m_forwarderStats.RouteOutputPacketsIn;
   *stream << " Out " << m_forwarderStats.packetsOut;
   *stream << " UnsupportedType " << m_forwarderStats.dropUnsupportedPacketType << std::endl;
 
@@ -599,8 +600,8 @@ CCNxStandardForwarder::PrintForwardingStatistics (Ptr<OutputStreamWrapper> strea
   *stream << std::setw (5) << m_node->GetId () << std::setw (0) << " StandardForwarder ";
   *stream << std::setw(10) << "Content" << std::setw(0);
   *stream << " ToContentStore " << m_forwarderStats.contentObjectsToContentStore;
-  *stream << " Matched " << m_forwarderStats.contentObjectsAddedToContentStore;
-  *stream << " NotMatched " << m_forwarderStats.contentObjectsNotAddedToContentStore << std::endl;
+  *stream << " Added " << m_forwarderStats.contentObjectsAddedToContentStore;
+  *stream << " NotAdded " << m_forwarderStats.contentObjectsNotAddedToContentStore << std::endl;
 
 }
 
