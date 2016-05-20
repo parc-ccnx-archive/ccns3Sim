@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -55,6 +55,7 @@
 
 #include "ns3/test.h"
 #include "ns3/ccnx-perhopheaderentry.h"
+#include "ns3/ccnx-interestlifetime.h"
 
 #include "../TestMacros.h"
 
@@ -65,6 +66,10 @@ namespace TestSuiteCCNxPerHopHeaderEntry {
 
 BeginTest (Constructor)
 {
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
 }
 EndTest()
 

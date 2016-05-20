@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -65,8 +65,86 @@ namespace TestSuiteCCNxInterestLifetime {
 
 BeginTest (Constructor)
 {
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
 }
 EndTest()
+
+BeginTest (GetInterestLifetime)
+{
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+
+  Ptr<CCNxTime> lifetimeValue = interestLifetime->GetInterestLifetime();
+  bool timeExists = (lifetimeValue);
+  NS_TEST_EXPECT_MSG_EQ (timeExists, true, "Gut null pointer");
+
+  bool truth = lifetimeValue->getTime() == 3600;
+  NS_TEST_EXPECT_MSG_EQ (truth, true, "Values should match");
+}
+EndTest()
+
+BeginTest (Print)
+{
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+
+  interestLifetime->Print(std::cout);
+}
+EndTest()
+
+BeginTest (GetInstanceTLVType)
+{
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+
+  uint16_t result = interestLifetime->GetInstanceTLVType ();
+  NS_TEST_EXPECT_MSG_EQ (result, 1, "Got wrong value");
+}
+EndTest()
+
+BeginTest (GetInstanceTypeId)
+{
+  Ptr<CCNxTime> time = Create<CCNxTime>(3600);
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
+  bool exists = (interestLifetime);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+
+  TypeId type = interestLifetime->GetInstanceTypeId ();
+  bool truth = type.GetName() == "ns3::ccnx::CCNxInterestLifetime";
+  NS_TEST_EXPECT_MSG_EQ (truth, true, "Names should match");
+}
+EndTest()
+
+BeginTest (Equals)
+{
+  Ptr<CCNxInterestLifetime> a = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  Ptr<CCNxInterestLifetime> b = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  Ptr<CCNxInterestLifetime> c = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+
+  Ptr<CCNxInterestLifetime> w = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+
+  // transitivity of equals
+  NS_TEST_EXPECT_MSG_EQ (a->Equals (b), true, "not equal");
+  NS_TEST_EXPECT_MSG_EQ (b->Equals (c), true, "not equal");
+  NS_TEST_EXPECT_MSG_EQ (c->Equals (a), true, "not equal");
+
+  // and the counter case
+  NS_TEST_EXPECT_MSG_EQ (a->Equals (w), false, "not equal");
+
+  // Negative test
+  NS_TEST_EXPECT_MSG_EQ (a->Equals (0), false, "null value");
+}
+EndTest ()
+
 
 /**
  * @ingroup ccnx-test
@@ -79,6 +157,11 @@ public:
   TestSuiteCCNxInterestLifetime () : TestSuite ("ccnx-interestlifetime", UNIT)
   {
     AddTestCase (new Constructor (), TestCase::QUICK);
+    AddTestCase (new GetInterestLifetime (), TestCase::QUICK);
+    AddTestCase (new Print (), TestCase::QUICK);
+    AddTestCase (new GetInstanceTLVType (), TestCase::QUICK);
+    AddTestCase (new GetInstanceTypeId (), TestCase::QUICK);
+    AddTestCase (new Equals (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxInterestLifetime;
 

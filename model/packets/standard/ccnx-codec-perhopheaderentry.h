@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -74,7 +74,7 @@ class CCNxCodecPerHopHeaderEntry : public Object
 public:
   static TypeId GetTypeId (void);
 
-  virtual TypeId GetInstanceTypeId (void) const;
+  virtual TypeId GetInstanceTypeId (void) const = 0;
 
   /**
    * Constructor for CCNxCodecPerHopHeaderEntry
@@ -89,11 +89,11 @@ public:
   /**
    * Implemented in CCNxCodecInterestLifetime
    */
-  virtual Ptr<CCNxPerHopHeaderEntry> Deserialize (Buffer::Iterator input, size_t *bytesRead) = 0;
+  virtual Ptr<CCNxPerHopHeaderEntry> Deserialize (Buffer::Iterator *input, size_t *bytesRead) = 0;
 
   virtual uint32_t GetSerializedSize (Ptr<CCNxPerHopHeaderEntry> perhopEntry) = 0;
 
-  virtual void Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator output) = 0;
+  virtual void Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator *output) = 0;
 
   virtual void Print (Ptr<CCNxPerHopHeaderEntry> perhopEntry, std::ostream &os) const = 0;
 };

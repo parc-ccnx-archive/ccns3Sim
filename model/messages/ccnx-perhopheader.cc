@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -80,7 +80,7 @@ CCNxPerHopHeader::size(void) const
 }
 
 void
-CCNxPerHopHeader::clear ()
+CCNxPerHopHeader::clear (void)
 {
   m_perhopheaders.clear ();
 }
@@ -97,12 +97,50 @@ CCNxPerHopHeader::RemoveHeader(size_t index)
   m_perhopheaders.erase (m_perhopheaders.begin() + index);
 }
 
+bool
+CCNxPerHopHeader::Equals (const Ptr<CCNxPerHopHeader> other) const
+{
+  if (other)
+    {
+      return Equals (*other);
+    }
+  else
+    {
+      return false;
+    }
+}
+
+bool
+CCNxPerHopHeader::Equals (CCNxPerHopHeader const &other) const
+{
+  bool result = false;
+
+  if (size() == other.size())
+  {
+    for (size_t i = 0; i < other.size(); ++i)
+    {
+      if (GetHeader(i)->Equals (*other.GetHeader(i)))
+      {
+	result = true;
+      }
+      else
+      {
+	result = false;
+	break;
+      }
+    }
+  }
+  return result;
+}
+
 std::ostream &
 ns3::ccnx::operator<< (std::ostream &os, CCNxPerHopHeader const &headerlist)
 {
+  os << "{ Per Hop Headers ";
   for (size_t i = 0; i < headerlist.size(); ++i)
   {
-      os << "Per Hop Header" << headerlist.GetHeader(i)->Print(os);
+      headerlist.GetHeader(i)->Print(os);
   }
+  os << " }";
   return os;
 }

@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -55,6 +55,8 @@
 
 #include "ns3/test.h"
 #include "ns3/ccnx-codec-perhopheader.h"
+#include "ns3/ccnx-time.h"
+#include "ns3/ccnx-interestlifetime.h"
 
 #include "../../TestMacros.h"
 
@@ -63,8 +65,93 @@ using namespace ns3::ccnx;
 
 namespace TestSuiteCCNxCodecPerHopHeader {
 
-BeginTest (Constructor)
+BeginTest (GetSerializedSize)
 {
+  CCNxCodecPerHopHeader codec;
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  codec.GetHeader()->AddHeader(interestLifetime1);
+
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  codec.GetHeader()->AddHeader(interestLifetime2);
+
+  // expected size = 4 (TL) + 2 (bytes needed to accommodate time value)
+  size_t expectedSize = (4 + 2) * 2;
+
+  size_t test = codec.GetSerializedSize();
+  NS_TEST_EXPECT_MSG_EQ (test, expectedSize, "wrong size");
+
+  codec.Print(std::cout);
+  std::cout<<"\n"<<std::endl;
+}
+EndTest()
+
+BeginTest (Serialize)
+{
+  CCNxCodecPerHopHeader codec;
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  codec.GetHeader()->AddHeader(interestLifetime1);
+
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  codec.GetHeader()->AddHeader(interestLifetime2);
+
+  Buffer buffer (0);
+  buffer.AddAtStart (codec.GetSerializedSize ());
+  codec.Serialize (buffer.Begin ());
+
+  NS_TEST_EXPECT_MSG_EQ (buffer.GetSize (), codec.GetSerializedSize (), "Wrong size");
+
+  const uint8_t truth[] = {
+    // T_INT_LIFE
+    0, 1, 0, 2,
+    0xE, 0x10,
+    0, 1, 0, 2,
+    0x4, 0xB0
+  };
+
+  uint8_t test[sizeof(truth)];
+  buffer.CopyData (test, sizeof(truth));
+
+  hexdump ("truth", sizeof(truth), truth);
+  hexdump ("test ", sizeof(test), test);
+
+  NS_TEST_EXPECT_MSG_EQ (memcmp (truth, test, sizeof(truth)), 0, "Data in buffer wrong");
+}
+EndTest()
+
+BeginTest (Deserialize)
+{
+  // serialize it into a buffer
+  CCNxCodecPerHopHeader codec;
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  codec.GetHeader()->AddHeader(interestLifetime1);
+
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  codec.GetHeader()->AddHeader(interestLifetime2);
+
+  Buffer buffer (0);
+  buffer.AddAtStart (codec.GetSerializedSize ());
+  codec.Serialize (buffer.Begin ());
+
+  // now de-serialize and compare
+  uint32_t expectedLength =  (4 + 2) * 2;
+  CCNxCodecPerHopHeader codectest;
+  codectest.SetDeserializeLength(expectedLength);
+  uint32_t returnedLength = codectest.Deserialize(buffer.Begin ());
+
+  bool test = expectedLength == returnedLength;
+  NS_TEST_EXPECT_MSG_EQ (test, true, "Should be same lengths");
+
+  bool equal = codec.GetHeader()->Equals(codectest.GetHeader());
+  NS_TEST_EXPECT_MSG_EQ (equal, true, "Data in buffer wrong");
+}
+EndTest()
+
+BeginTest (GetInstanceTypeId)
+{
+  CCNxCodecPerHopHeader codec;
+  TypeId type = codec.GetInstanceTypeId ();
+  bool truth = type.GetName() == "ns3::ccnx::CCNxCodecPerHopHeader";
+  NS_TEST_EXPECT_MSG_EQ (truth, true, "Names should match");
 }
 EndTest()
 
@@ -78,7 +165,10 @@ static class TestSuiteCCNxCodecPerHopHeader : public TestSuite
 public:
   TestSuiteCCNxCodecPerHopHeader () : TestSuite ("ccnx-codec-perhopheader", UNIT)
   {
-    AddTestCase (new Constructor (), TestCase::QUICK);
+    AddTestCase (new GetSerializedSize (), TestCase::QUICK);
+    AddTestCase (new Serialize (), TestCase::QUICK);
+    AddTestCase (new Deserialize (), TestCase::QUICK);
+    AddTestCase (new GetInstanceTypeId (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxCodecPerHopHeader;
 

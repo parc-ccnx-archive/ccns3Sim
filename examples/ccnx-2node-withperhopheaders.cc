@@ -73,11 +73,12 @@
 #include "ns3/point-to-point-module.h"
 #include "ns3/ccns3Sim-module.h"
 #include "ns3/ccnx-message.h"
+#include "ns3/ccnx-interestlifetime.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
 
-NS_LOG_COMPONENT_DEFINE ("ccnx-2node");
+NS_LOG_COMPONENT_DEFINE ("ccnx-2node-withperhopheaders");
 
 static const char * prefixString = "ccnx:/name=foo/name=sink";
 static const char * contentString = "ccnx:/name=foo/name=sink/name=kitchen";
@@ -100,6 +101,9 @@ CreatePacket (uint32_t size, Ptr<CCNxName> name, CCNxMessage::MessageType msgTyp
       {
         Ptr<CCNxInterest> interest = Create<CCNxInterest> (name, payload);
         packet = CCNxPacket::CreateFromMessage (interest);
+        // Add per hop header entry
+        Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+        packet->AddPerHopHeaderEntry(interestLifetime);
         break;
       }
 
@@ -159,6 +163,8 @@ PortalPrinter (Ptr<CCNxPortal> portal)
 static void
 RunSimulation (void)
 {
+  //LogComponentEnable ("CCNxPacket", (LogLevel) (LOG_LEVEL_DEBUG | LOG_LEVEL_INFO | LOG_PREFIX_ALL));
+
   Time::SetResolution (Time::MS);
 
   NodeContainer nodes;
@@ -205,8 +211,6 @@ RunSimulation (void)
   node0Portal->SetRecvCallback (MakeCallback (&PortalPrinter));
   node0Portal->RegisterPrefix (prefixName);
 
-
-
   // Create a CCNxPortal on the source and have it send Interests
   Ptr<CCNxPortal> node1Portal = CCNxPortal::CreatePortal (node1, tid);
   node1Portal->SetRecvCallback (MakeCallback (&PortalPrinter));
@@ -216,14 +220,12 @@ RunSimulation (void)
   //run some traffic
   GenerateTraffic (node1Portal, 500,  CCNxMessage::Interest,pktCnt);
 
-
   // return content
   Simulator::Schedule (Seconds (0.1), &GenerateTraffic, node0Portal, 1500,  CCNxMessage::ContentObject,pktCnt);
 
   // Run the simulator and execute all the events
   Simulator::Run ();
   Simulator::Destroy ();
-
 }
 
 int

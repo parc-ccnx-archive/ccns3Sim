@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -70,7 +70,8 @@ CCNxCodecPerHopHeader::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::ccnx::CCNxCodecPerHopHeader")
     .SetParent<Header> ()
-    .SetGroupName ("CCNx");
+    .SetGroupName ("CCNx")
+    .AddConstructor<CCNxCodecPerHopHeader> ();
   return tid;
 }
 
@@ -102,13 +103,15 @@ CCNxCodecPerHopHeader::Serialize (Buffer::Iterator outputIterator) const
 {
   NS_LOG_FUNCTION (this << &outputIterator);
 
+  Buffer::Iterator iterator = outputIterator;
+
   for (size_t i = 0; i < GetHeader()->size(); ++i)
   {
       Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetHeader()->GetHeader(i);
       uint16_t type = perhopEntry->GetInstanceTLVType();
       Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
       NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
-      codec->Serialize(perhopEntry, outputIterator);
+      codec->Serialize(perhopEntry, &iterator);
   }
 }
 
@@ -133,7 +136,7 @@ CCNxCodecPerHopHeader::Deserialize (Buffer::Iterator inputIterator)
       NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
 
       size_t bytesRead = 0;
-      Ptr<CCNxPerHopHeaderEntry> perHopHeaderEntry = codec->Deserialize(iterator, &bytesRead);
+      Ptr<CCNxPerHopHeaderEntry> perHopHeaderEntry = codec->Deserialize(&iterator, &bytesRead);
 
       NS_ASSERT_MSG(bytesRead == length + CCNxTlv::GetTLSize(), "did not read right length");
 
@@ -143,6 +146,7 @@ CCNxCodecPerHopHeader::Deserialize (Buffer::Iterator inputIterator)
       // Move the iterator pointer forward by bytesRead
       totalLen = totalLen - bytesRead;
   }
+
   return m_deserializeLength;
 }
 

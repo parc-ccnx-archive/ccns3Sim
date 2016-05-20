@@ -38,8 +38,8 @@
  * # media, etc) that they have contributed directly to this software.
  * #
  * # There is no guarantee that this section is complete, up to date or accurate. It
- * # is up to the contributors to maintain their section in this file up to date
- * # and up to the user of the software to verify any claims herein.
+ * # is up to the contributors to maintain their portion of this section and up to
+ * # the user of the software to verify any claims herein.
  * #
  * # Do not remove this header notification.  The contents of this section must be
  * # present in all distributions of the software.  You may only modify your own
@@ -55,6 +55,7 @@
 
 #include "ns3/log.h"
 #include "ccnx-interestlifetime.h"
+#include "ns3/ccnx-perhopheaderentry.h"
 
 #include "ns3/ccnx-tlv.h"
 #include "ns3/ccnx-schema-v1.h"
@@ -107,14 +108,39 @@ CCNxInterestLifetime :: GetInstanceTLVType (void) const
 }
 
 Ptr<CCNxTime>
-CCNxInterestLifetime::GetInterestLifetime () const
+CCNxInterestLifetime::GetInterestLifetime (void) const
 {
   return m_interestLifetime;
+}
+
+bool
+CCNxInterestLifetime::Equals (const Ptr<CCNxPerHopHeaderEntry> other) const
+{
+  if (other)
+    {
+      return Equals (*other);
+    }
+  else
+    {
+      return false;
+    }
+}
+
+bool
+CCNxInterestLifetime::Equals (CCNxPerHopHeaderEntry const &other) const
+{
+  bool result = false;
+  const CCNxInterestLifetime *lifetimePtr = dynamic_cast<const CCNxInterestLifetime *>(&other);
+  if (m_interestLifetime->Equals (lifetimePtr->GetInterestLifetime()))
+  {
+    result = true;
+  }
+  return result;
 }
 
 std::ostream &
 CCNxInterestLifetime::Print(std::ostream &os) const
 {
-  os << "{ Interest Lifetime timeValue " << GetInterestLifetime ()->getTime () << " }";
+  os << "{ Interest Lifetime " << GetInterestLifetime ()->getTime () << " }";
   return os;
 }
