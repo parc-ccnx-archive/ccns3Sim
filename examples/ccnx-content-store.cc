@@ -104,9 +104,13 @@ RunSimulation (void)
    */
   CCNxStandardForwarderHelper standardHelper;
 
+#define USECONTENTSTORE //comment out if no content store needed on forwarders
+
+#ifdef USECONTENTSTORE
   CCNxStandardContentStoreFactory contentStoreFactory;
   contentStoreFactory.Set("ObjectCapacity", IntegerValue(10000));
   standardHelper.SetContentStoreFactory(contentStoreFactory);
+#endif
 
   CCNxStackHelper ccnxStack;
   ccnxStack.SetForwardingHelper (standardHelper);
@@ -152,9 +156,9 @@ RunSimulation (void)
 #endif
 
   // Run the simulator and execute all the events
-  consumerApps.Stop (Seconds (120.0)); // Consumer runs for 10 seconds.
-  producerApps.Stop (Seconds (130.0)); // Producer runs for 13 seconds to be able to serve all requests from consumer
-  Simulator::Stop (Seconds (140)); // Allow an extra second for simulator to complete shutdown.
+  consumerApps.Stop (Seconds (12.0)); // Consumer runs for this long.
+  producerApps.Stop (Seconds (13.0)); // Producer runs for longer to be able to serve all requests from consumer
+  Simulator::Stop (Seconds (14)); // Allow an extra second for simulator to complete shutdown.
 
 
   Simulator::Run ();
@@ -171,11 +175,11 @@ RunSimulation (void)
 int
 main (int argc, char *argv[])
 {
-#if 0
+#if 1
 //  LogComponentEnable ("CCNxContentRepository", LOG_LEVEL_DEBUG);
-  LogComponentEnable ("CCNxStandardForwarder", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
-  LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
-  LogComponentEnable ("CCNxStandardContentStoreLruList", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
+  LogComponentEnable ("CCNxStandardForwarder", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
+//  LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
+//  LogComponentEnable ("CCNxStandardContentStoreLruList", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
 #endif
   RunSimulation ();
   return 0;
