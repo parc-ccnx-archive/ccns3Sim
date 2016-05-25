@@ -79,6 +79,7 @@ Ptr<CCNxConnection> CCNxStandardForwarderWorkItem::GetEgressConnection () const
   return m_egressConnection;
 }
 
+
 void CCNxStandardForwarderWorkItem::SetRouteError (CCNxRoutingError::RoutingErrno routingErrno)
 {
   m_routingErrno = routingErrno;

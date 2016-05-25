@@ -209,12 +209,14 @@ CCNxStandardForwarder::ServiceInputQueue (Ptr<CCNxStandardForwarderWorkItem> ite
     case CCNxFixedHeaderType_Interest:
       {
 	m_forwarderStats.interestsToPit++;
+	NS_LOG_DEBUG("INTEREST: sending to PIT.  name="<< *item->GetPacket()->GetMessage()->GetName());
         m_pit->ReceiveInterest (item);
         break;
       }
     case CCNxFixedHeaderType_Object:
       {
 	m_forwarderStats.contentObjectsToPit++;
+	NS_LOG_DEBUG("CONTENT: sending to PIT.  name="<< *item->GetPacket()->GetMessage()->GetName());
         m_pit->SatisfyInterest (item);
         break;
       }
@@ -287,7 +289,7 @@ CCNxStandardForwarder::RouteOutput (Ptr<CCNxPacket> packet,
                                     Ptr<CCNxConnection> egressConnection)
 {
   NS_LOG_FUNCTION (this << packet << ingressConnection);
-  m_forwarderStats.packetsIn++;
+  m_forwarderStats.RouteOutputPacketsIn++;
 
   Ptr<CCNxStandardForwarderWorkItem> item = Create<CCNxStandardForwarderWorkItem> (packet, ingressConnection, egressConnection);
   m_inputQueue->push_back (item);
@@ -298,7 +300,7 @@ CCNxStandardForwarder::RouteInput (Ptr<CCNxPacket> packet,
                                    Ptr<CCNxConnection> ingressConnection)
 {
   NS_LOG_FUNCTION (this << packet << ingressConnection);
-  m_forwarderStats.packetsIn++;
+  m_forwarderStats.RouteInputPacketsIn++;
 
   Ptr<CCNxStandardForwarderWorkItem> item = Create<CCNxStandardForwarderWorkItem> (packet, ingressConnection, Ptr<CCNxConnection> (0));
   m_inputQueue->push_back (item);
@@ -311,7 +313,6 @@ void
 CCNxStandardForwarder::PitReceiveInterestCallback (Ptr<CCNxForwarderMessage> message, enum CCNxPit::Verdict verdict)
 {
   NS_LOG_FUNCTION (message->GetPacket () << message->GetIngressConnection () << verdict);
-  m_forwarderStats.packetsIn++;
   if (verdict == CCNxPit::Forward)
     {
       m_forwarderStats.interestsVerdictForward++;
@@ -344,29 +345,38 @@ CCNxStandardForwarder::PitSatisfyInterestCallback (Ptr<CCNxForwarderMessage> mes
 {
   NS_LOG_FUNCTION (message->GetPacket () << message->GetIngressConnection () << egressConnections);
 
-  // For a content object, no additional processing (until ready to put in content store)
   Ptr<CCNxStandardForwarderWorkItem> item = DynamicCast<CCNxStandardForwarderWorkItem, CCNxForwarderMessage> (message);
   NS_ASSERT_MSG ( (item), "Got null dynamic cast from CCNxForwarderMessage to CCNxStandardForwarderWorkItem");
 
   if (egressConnections->size() ) //match!
       {
       m_forwarderStats.contentObjectsMatchedInPit++;
-      if  (m_contentStore) // there is a CS, so add this content
-	{
+      if  (m_contentStore and item->GetIngressConnection())
+	{ // there is a CS and this content is not from the CS, so try to add this content
+
 	  m_forwarderStats.contentObjectsToContentStore++;
 	  NS_LOG_DEBUG ("CONTENT:name=" << *message->GetPacket()->GetMessage()->GetName() <<" matched Pit Entry  - starting add to Content Store. 1st egressConn=" << egressConnections->front()->GetConnectionId());
 	  m_contentStore->AddContentObject(message,egressConnections); //will fwd packet after this, so must retain egressConnections
 	}
       else
-	{  //match but no content store - fwd packet
-	      NS_LOG_DEBUG ("CONTENT: match but no content store, finishing route lookup.");
-	      FinishRouteLookup (item, egressConnections);
+	{  //match but no content store or this content came from the content store - fwd packet
+	  std::string logString;
+	      if (item->GetIngressConnection())
+		{
+		  logString = "CONTENT: match but no content store, finishing route lookup.";
+		}
+	      else
+		{
+		  logString = "CONTENT: match on content from content store - finishing route lookup.";
+		}
+	  NS_LOG_DEBUG(logString);
+	  FinishRouteLookup (item, egressConnections);
 	}
       }
   else
     { //no match - drop pkt
       m_forwarderStats.contentObjectsNotMatchedInPit++;
-      NS_LOG_DEBUG ("CONTENT: no Pit Entry match, discarding packet.");
+      NS_LOG_ERROR ("CONTENT: no matching Pit Entry! discarding packet="<< *message->GetPacket());
       FinishRouteLookup (item, Ptr<CCNxConnectionList>(0));
     }
 
@@ -384,6 +394,7 @@ CCNxStandardForwarder::FibLookupCallback (Ptr<CCNxForwarderMessage> message, Ptr
   if (egressConnections && egressConnections->size() > 0) {
       m_forwarderStats.interestsFibForwarded++;
   } else {
+      NS_LOG_ERROR ("INTEREST:no matching fib entry! discarding packet="<< *message->GetPacket());
       m_forwarderStats.interestsFibNotForwarded++;
   }
   FinishRouteLookup (item, egressConnections); //back to layer 3 protocol eventually
@@ -403,6 +414,7 @@ CCNxStandardForwarder::ContentStoreMatchInterestCallback (Ptr<CCNxForwarderMessa
       NS_LOG_DEBUG ("INTEREST sent to content store, found match.  Sending Content back to pit.");
       Ptr<CCNxStandardForwarderWorkItem> newWorkItem =
 	  Create<CCNxStandardForwarderWorkItem> (workItem->GetContentStorePacket(),Ptr<CCNxConnection>(0),Ptr<CCNxConnection>(0));
+      m_forwarderStats.contentObjectsToPit++;
       m_pit->SatisfyInterest (newWorkItem);
     }
   else
@@ -563,7 +575,8 @@ CCNxStandardForwarder::PrintForwardingStatistics (Ptr<OutputStreamWrapper> strea
   (*timePrinter)(*stream);
   *stream << std::setw (5) << m_node->GetId () << std::setw (0) << " StandardForwarder ";
   *stream << std::setw(10) << "Packets" << std::setw(0);
-  *stream << " In " << m_forwarderStats.packetsIn;
+  *stream << " In L2 " << m_forwarderStats.RouteInputPacketsIn;
+  *stream << " In L4 " << m_forwarderStats.RouteOutputPacketsIn;
   *stream << " Out " << m_forwarderStats.packetsOut;
   *stream << " UnsupportedType " << m_forwarderStats.dropUnsupportedPacketType << std::endl;
 
@@ -599,8 +612,8 @@ CCNxStandardForwarder::PrintForwardingStatistics (Ptr<OutputStreamWrapper> strea
   *stream << std::setw (5) << m_node->GetId () << std::setw (0) << " StandardForwarder ";
   *stream << std::setw(10) << "Content" << std::setw(0);
   *stream << " ToContentStore " << m_forwarderStats.contentObjectsToContentStore;
-  *stream << " Matched " << m_forwarderStats.contentObjectsAddedToContentStore;
-  *stream << " NotMatched " << m_forwarderStats.contentObjectsNotAddedToContentStore << std::endl;
+  *stream << " Added " << m_forwarderStats.contentObjectsAddedToContentStore;
+  *stream << " NotAdded " << m_forwarderStats.contentObjectsNotAddedToContentStore << std::endl;
 
 }
 
