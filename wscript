@@ -95,6 +95,7 @@ def build(bld):
         'model/messages/ccnx-namesegment.cc',
         'model/messages/ccnx-time.cc',
         'model/messages/ccnx-perhopheaderentry.cc',
+        'model/messages/ccnx-cachetime.cc',
         'model/messages/ccnx-interestlifetime.cc',
         'model/messages/ccnx-perhopheader.cc',
         # Crypto
@@ -177,6 +178,7 @@ def build(bld):
         'model/packets/standard/ccnx-codec-perhopheaderentry.cc',
         'model/packets/standard/ccnx-codec-perhopheader.cc',
         'model/packets/standard/ccnx-codec-interestlifetime.cc',
+        'model/packets/standard/ccnx-codec-cachetime.cc',
         # Portal
         'model/portal/ccnx-portal.cc',
         'model/portal/ccnx-portal-factory.cc',
@@ -215,6 +217,7 @@ def build(bld):
         'model/messages/ccnx-fixedheader.h',
         'model/messages/ccnx-perhopheaderentry.h',
         'model/messages/ccnx-interestlifetime.h',
+        'model/messages/ccnx-cachetime.h',
         'model/messages/ccnx-perhopheader.h',
         'model/messages/ccnx-interest.h',
         'model/messages/ccnx-message.h',
@@ -307,6 +310,7 @@ def build(bld):
         'model/packets/standard/ccnx-codec-perhopheaderentry.h',
         'model/packets/standard/ccnx-codec-perhopheader.h',
         'model/packets/standard/ccnx-codec-interestlifetime.h',
+        'model/packets/standard/ccnx-codec-cachetime.h',
         # Portal
         'model/portal/ccnx-portal.h',
         'model/portal/ccnx-portal-factory.h',
