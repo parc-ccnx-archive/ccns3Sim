@@ -384,7 +384,7 @@ std::ostream &
 ns3::ccnx::operator<< (std::ostream &os, CCNxPacket const &packet)
 {
   os << "header " << *packet.GetFixedHeader ()
-     << "perhopheader " << *packet.GetPerhopHeaders()
+     << ", perhopheader " << *packet.GetPerhopHeaders()
      << ", message " << *packet.GetMessage ()
      << ", validation " << packet.GetValidation ();
   return os;

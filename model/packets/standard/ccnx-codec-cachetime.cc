@@ -58,15 +58,15 @@
 #include "ns3/ccnx-schema-v1.h"
 #include "ccnx-codec-registry.h"
 #include "ccnx-codec-perhopheader.h"
-#include "ccnx-codec-interestlifetime.h"
+#include "ccnx-codec-cachetime.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
 
 
-NS_LOG_COMPONENT_DEFINE ("CCNxCodecInterestLifetime");
+NS_LOG_COMPONENT_DEFINE ("CCNxCodecCachetime");
 
-NS_OBJECT_ENSURE_REGISTERED (CCNxCodecInterestLifetime);
+NS_OBJECT_ENSURE_REGISTERED (CCNxCodecCachetime);
 
 static bool _registered = false;
 static void
@@ -74,40 +74,40 @@ RegisterCodec()
 {
     if (!_registered) {
 	_registered = true;
-	Ptr<CCNxCodecInterestLifetime> codec = CreateObject<CCNxCodecInterestLifetime>();
-	CCNxCodecRegistry::PerHopRegisterCodec(CCNxInterestLifetime::GetTLVType(), codec);
+	Ptr<CCNxCodecCachetime> codec = CreateObject<CCNxCodecCachetime>();
+	CCNxCodecRegistry::PerHopRegisterCodec(CCNxCachetime::GetTLVType(), codec);
     }
 }
 
 TypeId
-CCNxCodecInterestLifetime::GetTypeId (void)
+CCNxCodecCachetime::GetTypeId (void)
 {
     RegisterCodec();
-    static TypeId tid = TypeId ("ns3::ccnx::CCNxCodecInterestLifetime")
+    static TypeId tid = TypeId ("ns3::ccnx::CCNxCodecCachetime")
     .SetParent<CCNxCodecPerHopHeaderEntry> ()
     .SetGroupName ("CCNx")
-    .AddConstructor<CCNxCodecInterestLifetime>();
+    .AddConstructor<CCNxCodecCachetime>();
     return tid;
 }
 
 TypeId
-CCNxCodecInterestLifetime::GetInstanceTypeId (void) const
+CCNxCodecCachetime::GetInstanceTypeId (void) const
 {
   return GetTypeId ();
 }
 
-CCNxCodecInterestLifetime::CCNxCodecInterestLifetime ()
+CCNxCodecCachetime::CCNxCodecCachetime ()
 {
   // empty
 }
 
-CCNxCodecInterestLifetime::~CCNxCodecInterestLifetime ()
+CCNxCodecCachetime::~CCNxCodecCachetime ()
 {
   // empty
 }
 
 Ptr<CCNxPerHopHeaderEntry>
-CCNxCodecInterestLifetime::Deserialize (Buffer::Iterator *inputIterator, size_t *bytesRead)
+CCNxCodecCachetime::Deserialize (Buffer::Iterator *inputIterator, size_t *bytesRead)
 {
     NS_LOG_FUNCTION (this << &inputIterator);
     NS_ASSERT_MSG (inputIterator->GetSize () >= CCNxTlv::GetTLSize(), "Need to have at least 4 bytes to read");
@@ -120,100 +120,62 @@ CCNxCodecInterestLifetime::Deserialize (Buffer::Iterator *inputIterator, size_t 
 
     NS_LOG_DEBUG ("Type " << type << " length " << length << " bytesRead " << numBytes);
 
-    uint64_t value = 0;
-    uint16_t tempLen = length;
+    NS_ASSERT_MSG (length >= 8, "Must be at least 8 bytes in Cache time");
 
-    while (tempLen > 0)
-    {
-      value |= iterator->ReadU8();
-      tempLen--;
-      if (tempLen != 0)
-	value <<= 8;
-    }
+    uint64_t value = iterator->ReadNtohU64 ();
 
-    NS_LOG_DEBUG ("De-serialized Interest Lifetime" << value);
+    NS_LOG_DEBUG ("De-serialized Cache time" << value);
 
     Ptr<CCNxTime> time = Create<CCNxTime>(value);
     NS_ASSERT_MSG ((time), "Unable to create CCNxTime");
 
-    Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (time);
-    NS_ASSERT_MSG ((interestLifetime), "Unable to create CCNxInterestLifetime");
+    Ptr<CCNxCachetime> cachetime = Create<CCNxCachetime> (time);
+    NS_ASSERT_MSG ((cachetime), "Unable to create CCNxCachetime");
 
     numBytes += length;
 
     *bytesRead = numBytes;
-    return interestLifetime;
-}
-
-static uint32_t CCNxCodecTlvEncoder_ComputeVarIntLength(uint64_t value)
-{
-    unsigned length = 8;
-    if (value <= 0x00000000000000FFULL) {
-        length = 1;
-    } else if (value <= 0x000000000000FFFFULL) {
-        length = 2;
-    } else if (value <= 0x0000000000FFFFFFULL) {
-        length = 3;
-    } else if (value <= 0x00000000FFFFFFFFULL) {
-        length = 4;
-    } else if (value <= 0x000000FFFFFFFFFFULL) {
-        length = 5;
-    } else if (value <= 0x0000FFFFFFFFFFFFULL) {
-        length = 6;
-    } else if (value <= 0x00FFFFFFFFFFFFFFULL) {
-        length = 7;
-    }
-
-    return length;
+    return cachetime;
 }
 
 uint32_t
-CCNxCodecInterestLifetime::GetSerializedSize (Ptr<CCNxPerHopHeaderEntry> perhopEntry)
+CCNxCodecCachetime::GetSerializedSize (Ptr<CCNxPerHopHeaderEntry> perhopEntry)
 {
-    Ptr<CCNxInterestLifetime> interestLifetime = DynamicCast<CCNxInterestLifetime, CCNxPerHopHeaderEntry> (perhopEntry);
-    Ptr<CCNxTime> time = interestLifetime->GetInterestLifetime();
+    Ptr<CCNxCachetime> cachetime = DynamicCast<CCNxCachetime, CCNxPerHopHeaderEntry> (perhopEntry);
+    Ptr<CCNxTime> time = cachetime->GetCachetime();
     NS_ASSERT_MSG (time, "Time can not be NULL");
-    uint32_t length = CCNxTlv::GetTLSize () + CCNxCodecTlvEncoder_ComputeVarIntLength(time->getTime());
+    uint32_t length = CCNxTlv::GetTLSize () + 8; //Cache time is 8 bytes fixed
     return length;
 }
 
 void
-CCNxCodecInterestLifetime::Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator *outputIterator)
+CCNxCodecCachetime::Serialize (Ptr<CCNxPerHopHeaderEntry> perhopEntry, Buffer::Iterator *outputIterator)
 {
     NS_LOG_FUNCTION (this << &outputIterator);
 
     uint16_t bytes = (uint16_t) GetSerializedSize (perhopEntry);
     NS_ASSERT_MSG (bytes >= CCNxTlv::GetTLSize(), "Serialized size must be at least 4 bytes");
 
-    // -4 because it includes the T_INT_LIFE TLV.
-    CCNxTlv::WriteTypeLength (*outputIterator, CCNxSchemaV1::T_INT_LIFE, bytes - CCNxTlv::GetTLSize ());
+    // -4 because it includes the T_CACHE_TIME TLV.
+    CCNxTlv::WriteTypeLength (*outputIterator, CCNxSchemaV1::T_CACHE_TIME, bytes - CCNxTlv::GetTLSize ());
 
-    Ptr<CCNxInterestLifetime> interestLifetime = DynamicCast<CCNxInterestLifetime, CCNxPerHopHeaderEntry> (perhopEntry);
-    Ptr<CCNxTime> time = interestLifetime->GetInterestLifetime();
+    Ptr<CCNxCachetime> cachetime = DynamicCast<CCNxCachetime, CCNxPerHopHeaderEntry> (perhopEntry);
+    Ptr<CCNxTime> time = cachetime->GetCachetime();
     NS_ASSERT_MSG (time, "Time can not be NULL");
-    uint64_t value = time->getTime();
-
-    bool mustContinue = false;
-    for (int byte = 7; byte >= 0; byte--) {
-    	uint8_t b = (value >> (byte * 8)) & 0xFF;
-    	if (b != 0 || byte == 0 || mustContinue) {
-    		outputIterator->WriteU8 (b);
-			mustContinue = true;
-        }
-    }
+    outputIterator->WriteHtonU64 (time->getTime ());
 }
 
 void
-CCNxCodecInterestLifetime::Print (Ptr<CCNxPerHopHeaderEntry> perhopEntry, std::ostream &os) const
+CCNxCodecCachetime::Print (Ptr<CCNxPerHopHeaderEntry> perhopEntry, std::ostream &os) const
 {
   if (perhopEntry)
   {
-      Ptr<CCNxInterestLifetime> interestLifetime = DynamicCast<CCNxInterestLifetime, CCNxPerHopHeaderEntry> (perhopEntry);
-      interestLifetime->Print(os);
+      Ptr<CCNxCachetime> cachetime = DynamicCast<CCNxCachetime, CCNxPerHopHeaderEntry> (perhopEntry);
+      cachetime->Print(os);
   }
   else
   {
-      os << "\nNo interest lifetime header";
+      os << "\nNo cache time header";
   }
 }
 

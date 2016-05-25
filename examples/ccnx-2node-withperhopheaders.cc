@@ -104,6 +104,8 @@ CreatePacket (uint32_t size, Ptr<CCNxName> name, CCNxMessage::MessageType msgTyp
         // Add per hop header entry
         Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
         packet->AddPerHopHeaderEntry(interestLifetime);
+        Ptr<CCNxCachetime> cachetime = Create<CCNxCachetime> (Create<CCNxTime>(3600));
+        packet->AddPerHopHeaderEntry(cachetime);
         break;
       }
 
@@ -156,6 +158,7 @@ PortalPrinter (Ptr<CCNxPortal> portal)
   while ((packet = portal->Recv ()))
     {
       std::cout << "Client Rx at=" << Simulator::Now ().GetSeconds () << "sec, name=" << *packet->GetMessage ()->GetName () << ", pkt type=" << (packet->GetMessage ()->GetMessageType () ? "Content" : "Interest") << std::endl;
+      std::cout << "Packet=" << *packet << std::endl;
     }
 }
 
