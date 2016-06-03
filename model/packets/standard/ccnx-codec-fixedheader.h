@@ -58,6 +58,8 @@
 
 #include "ns3/header.h"
 #include "ns3/ccnx-fixedheader.h"
+#include "ns3/ccnx-perhopheader.h"
+#include "ns3/ccnx-codec-perhopheaderentry.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -111,12 +113,17 @@ public:
    * either by SetHeader() or Deserialize().  If it has not been set the Ptr
    * will not evaluate true (i.e. operator() will evaluate false).
    */
-  Ptr<CCNxFixedHeader> GetHeader () const;
+  Ptr<CCNxFixedHeader> GetFixedHeader () const;
 
   /**
    * Sets the internal CCNxFixedHeader to the given header.
    */
-  void SetHeader (Ptr<CCNxFixedHeader> header);
+  void SetFixedHeader (Ptr<CCNxFixedHeader> header);
+
+  /**
+   * Returns the internal CCNxPerHopHeader
+   */
+  Ptr<CCNxPerHopHeader> GetPerHopHeader () const;
 
 private:
   /**
@@ -129,7 +136,9 @@ private:
    */
   static uint8_t PacketTypeValueFromEnum (CCNxFixedHeaderType type);
 
-  Ptr<CCNxFixedHeader> m_header;
+  Ptr<CCNxFixedHeader> m_fixedheader;
+
+  Ptr<CCNxPerHopHeader> m_perHopHeader;
 };
 
 } // namespace ccnx

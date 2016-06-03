@@ -89,7 +89,11 @@ CreatePacket (uint32_t size, Ptr<CCNxName> name)
 
   Ptr<CCNxInterest> interest = Create<CCNxInterest> (name, payload);
   Ptr<CCNxPacket> packet = CCNxPacket::CreateFromMessage (interest);
-
+  // Add per hop header entry
+  Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  packet->AddPerHopHeaderEntry(interestLifetime);
+  Ptr<CCNxCachetime> cachetime = Create<CCNxCachetime> (Create<CCNxTime>(3600));
+  packet->AddPerHopHeaderEntry(cachetime);
   return packet;
 }
 

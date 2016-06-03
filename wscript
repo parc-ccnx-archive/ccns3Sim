@@ -176,7 +176,7 @@ def build(bld):
         'model/packets/standard/ccnx-codec-name.cc',
         'model/packets/standard/ccnx-tlv.cc',
         'model/packets/standard/ccnx-codec-perhopheaderentry.cc',
-        'model/packets/standard/ccnx-codec-perhopheader.cc',
+        #'model/packets/standard/ccnx-codec-perhopheader.cc',
         'model/packets/standard/ccnx-codec-interestlifetime.cc',
         'model/packets/standard/ccnx-codec-cachetime.cc',
         # Portal
@@ -308,7 +308,7 @@ def build(bld):
         'model/packets/standard/ccnx-schema-v1.h',
         'model/packets/standard/ccnx-tlv.h',
         'model/packets/standard/ccnx-codec-perhopheaderentry.h',
-        'model/packets/standard/ccnx-codec-perhopheader.h',
+        #'model/packets/standard/ccnx-codec-perhopheader.h',
         'model/packets/standard/ccnx-codec-interestlifetime.h',
         'model/packets/standard/ccnx-codec-cachetime.h',
         # Portal

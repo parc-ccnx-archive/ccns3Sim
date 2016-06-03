@@ -57,7 +57,6 @@
 #include "ns3/ccnx-tlv.h"
 #include "ns3/ccnx-schema-v1.h"
 #include "ccnx-codec-registry.h"
-#include "ccnx-codec-perhopheader.h"
 #include "ccnx-codec-cachetime.h"
 
 using namespace ns3;

@@ -55,6 +55,8 @@
 
 #include "ns3/log.h"
 #include "ccnx-codec-fixedheader.h"
+#include "ns3/ccnx-tlv.h"
+#include "ccnx-codec-registry.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
@@ -84,7 +86,19 @@ CCNxCodecFixedHeader::GetInstanceTypeId (void) const
 uint32_t
 CCNxCodecFixedHeader::GetSerializedSize (void) const
 {
-  return 8;
+  uint32_t length = 8; // Length of fixed size header
+
+  // Check if there are any per hop headers and add length (if any)
+  for (size_t i = 0; i < GetPerHopHeader()->size(); ++i)
+  {
+    Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetPerHopHeader()->GetHeader(i);
+    uint16_t type = perhopEntry->GetInstanceTLVType();
+    Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
+    NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
+    length += codec->GetSerializedSize(perhopEntry);
+  }
+
+  return length;
 }
 
 void
@@ -93,13 +107,22 @@ CCNxCodecFixedHeader::Serialize (Buffer::Iterator start) const
   NS_LOG_FUNCTION (this << &start);
   Buffer::Iterator i = start;
 
-  i.WriteU8 (m_header->GetVersion ());
-  i.WriteU8 (PacketTypeValueFromEnum (m_header->GetPacketType ()));
-  i.WriteHtonU16 (m_header->GetPacketLength ());
-  i.WriteU8 (m_header->GetHopLimit ());
-  i.WriteU8 (m_header->GetReturnCode ());
+  i.WriteU8 (m_fixedheader->GetVersion ());
+  i.WriteU8 (PacketTypeValueFromEnum (m_fixedheader->GetPacketType ()));
+  i.WriteHtonU16 (m_fixedheader->GetPacketLength ());
+  i.WriteU8 (m_fixedheader->GetHopLimit ());
+  i.WriteU8 (m_fixedheader->GetReturnCode ());
   i.WriteU8 (0); // reserved byte
-  i.WriteU8 (m_header->GetHeaderLength ());
+  i.WriteU8 (GetSerializedSize());
+
+  for (size_t k = 0; k < GetPerHopHeader()->size(); ++k)
+  {
+      Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetPerHopHeader()->GetHeader(k);
+      uint16_t type = perhopEntry->GetInstanceTLVType();
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
+      NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
+      codec->Serialize(perhopEntry, &i);
+  }
 }
 
 uint32_t
@@ -119,28 +142,65 @@ CCNxCodecFixedHeader::Deserialize (Buffer::Iterator start)
   uint8_t headerLength = i.ReadU8 ();
 
   CCNxFixedHeaderType pt = PacketTypeEnumFromValue (packetType);
-  m_header = Create<CCNxFixedHeader> (ver, pt, packetLength, hopLimit, returnCode, headerLength);
+  m_fixedheader = Create<CCNxFixedHeader> (ver, pt, packetLength, hopLimit, returnCode, headerLength);
 
-  NS_LOG_DEBUG ("Header: " << *m_header);
-  return GetSerializedSize ();
+  NS_LOG_DEBUG ("Fixed Header: " << *m_fixedheader);
+
+  uint32_t perhopLen = headerLength - 8;
+
+  while (perhopLen != 0)
+  {
+      NS_ASSERT_MSG(perhopLen >= 4, "underrun - not enough bytes for a T and L");
+      uint16_t type = CCNxTlv::ReadType (i);
+      uint16_t length = CCNxTlv::ReadLength (i);
+      NS_ASSERT_MSG(length < perhopLen, "too long");
+
+      // backup to start of TLV
+      i.Prev(CCNxTlv::GetTLSize());
+
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
+      NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
+
+      size_t bytesRead = 0;
+      Ptr<CCNxPerHopHeaderEntry> perHopHeaderEntry = codec->Deserialize(&i, &bytesRead);
+
+      NS_ASSERT_MSG(bytesRead == length + CCNxTlv::GetTLSize(), "did not read right length");
+
+      // Add per Hop header to the vector
+      m_perHopHeader->AddHeader(perHopHeaderEntry);
+
+      // Move the iterator pointer forward by bytesRead
+      perhopLen = perhopLen - bytesRead;
+  }
+
+    return GetSerializedSize();
 }
 
 void
 CCNxCodecFixedHeader::Print (std::ostream &os) const
 {
-  if (m_header)
+  if (m_fixedheader)
     {
-      os << *m_header;
+      os << *m_fixedheader;
     }
   else
     {
-      os << "NULL header";
+      os << "NULL Fixed header";
     }
+
+  for (size_t i = 0; i < GetPerHopHeader()->size(); ++i)
+  {
+      Ptr<CCNxPerHopHeaderEntry> perhopEntry = GetPerHopHeader()->GetHeader(i);
+      uint16_t type = perhopEntry->GetInstanceTLVType();
+      Ptr<CCNxCodecPerHopHeaderEntry> codec = CCNxCodecRegistry::PerHopLookupCodec(type);
+      NS_ASSERT_MSG ( (codec), "Could not find codec for type " << type);
+      codec->Print(perhopEntry, os);
+  }
 }
 
-CCNxCodecFixedHeader::CCNxCodecFixedHeader () : m_header (0)
+CCNxCodecFixedHeader::CCNxCodecFixedHeader () : m_fixedheader (0)
 {
-  // empty
+  m_perHopHeader = Create<CCNxPerHopHeader>();
 }
 
 CCNxCodecFixedHeader::~CCNxCodecFixedHeader ()
@@ -149,15 +209,21 @@ CCNxCodecFixedHeader::~CCNxCodecFixedHeader ()
 }
 
 Ptr<CCNxFixedHeader>
-CCNxCodecFixedHeader::GetHeader () const
+CCNxCodecFixedHeader::GetFixedHeader () const
 {
-  return m_header;
+  return m_fixedheader;
 }
 
 void
-CCNxCodecFixedHeader::SetHeader (Ptr<CCNxFixedHeader> header)
+CCNxCodecFixedHeader::SetFixedHeader (Ptr<CCNxFixedHeader> header)
 {
-  m_header = header;
+  m_fixedheader = header;
+}
+
+Ptr<CCNxPerHopHeader>
+CCNxCodecFixedHeader::GetPerHopHeader () const
+{
+  return m_perHopHeader;
 }
 
 CCNxFixedHeaderType
