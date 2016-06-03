@@ -55,21 +55,36 @@
 
 #include "ns3/test.h"
 #include "ns3/ccnx-codec-fixedheader.h"
+#include "ns3/ccnx-time.h"
+#include "ns3/ccnx-interestlifetime.h"
 #include "../../TestMacros.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
-
-// =================================
 
 namespace TestCCNxCodecFixedHeader {
 
 BeginTest (TestGetSerializedSize)
 {
   printf ("TestGetSerializedSize DoRun\n");
-  CCNxCodecFixedHeader cfh;
-  size_t test = cfh.GetSerializedSize ();
-  NS_TEST_EXPECT_MSG_EQ (test, 8, "wrong size");
+  CCNxCodecFixedHeader codec;
+  size_t test1 = codec.GetSerializedSize ();
+  NS_TEST_EXPECT_MSG_EQ (test1, 8, "wrong size");
+
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  codec.GetPerHopHeader()->AddHeader(interestLifetime1);
+
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  codec.GetPerHopHeader()->AddHeader(interestLifetime2);
+
+  // expected size = 8 (Fixed header size) + 4 (TL) + 2 (bytes needed to accommodate time value)
+  size_t expectedSize = 8 + (4 + 2) * 2;
+
+  size_t test2 = codec.GetSerializedSize();
+  NS_TEST_EXPECT_MSG_EQ (test2, expectedSize, "wrong size");
+
+  codec.Print(std::cout);
+  std::cout<<"\n"<<std::endl;
 }
 EndTest ()
 
@@ -77,21 +92,39 @@ BeginTest (TestSerialize)
 {
   printf ("TestSerialize DoRun\n");
 
-  Ptr<CCNxFixedHeader> fh = Create<CCNxFixedHeader> (1, CCNxFixedHeaderType_Interest, 300, 255, 3, 10);
-  CCNxCodecFixedHeader cfh;
-  cfh.SetHeader (fh);
+  CCNxCodecFixedHeader codec;
+
+  Ptr<CCNxFixedHeader> fh = Create<CCNxFixedHeader> (1, CCNxFixedHeaderType_Interest, 300, 255, 3, 20);
+  codec.SetFixedHeader (fh);
+
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  codec.GetPerHopHeader()->AddHeader(interestLifetime1);
+
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  codec.GetPerHopHeader()->AddHeader(interestLifetime2);
 
   Buffer buffer (0);
-  buffer.AddAtStart (8);
-  cfh.Serialize (buffer.Begin ());
+  buffer.AddAtStart (codec.GetSerializedSize ());
+  codec.Serialize (buffer.Begin ());
 
-  NS_TEST_EXPECT_MSG_EQ (buffer.GetSize (), 8, "Should have serialized 8 bytes");
+  NS_TEST_EXPECT_MSG_EQ (buffer.GetSize (), codec.GetSerializedSize (), "Wrong size");
 
-  const uint8_t truth[] = { 0x01, 0x01, 0x01, 0x2c, 0xff, 0x03, 0x00, 0x0a };
-  uint8_t test[8];
-  buffer.CopyData (test, 8);
+  const uint8_t truth[] = {
+    0x01, 0x01, 0x01, 0x2c, 0xff, 0x03, 0x00, 0x14,
+    // T_INT_LIFE
+    0, 1, 0, 2,
+    0xE, 0x10,
+    0, 1, 0, 2,
+    0x4, 0xB0
+  };
 
-  NS_TEST_EXPECT_MSG_EQ (memcmp (truth, test, 8), 0, "Data in buffer wrong");
+  uint8_t test[sizeof(truth)];
+  buffer.CopyData (test, sizeof(truth));
+
+  hexdump ("truth", sizeof(truth), truth);
+  hexdump ("test ", sizeof(test), test);
+
+  NS_TEST_EXPECT_MSG_EQ (memcmp (truth, test, sizeof(truth)), 0, "Data in buffer wrong");
 }
 EndTest ()
 
@@ -99,29 +132,37 @@ BeginTest (TestDeserialize)
 {
   printf ("TestDeserialize DoRun\n");
 
+  CCNxCodecFixedHeader codec;
+
   // serialize it then make sure we got what we expected
-  Ptr<CCNxFixedHeader> truth = Create<CCNxFixedHeader> (1, CCNxFixedHeaderType_Interest, 300, 255, 3, 10);
-  CCNxCodecFixedHeader cfh;
-  cfh.SetHeader (truth);
+  Ptr<CCNxFixedHeader> truth = Create<CCNxFixedHeader> (1, CCNxFixedHeaderType_Interest, 300, 255, 3, 20);
+  codec.SetFixedHeader (truth);
+
+  Ptr<CCNxInterestLifetime> interestLifetime1 = Create<CCNxInterestLifetime> (Create<CCNxTime>(3600));
+  codec.GetPerHopHeader()->AddHeader(interestLifetime1);
+
+  Ptr<CCNxInterestLifetime> interestLifetime2 = Create<CCNxInterestLifetime> (Create<CCNxTime>(1200));
+  codec.GetPerHopHeader()->AddHeader(interestLifetime2);
 
   Buffer buffer (0);
-  buffer.AddAtStart (8);
-  cfh.Serialize (buffer.Begin ());
+  buffer.AddAtStart (codec.GetSerializedSize ());
+  codec.Serialize (buffer.Begin ());
 
-  cfh.Deserialize (buffer.Begin ());
+  CCNxCodecFixedHeader codectest;
+  codectest.Deserialize (buffer.Begin ());
 
-  Ptr<CCNxFixedHeader> test = cfh.GetHeader ();
-  NS_TEST_EXPECT_MSG_EQ (truth->Equals (test), true, "Data in buffer wrong");
+  Ptr<CCNxFixedHeader> test1 = codectest.GetFixedHeader ();
+  NS_TEST_EXPECT_MSG_EQ (truth->Equals (test1), true, "Data in buffer wrong");
+
+  bool equal = codec.GetPerHopHeader()->Equals(codectest.GetPerHopHeader());
+  NS_TEST_EXPECT_MSG_EQ (equal, true, "Data in buffer wrong");
 }
 EndTest ()
 
-// =================================
-// Finally, define the TestSuite
-
 /**
- * \ingroup ccnx-test
+ * @ingroup ccnx-test
  *
- * \brief Test Suite for CCNxCodecFixedHeader
+ * Test Suite for CCNxCodecFixedHeader
  */
 static class TestSuiteCCNxCodecFixedHeader : public TestSuite
 {
