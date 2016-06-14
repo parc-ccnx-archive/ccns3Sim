@@ -56,9 +56,13 @@
 #include "ns3/ccnx-standard-content-store-factory.h"
 #include "ns3/ccnx-standard-content-store.h"
 #include "ns3/integer.h"
+#include "ns3/object.h"
+
 
 using namespace ns3;
 using namespace ns3::ccnx;
+
+NS_OBJECT_ENSURE_REGISTERED (CCNxStandardContentStoreFactory);
 
 CCNxStandardContentStoreFactory::CCNxStandardContentStoreFactory () : ObjectFactory("ns3::ccnx::CCNxStandardContentStore")
 {
@@ -67,6 +71,18 @@ CCNxStandardContentStoreFactory::CCNxStandardContentStoreFactory () : ObjectFact
 CCNxStandardContentStoreFactory::~CCNxStandardContentStoreFactory ()
 {
 }
+
+TypeId
+CCNxStandardContentStoreFactory::GetTypeId ()
+{
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxStandardContentStoreFactory")
+    .SetParent<Object> ()
+    .SetGroupName ("CCNx")
+//    .AddConstructor<CCNxStandardContentStoreFactory> ()
+    ;
+    return tid;
+}
+
 
 void
 CCNxStandardContentStoreFactory::SetLayerDelayConstant (Time delay)

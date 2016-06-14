@@ -98,7 +98,8 @@ static ObjectFactory
 GetDefaultContentStoreFactory ()
 {
   // This will have a TypeId of 0 - Default value is no content store
-  static ObjectFactory factory;
+  static CCNxStandardContentStoreFactory factory; //REMOVE - FOR DEBUG ONLY
+//  static ObjectFactory factory;
   return factory;
 }
 

@@ -73,6 +73,8 @@ class CCNxStandardContentStoreFactory : public ns3::ObjectFactory
 {
 public:
 
+  static TypeId GetTypeId ();
+
   CCNxStandardContentStoreFactory ();
   virtual ~CCNxStandardContentStoreFactory ();
 
