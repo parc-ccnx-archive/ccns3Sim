@@ -59,6 +59,7 @@
 #include "ns3/ptr.h"
 #include <ns3/simple-ref-count.h>
 #include <stdint.h>
+#include "ns3/nstime.h"
 
 namespace ns3 {
 namespace ccnx {
@@ -71,7 +72,7 @@ namespace ccnx {
  * Class representation of Time.
  *
  */
-class CCNxTime : public SimpleRefCount<CCNxTime>
+class CCNxTime : public SimpleRefCount<CCNxTime>,ns3::Time
 {
 public:
   /**
@@ -84,7 +85,7 @@ public:
    * Ptr<CCNxTime> time = Create<CCNxTime>(time);
    * @endcode
    */
-  CCNxTime (uint64_t time);
+   CCNxTime (uint64_t time);
 
   /**
    * Create CCNx Time
@@ -96,29 +97,37 @@ public:
    * Ptr<CCNxTime> time = Create<CCNxTime>(ccnxTime);
    * @endcode
    */
-  CCNxTime (const CCNxTime &ccnxTime);
+   CCNxTime (const CCNxTime &ccnxTime);
+
+  /**
+   * Deconstructor for CCNx Time
+   *
+   */
+  virtual ~CCNxTime ();
+
 
   /**
    * Returns the time value associated with this CCNxTime.
    */
-  uint64_t getTime () const;
+  virtual uint64_t getTime () const;
 
   /**
    * Determines if the given CCNxTime is equivalent to this Time.
    *
    * Two times are equivalent if the time values are exactly equal.
    */
-  bool Equals (const Ptr<CCNxTime> other) const;
+  virtual bool Equals (const Ptr<CCNxTime> other) const;
 
   /**
    * Determines if the given CCNxTime is equivalent to this Time.
    *
    * Two times are equivalent if the time values are exactly equal.
    */
-  bool Equals (CCNxTime const &other) const;
+  virtual bool Equals (CCNxTime const &other) const;
 
 protected:
-  uint64_t value;
+
+//  uint64_t value;
 };
 
 }

@@ -58,19 +58,26 @@
 using namespace ns3;
 using namespace ns3::ccnx;
 
-CCNxTime::CCNxTime (uint64_t t)
+CCNxTime::CCNxTime (uint64_t t) : Time(t)
 {
-  this->value = t;
+//  this->value = t;
 }
 
-CCNxTime::CCNxTime (const CCNxTime &ccnxTime)
+CCNxTime::CCNxTime (const CCNxTime &ccnxTime) : Time(ccnxTime.getTime())
 {
-  this->value = ccnxTime.getTime ();
+
+// this->value = ccnxTime.getTime ();
 }
+
+CCNxTime::~CCNxTime()
+{
+}
+
 
 uint64_t CCNxTime::getTime () const
 {
-  return this->value;
+    return ToInteger(Time::LAST);  //use current time unit
+//  return this->value;
 }
 
 bool
@@ -78,7 +85,7 @@ CCNxTime::Equals (const Ptr<CCNxTime> other) const
 {
   if (other)
     {
-      return Equals (*other);
+      return ~Compare (*other);
     }
   else
     {
@@ -89,10 +96,5 @@ CCNxTime::Equals (const Ptr<CCNxTime> other) const
 bool
 CCNxTime::Equals (CCNxTime const &other) const
 {
-  bool result = false;
-  if (value == other.value)
-    {
-      result = true;
-    }
-  return result;
+  return ~Compare(other);
 }

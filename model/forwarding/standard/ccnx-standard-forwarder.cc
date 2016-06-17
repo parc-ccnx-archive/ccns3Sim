@@ -65,6 +65,7 @@
 #include "ns3/ccnx-standard-pit.h"
 #include "ns3/ccnx-standard-fib.h"
 #include "ns3/ccnx-standard-content-store-factory.h"
+#include "ns3/ccnx-null-content-store-factory.h"
 #include "ns3/ccnx-standard-pit-factory.h"
 #include "ns3/ccnx-standard-fib-factory.h"
 
@@ -98,7 +99,7 @@ static ObjectFactory
 GetDefaultContentStoreFactory ()
 {
   // This will have a TypeId of 0 - Default value is no content store
-  static CCNxStandardContentStoreFactory factory; //REMOVE - FOR DEBUG ONLY
+  static CCNxNullContentStoreFactory factory;
 //  static ObjectFactory factory;
   return factory;
 }
@@ -174,7 +175,8 @@ CCNxStandardForwarder::DoInitialize (void)
   m_fib->SetLookupCallback (MakeCallback (&CCNxStandardForwarder::FibLookupCallback, this));
   m_fib->Initialize ();
 
-  if (m_contentStoreFactory.GetTypeId().GetUid())
+  CCNxNullContentStoreFactory nullContentStoreFactory;
+  if (m_contentStoreFactory.GetTypeId().GetUid() != nullContentStoreFactory.GetTypeId ().GetUid())
     {
     m_contentStore = m_contentStoreFactory.Create<CCNxContentStore> ();
     m_contentStore->SetMatchInterestCallback (MakeCallback (&CCNxStandardForwarder::ContentStoreMatchInterestCallback, this));
