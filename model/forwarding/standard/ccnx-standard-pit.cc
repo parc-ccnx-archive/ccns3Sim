@@ -59,6 +59,7 @@
 #include "ns3/ptr.h"
 #include "ns3/object.h"
 #include "ns3/integer.h"
+#include "ns3/ccnx-interestlifetime.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
@@ -126,7 +127,7 @@ CCNxStandardPit::CCNxStandardPit () : m_defaultLifetime (_defaultLifetime),
   m_layerDelaySlope (_defaultLayerDelaySlope),
   m_layerDelayServers (_defaultLayerDelayServers)
 {
-  NS_LOG_DEBUG ("_defaultLifetime=" << _defaultLifetime << ", m_defaultLifetime=" << m_defaultLifetime);
+  NS_LOG_DEBUG ("at end of ctor, m_defaultLifetime =" << m_defaultLifetime.As(Time::MS));
 }
 
 CCNxStandardPit::~CCNxStandardPit ()
@@ -208,9 +209,20 @@ CCNxStandardPit::ServiceInputQueue (Ptr<CCNxForwarderMessage> item)
 Time
 CCNxStandardPit::CalculateInterestExpiryTime(Ptr<CCNxPacket> interestPacket)
 {
-  // Currently, there is no InterestLifetime header, so always use default lifetime
-  Time expiryTime = Simulator::Now() + _defaultLifetime;
-  return expiryTime;
+
+  Ptr<CCNxPerHopHeader> perHopHeader = interestPacket->GetPerhopHeaders();
+  for (size_t i=0;i<perHopHeader->size();i++)
+    {
+      Ptr<CCNxPerHopHeaderEntry> entry = perHopHeader->GetHeader(i);
+      if (entry->GetInstanceTLVType() == 1) //TODO - why aren't we using an enum for TLV types?
+	{
+	  Ptr<CCNxInterestLifetime> lifetime = DynamicCast<CCNxInterestLifetime,CCNxPerHopHeaderEntry >(entry);
+	  Time expiryTime(lifetime->GetInterestLifetime()->getTime());
+	  return(expiryTime+Simulator::Now());
+	}
+    }
+  return(_defaultLifetime + Simulator::Now()); // If no InterestLifetime header use default lifetime
+
 }
 
 /*
@@ -237,7 +249,7 @@ CCNxStandardPit::ServiceReceiveInterest (Ptr<CCNxForwarderMessage> item)
   CCNxPit::Verdict verdict = pitEntry->ReceiveInterest(interest, item->GetIngressConnection(), interestExpiryTime);
 
   NS_LOG_DEBUG ("at end of ReceiveInterest - name,hash pit sizes =[" << m_tableByName.size () << "," << m_tableByHash.size () << "]");
-  NS_LOG_DEBUG ("m_defaultLifetime=" << m_defaultLifetime << ", _defaultLifetime=" << _defaultLifetime);
+  NS_LOG_DEBUG ("and the interestExpiryTime=" << interestExpiryTime.As(Time::MS) );
 
   m_receiveInterestCallback (item, verdict);
 }

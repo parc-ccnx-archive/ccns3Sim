@@ -307,6 +307,7 @@ CCNxStandardContentStore::ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkIte
 
     }
 
+
  if (entry)
     {
      if (IsEntryValid(entry))
@@ -518,7 +519,7 @@ CCNxStandardContentStore::AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardC
 
   Ptr<CCNxContentObject> content = DynamicCast<CCNxContentObject, CCNxMessage>(cPacket->GetMessage());
   NS_ASSERT_MSG (newEntry->GetPacket()->GetFixedHeader ()->GetPacketType () == CCNxFixedHeaderType_Object,
-                 "IsEntryValid given a non-Content Object packet: " << *newEntry->GetPacket ());
+                 "AddMapEntry given a non-Content Object packet: " << *newEntry->GetPacket ());
 
   if (*cPacket->GetContentObjectHash()->GetValue() != *nullHashValue->GetValue())
     {

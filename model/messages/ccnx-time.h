@@ -127,7 +127,6 @@ public:
 
 protected:
 
-//  uint64_t value;
 };
 
 }

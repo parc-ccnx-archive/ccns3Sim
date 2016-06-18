@@ -61,6 +61,7 @@
 #include "../../mockups/ccnx-standard-content-store-with-test-methods.h"
 #include "ns3/integer.h"
 #include "../../TestMacros.h"
+#include "ns3/ccnx-cachetime.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
@@ -72,12 +73,13 @@ namespace TestSuiteCCNxStandardContentStore {
 BeginTest (Constructor)
 {
   printf ("TestCCNxStandardContentStoreConstructor DoRun\n");
-   LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_ALL | LOG_PREFIX_ALL));
-   LogComponentEnable ("CCNxStandardContentStoreLruList", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_ALL ));
+   LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
+   LogComponentEnable ("CCNxStandardContentStoreLruList", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
+   Time::SetResolution (Time::MS);
 }
 EndTest ()
 
-static Time _layerDelay = MicroSeconds (1);
+static Time _layerDelay = MilliSeconds (10); 	//lengthen to test IsExpired and IsStale
 
 static Ptr<CCNxPacket> _lookupMatchInterestCallbackPacket;
 static bool _lookupMatchInterestCallbackFired;
@@ -558,11 +560,14 @@ BeginTest (IsEntryValid)
   //  *  verify IsEntryValid returns true
 
   TestData data = CreateTestData ();
-  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
+  Ptr<CCNxStandardContentStoreWithTestMethods> dut = CreateContentStore ();
+  Ptr<CCNxCachetime> cachetime = Create<CCNxCachetime> (Create<CCNxTime>(50));	//longer than _layerDelay to cause non-stale content
+  data.cPacket1->AddPerHopHeaderEntry(cachetime);
   Ptr<CCNxStandardContentStoreEntry> newEntry = Create<CCNxStandardContentStoreEntry> (data.cPacket1);
-  a->AddContentObject(data.cWorkItem1,data.eConnList1);  StepSimulatorAddContentObject();
+  dut->AddContentObject(data.cWorkItem1,data.eConnList1);
+  StepSimulatorAddContentObject();
 
-  NS_TEST_EXPECT_MSG_EQ(a->IsEntryValid(a->FindEntryInHashMap(data.cPacket1)),true,"entry should be valid");
+  NS_TEST_EXPECT_MSG_EQ(dut->IsEntryValid(dut->FindEntryInHashMap(data.cPacket1)),true,"entry should be valid");
 
   // TODO CCN wait until IsStale, verify IsEntryValid returns false
   // TODO CCN wait until IsExpired, verify IsEntryValid returns false
@@ -590,6 +595,7 @@ BeginTest (GetMapCounts)
 
 }
 EndTest ()
+
 
 /**
  * @ingroup ccnx-test

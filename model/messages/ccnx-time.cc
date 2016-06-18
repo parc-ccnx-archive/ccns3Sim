@@ -60,13 +60,12 @@ using namespace ns3::ccnx;
 
 CCNxTime::CCNxTime (uint64_t t) : Time(t)
 {
-//  this->value = t;
+
 }
 
 CCNxTime::CCNxTime (const CCNxTime &ccnxTime) : Time(ccnxTime.getTime())
 {
 
-// this->value = ccnxTime.getTime ();
 }
 
 CCNxTime::~CCNxTime()
@@ -76,8 +75,7 @@ CCNxTime::~CCNxTime()
 
 uint64_t CCNxTime::getTime () const
 {
-    return ToInteger(Time::LAST);  //use current time unit
-//  return this->value;
+    return ToInteger(ns3::Time::GetResolution());  //use current time unit
 }
 
 bool
