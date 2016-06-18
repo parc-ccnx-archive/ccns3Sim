@@ -83,11 +83,14 @@ bool CCNxStandardContentStoreEntry::IsExpired () const
 {
   bool expired = false;
   Ptr<CCNxContentObject> content = DynamicCast<CCNxContentObject, CCNxMessage>(m_contentObject->GetMessage());
-  Time expiryTime(content->GetExpiryTime()->getTime());
-  if (expiryTime < Simulator::Now())
+  if (content->GetExpiryTime()->getTime() != 0) //Ignore null expiry time
     {
-      expired = true;
-      NS_LOG_DEBUG("content packet " << *m_contentObject << " in store is expired!");
+    Time expiryTime(content->GetExpiryTime()->getTime());
+    if (expiryTime < Simulator::Now())
+      {
+	expired = true;
+	NS_LOG_DEBUG("content packet " << *m_contentObject << " in store is expired!");
+      }
     }
   return expired;
 }
@@ -103,12 +106,15 @@ bool CCNxStandardContentStoreEntry::IsStale () const
       if (entry->GetInstanceTLVType() == 2) //TODO - why aren't we using an enum for TLV types?
 	{
 	  Ptr<CCNxCachetime> rct = DynamicCast<CCNxCachetime,CCNxPerHopHeaderEntry >(entry);
-	  Time expiryTime(rct->GetCachetime()->getTime());
-	  if (expiryTime < Simulator::Now())
+	  if (rct->GetCachetime()->getTime() != 0) //Ignore null  time
 	    {
-	      stale = true;
-	      NS_LOG_DEBUG("content packet " << *m_contentObject << " in store is stale!");
-	      break;
+	    Time expiryTime(rct->GetCachetime()->getTime());
+	    if (expiryTime < Simulator::Now())
+	      {
+		stale = true;
+		NS_LOG_DEBUG("content packet " << *m_contentObject << " in store is stale!");
+		break;
+	      }
 	    }
 	}
     }

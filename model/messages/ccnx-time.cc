@@ -81,18 +81,26 @@ uint64_t CCNxTime::getTime () const
 bool
 CCNxTime::Equals (const Ptr<CCNxTime> other) const
 {
+  bool equal=false;
   if (other)
     {
-      return ~Compare (*other);
+      if (Compare (*other)==0)
+	{
+	  equal=true;
+	}
     }
-  else
-    {
-      return false;
-    }
+  return equal;
 }
 
 bool
 CCNxTime::Equals (CCNxTime const &other) const
 {
-  return ~Compare(other);
+  bool equal=false;
+
+  if (Compare (other)==0)
+    {
+      equal=true;
+    }
+
+  return equal;
 }

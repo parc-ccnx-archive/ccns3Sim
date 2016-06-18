@@ -320,7 +320,7 @@ BeginTest (PrintPitEntry_Expired)
   entry->PrintPitEntry(ss);
   std::string test = ss.str ();
 
-  std::string expected("PitEntry { ExpiryTime : -1000000000.0ns EXPIRED ReverseRouteSize : 0 }\n");
+  std::string expected("PitEntry { ExpiryTime : -1000.0ms EXPIRED ReverseRouteSize : 0 }\n");
   NS_TEST_EXPECT_MSG_EQ (expected, test, "PitEntry stream output wrong");
 }
 EndTest ()
@@ -346,8 +346,8 @@ BeginTest (PrintPitEntry_NotExpired)
 
   std::cout << test << std::endl;
 
-  std::string expected1("PitEntry { ExpiryTime : +2000000000.0ns ReverseRouteSize : 2 ReverseRoutes: 1, 2,  }\n");
-  std::string expected2("PitEntry { ExpiryTime : +2000000000.0ns ReverseRouteSize : 2 ReverseRoutes: 2, 1,  }\n");
+  std::string expected1("PitEntry { ExpiryTime : +2000.0ms ReverseRouteSize : 2 ReverseRoutes: 1, 2,  }\n");
+  std::string expected2("PitEntry { ExpiryTime : +2000.0ms ReverseRouteSize : 2 ReverseRoutes: 2, 1,  }\n");
   if (test != expected1 and test != expected2)
     {
       NS_TEST_EXPECT_MSG_EQ (false, true, "PitEntry stream output wrong");

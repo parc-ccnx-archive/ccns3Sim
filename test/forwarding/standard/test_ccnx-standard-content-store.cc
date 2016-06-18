@@ -75,11 +75,13 @@ BeginTest (Constructor)
   printf ("TestCCNxStandardContentStoreConstructor DoRun\n");
    LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
    LogComponentEnable ("CCNxStandardContentStoreLruList", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
+   LogComponentEnable ("CCNxStandardContentStoreEntry", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
    Time::SetResolution (Time::MS);
 }
 EndTest ()
 
-static Time _layerDelay = MilliSeconds (10); 	//lengthen to test IsExpired and IsStale
+#define LAYERDELAY 10
+static Time _layerDelay = MilliSeconds (LAYERDELAY); 	//lengthen to test IsExpired and IsStale
 
 static Ptr<CCNxPacket> _lookupMatchInterestCallbackPacket;
 static bool _lookupMatchInterestCallbackFired;
@@ -239,8 +241,12 @@ CreateTestData ()
   data.iPacket1 = CCNxPacket::CreateFromMessage (data.interest1);
   data.iForwarderMessage1 = Create<CCNxForwarderMessage> (data.iPacket1,data.ingress1);
   data.iWorkItem1 = CreateWorkItem(data.iPacket1,data.ingress1);
+  Ptr<CCNxBuffer> payload1 = Create<CCNxBuffer> (0);
+  CCNxContentObjectPayloadType payloadType1 = CCNxContentObjectPayloadType_Data;
+  Ptr<CCNxTime>expiryTime1 = Create<CCNxTime>(500);	//large enough that it should not expire
 
-  data.content1 = Create<CCNxContentObject> (data.name1);
+  data.content1 = Create<CCNxContentObject> (data.name1,payload1,payloadType1,expiryTime1);
+
   data.cPacket1 = CCNxPacket::CreateFromMessage (data.content1);
   data.hash1 = Create<CCNxHashValue>(1);
   data.cPacket1->SetContentObjectHash(data.hash1);
@@ -561,7 +567,7 @@ BeginTest (IsEntryValid)
 
   TestData data = CreateTestData ();
   Ptr<CCNxStandardContentStoreWithTestMethods> dut = CreateContentStore ();
-  Ptr<CCNxCachetime> cachetime = Create<CCNxCachetime> (Create<CCNxTime>(50));	//longer than _layerDelay to cause non-stale content
+  Ptr<CCNxCachetime> cachetime = Create<CCNxCachetime> (Create<CCNxTime>(500));	//longer than _layerDelay to cause non-stale content
   data.cPacket1->AddPerHopHeaderEntry(cachetime);
   Ptr<CCNxStandardContentStoreEntry> newEntry = Create<CCNxStandardContentStoreEntry> (data.cPacket1);
   dut->AddContentObject(data.cWorkItem1,data.eConnList1);
