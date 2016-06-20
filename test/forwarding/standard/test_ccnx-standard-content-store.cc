@@ -62,6 +62,7 @@
 #include "ns3/integer.h"
 #include "../../TestMacros.h"
 #include "ns3/ccnx-cachetime.h"
+#include "ns3/nstime.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
@@ -236,22 +237,18 @@ CreateTestData ()
 
   //interest and content #1 - content has hash, name, and keyid. interest name matches
   data.name1 = Create<CCNxName> ("ccnx:/name=trump/name=is/name=forwarder/name=paradox");
-
-  data.interest1 = Create<CCNxInterest> (data.name1);
-  data.iPacket1 = CCNxPacket::CreateFromMessage (data.interest1);
-  data.iForwarderMessage1 = Create<CCNxForwarderMessage> (data.iPacket1,data.ingress1);
-  data.iWorkItem1 = CreateWorkItem(data.iPacket1,data.ingress1);
-  Ptr<CCNxBuffer> payload1 = Create<CCNxBuffer> (0);
-  CCNxContentObjectPayloadType payloadType1 = CCNxContentObjectPayloadType_Data;
-  Ptr<CCNxTime>expiryTime1 = Create<CCNxTime>(500);	//large enough that it should not expire
-
-  data.content1 = Create<CCNxContentObject> (data.name1,payload1,payloadType1,expiryTime1);
-
-  data.cPacket1 = CCNxPacket::CreateFromMessage (data.content1);
-  data.hash1 = Create<CCNxHashValue>(1);
-  data.cPacket1->SetContentObjectHash(data.hash1);
-  data.cForwarderMessage1 = Create<CCNxForwarderMessage> (data.cPacket1,data.ingress1);
-  data.cWorkItem1 = CreateWorkItem(data.cPacket1,data.ingress1);
+  // interest
+    data.interest1 = Create<CCNxInterest> (data.name1);
+    data.iPacket1 = CCNxPacket::CreateFromMessage (data.interest1);
+    data.iForwarderMessage1 = Create<CCNxForwarderMessage> (data.iPacket1,data.ingress1);
+    data.iWorkItem1 = CreateWorkItem(data.iPacket1,data.ingress1);
+  //content
+    data.content1 = Create<CCNxContentObject> (data.name1);
+    data.cPacket1 = CCNxPacket::CreateFromMessage (data.content1);
+    data.hash1 = Create<CCNxHashValue>(1);
+    data.cPacket1->SetContentObjectHash(data.hash1);
+    data.cForwarderMessage1 = Create<CCNxForwarderMessage> (data.cPacket1,data.ingress1);
+    data.cWorkItem1 = CreateWorkItem(data.cPacket1,data.ingress1);
 
   //interest and content #2 - content has hash, name, and keyid. interest has name and hash matches
   //TODO CCN make interest and content nameless
@@ -563,20 +560,42 @@ BeginTest (IsEntryValid)
 {
   printf ("TestCCNxStandardContentStore_IsEntryValid DoRun\n");
 
-  //  *  verify IsEntryValid returns true
-
   TestData data = CreateTestData ();
   Ptr<CCNxStandardContentStoreWithTestMethods> dut = CreateContentStore ();
-  Ptr<CCNxCachetime> cachetime = Create<CCNxCachetime> (Create<CCNxTime>(500));	//longer than _layerDelay to cause non-stale content
-  data.cPacket1->AddPerHopHeaderEntry(cachetime);
-  Ptr<CCNxStandardContentStoreEntry> newEntry = Create<CCNxStandardContentStoreEntry> (data.cPacket1);
-  dut->AddContentObject(data.cWorkItem1,data.eConnList1);
-  StepSimulatorAddContentObject();
 
-  NS_TEST_EXPECT_MSG_EQ(dut->IsEntryValid(dut->FindEntryInHashMap(data.cPacket1)),true,"entry should be valid");
+  //verify IsStale
+      uint64_t rctInMs = Simulator::Now().GetTimeStep() + 1; //set  to current time plus small delta
+      Ptr<CCNxCachetime> rct1 = Create<CCNxCachetime> (Create<CCNxTime> (rctInMs));
+      data.cPacket1->AddPerHopHeaderEntry(rct1);
+      Ptr<CCNxStandardContentStoreEntry> entry1 = Create<CCNxStandardContentStoreEntry> (data.cPacket1);
+      NS_TEST_EXPECT_MSG_EQ(dut->IsEntryValid(entry1),true,"Entry should not be stale");
 
-  // TODO CCN wait until IsStale, verify IsEntryValid returns false
-  // TODO CCN wait until IsExpired, verify IsEntryValid returns false
+      rctInMs = Simulator::Now().GetTimeStep() -1; //set  to current time less small delta
+      Ptr<CCNxCachetime> rct2 = Create<CCNxCachetime> (Create<CCNxTime> (rctInMs));
+      data.cPacket2->AddPerHopHeaderEntry(rct2);
+      Ptr<CCNxStandardContentStoreEntry> entry2 = Create<CCNxStandardContentStoreEntry> (data.cPacket2);
+      NS_TEST_EXPECT_MSG_EQ(dut->IsEntryValid(entry2),false,"Entry should be stale");
+
+  // verify IsExpired
+      //create content packet with correct expiry time
+	Ptr<CCNxName> name3 = Create<CCNxName> ("ccnx:/name=trump/name=is/name=a/name=paradox");
+	Ptr<CCNxBuffer> payload3 = Create<CCNxBuffer> (0);
+	uint64_t expiryTimeInMs3 = Simulator::Now().GetTimeStep() + 1; //set to current time plus small delta
+	Ptr<CCNxTime>expiryTime3 = Create<CCNxTime>(expiryTimeInMs3);
+	Ptr<CCNxContentObject> content3 = Create<CCNxContentObject> (name3,payload3,CCNxContentObjectPayloadType_Data,expiryTime3);
+	Ptr<CCNxPacket> cPacket3 = CCNxPacket::CreateFromMessage (content3);
+	Ptr<CCNxStandardContentStoreEntry> entry3 = Create<CCNxStandardContentStoreEntry> (cPacket3);
+      NS_TEST_EXPECT_MSG_EQ(dut->IsEntryValid(entry3),true,"Entry should not be expired");
+
+      //create content packet with correct expiry time
+	Ptr<CCNxName> name4 = Create<CCNxName> ("ccnx:/name=trump/name=is/name=a/name=paradox");
+	Ptr<CCNxBuffer> payload4 = Create<CCNxBuffer> (0);
+	uint64_t expiryTimeInMs4 = Simulator::Now().GetTimeStep() - 1; //set to current time minus small delta
+	Ptr<CCNxTime>expiryTime4 = Create<CCNxTime>(expiryTimeInMs4);
+	Ptr<CCNxContentObject> content4 = Create<CCNxContentObject> (name4,payload4,CCNxContentObjectPayloadType_Data,expiryTime4);
+	Ptr<CCNxPacket> cPacket4 = CCNxPacket::CreateFromMessage (content4);
+	Ptr<CCNxStandardContentStoreEntry> entry4 = Create<CCNxStandardContentStoreEntry> (cPacket4);
+      NS_TEST_EXPECT_MSG_EQ(dut->IsEntryValid(entry4),false,"Entry should be expired");
 
 }
 EndTest ()
