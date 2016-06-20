@@ -53,81 +53,33 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
+#include "ns3/ccnx-null-content-store-factory.h"
+#include "ns3/integer.h"
+#include "ns3/object.h"
 
-#include "ns3/log.h"
-#include "ns3/assert.h"
-#include "ccnx-standard-content-store-entry.h"
-#include "ns3/ccnx-cachetime.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
 
-NS_LOG_COMPONENT_DEFINE ("CCNxStandardContentStoreEntry");
+NS_OBJECT_ENSURE_REGISTERED (CCNxNullContentStoreFactory);
 
-CCNxStandardContentStoreEntry::CCNxStandardContentStoreEntry (Ptr<CCNxPacket> contentObject) : m_contentObject (contentObject), m_useCount (0)
+CCNxNullContentStoreFactory::CCNxNullContentStoreFactory () : ObjectFactory("ns3::ccnx::CCNxNullContentStoreFactory")
 {
-  // empty
 }
 
-CCNxStandardContentStoreEntry::~CCNxStandardContentStoreEntry ()
+CCNxNullContentStoreFactory::~CCNxNullContentStoreFactory ()
 {
-  // empty
 }
 
-Ptr<CCNxPacket> CCNxStandardContentStoreEntry::GetPacket () const
+TypeId
+CCNxNullContentStoreFactory::GetTypeId ()
 {
-  return m_contentObject;
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxNullContentStoreFactory")
+    .SetParent<Object> ()
+    .SetGroupName ("CCNx")
+//    .AddConstructor<CCNxNullContentStoreFactory> ()
+    ;
+    return tid;
 }
 
-bool CCNxStandardContentStoreEntry::IsExpired () const
-{
-  bool expired = false;
-  Ptr<CCNxContentObject> content = DynamicCast<CCNxContentObject, CCNxMessage>(m_contentObject->GetMessage());
-  if (content->GetExpiryTime()->getTime() != 0) //Ignore null expiry time
-    {
-    Time expiryTime(content->GetExpiryTime()->getTime());
-    if (expiryTime < Simulator::Now())
-      {
-	expired = true;
-	NS_LOG_DEBUG("content packet " << *m_contentObject << " in store is expired!");
-      }
-    }
-  return expired;
-}
 
-bool CCNxStandardContentStoreEntry::IsStale () const
-{
-
-  bool stale=false;
-  Ptr<CCNxPerHopHeader> perHopHeader = m_contentObject->GetPerhopHeaders();
-  for (size_t i=0;i<perHopHeader->size();i++)
-    {
-      Ptr<CCNxPerHopHeaderEntry> entry = perHopHeader->GetHeader(i);
-      if (entry->GetInstanceTLVType() == 2) //TODO - why aren't we using an enum for TLV types?
-	{
-	  Ptr<CCNxCachetime> rct = DynamicCast<CCNxCachetime,CCNxPerHopHeaderEntry >(entry);
-	  if (rct->GetCachetime()->getTime() != 0) //Ignore null  time
-	    {
-	    Time expiryTime(rct->GetCachetime()->getTime());
-	    if (expiryTime < Simulator::Now())
-	      {
-		stale = true;
-		NS_LOG_DEBUG("content packet " << *m_contentObject << " in store is stale!");
-		break;
-	      }
-	    }
-	}
-    }
-
-  return stale;
-}
-
-void CCNxStandardContentStoreEntry::IncrementUseCount ()
-{
-  m_useCount++;
-}
-
-uint64_t CCNxStandardContentStoreEntry::GetUseCount ()
-{
-  return m_useCount;
-}
