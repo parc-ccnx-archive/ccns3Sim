@@ -69,6 +69,7 @@ BeginTest (Constructor)
   Ptr<CCNxPerHopHeader> perHopHeader = Create<CCNxPerHopHeader>();
   bool exists = (perHopHeader);
   NS_TEST_EXPECT_MSG_EQ (exists, true, "Gut null pointer");
+  Time::SetResolution(Time::MS);
 }
 EndTest ()
 
@@ -181,6 +182,10 @@ BeginTest (Equals)
   NS_TEST_EXPECT_MSG_EQ (perHopHeader3->Equals (perHopHeader1), true, "not equal");
 
   // and the counter case
+//  std::cout << "phh1=" << *perHopHeader1 << std::endl;
+//  std::cout << "phh4=" << *perHopHeader4 << std::endl;
+//  std::cout << "phh5=" << *perHopHeader5 << std::endl;
+
   NS_TEST_EXPECT_MSG_EQ (perHopHeader1->Equals (perHopHeader4), false, "not equal");
   NS_TEST_EXPECT_MSG_EQ (perHopHeader1->Equals (perHopHeader5), false, "not equal");
 

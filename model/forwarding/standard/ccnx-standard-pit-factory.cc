@@ -60,12 +60,25 @@
 using namespace ns3;
 using namespace ns3::ccnx;
 
+NS_OBJECT_ENSURE_REGISTERED (CCNxStandardPitFactory);
+
 CCNxStandardPitFactory::CCNxStandardPitFactory () : ns3::ObjectFactory ("ns3::ccnx::CCNxStandardPit")
 {
 }
 
 CCNxStandardPitFactory::~CCNxStandardPitFactory ()
 {
+}
+
+TypeId
+CCNxStandardPitFactory::GetTypeId ()
+{
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxStandardPitFactory")
+    .SetParent<Object> ()
+    .SetGroupName ("CCNx")
+//    .AddConstructor<CCNxStandardPitFactory> ()
+    ;
+    return tid;
 }
 
 void

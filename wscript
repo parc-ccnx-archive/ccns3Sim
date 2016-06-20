@@ -130,6 +130,7 @@ def build(bld):
         'model/forwarding/ccnx-forwarder.cc',
         'model/forwarding/ccnx-forwarder-message.cc',
         'model/forwarding/ccnx-content-store.cc',
+        'model/forwarding/ccnx-null-content-store-factory.cc',
         'model/forwarding/ccnx-fib.cc',
         'model/forwarding/ccnx-pit.cc',
         'model/forwarding/standard/ccnx-standard-content-store.cc',
@@ -256,6 +257,7 @@ def build(bld):
         
         # forwarding
         'model/forwarding/ccnx-content-store.h',
+        'model/forwarding/ccnx-null-content-store-factory.h',
         'model/forwarding/ccnx-pit.h',
         'model/forwarding/ccnx-fib.h',
         'model/forwarding/ccnx-forwarder.h',

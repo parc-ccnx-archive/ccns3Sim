@@ -95,13 +95,6 @@ CCNxStandardPitEntry::isExpired() const
 CCNxPit::Verdict
 CCNxStandardPitEntry::ReceiveInterest (Ptr<CCNxInterest> interest, Ptr<CCNxConnection> ingress, Time expiryTime)
 {
-  if (isExpired()) {
-      NS_LOG_DEBUG("Pit entry is expired, clearing reverse routes");
-
-      // make sure the reverse routes are cleaned up
-      m_reverseRoutes.clear();
-      m_expiryTime = Seconds(-1);
-  }
 
   /*
    * If the new expiry time is beyond our current expiry time, extend it.  Never shrink
@@ -112,6 +105,14 @@ CCNxStandardPitEntry::ReceiveInterest (Ptr<CCNxInterest> interest, Ptr<CCNxConne
       m_expiryTime = expiryTime;
       NS_LOG_DEBUG("Extending PitEntry expiry time to " << expiryTime);
  }
+
+  if (isExpired()) {
+      NS_LOG_DEBUG("Pit entry is expired, clearing reverse routes");
+
+      // make sure the reverse routes are cleaned up
+      m_reverseRoutes.clear();
+      m_expiryTime = Seconds(-1);
+  }
 
   // Implement the Interest Aggregation strategy.  The default behavior is to forward.
   enum CCNxPit::Verdict verdict = CCNxPit::Forward;
@@ -182,7 +183,7 @@ CCNxStandardPitEntry::SatisfyInterest (Ptr<CCNxConnection> ingress)
 std::ostream & CCNxStandardPitEntry::PrintPitEntry (std::ostream & os)
 
 {
-  os << "PitEntry { ExpiryTime : " << m_expiryTime;
+  os << "PitEntry { ExpiryTime : " << m_expiryTime.As(Time::MS);
   if (isExpired()) {
       os << " EXPIRED";
   }

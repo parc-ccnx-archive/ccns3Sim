@@ -78,13 +78,13 @@ CCNxContentObject::CCNxContentObject ( Ptr<const CCNxName> name, Ptr<CCNxBuffer>
 }
 
 CCNxContentObject::CCNxContentObject ( Ptr<const CCNxName> name, Ptr<CCNxBuffer> payload)
-  : CCNxMessage (name, payload), m_payloadType (CCNxContentObjectPayloadType_Data), m_expiryTime (0)
+  : CCNxMessage (name, payload), m_payloadType (CCNxContentObjectPayloadType_Data), m_expiryTime (Create<CCNxTime>(0))
 {
   // empty
 }
 
 CCNxContentObject::CCNxContentObject ( Ptr<const CCNxName> name)
-  : CCNxMessage (name), m_payloadType (CCNxContentObjectPayloadType_Data), m_expiryTime (0)
+  : CCNxMessage (name), m_payloadType (CCNxContentObjectPayloadType_Data), m_expiryTime (Create<CCNxTime>(0))
 {
   // empty
 }

@@ -58,7 +58,7 @@
 #include "../../mockups/mockup_ccnx-virtual-connection.h"
 #include "ns3/log.h"
 #include "ns3/assert.h"
-
+#include "ns3/ccnx-interestlifetime.h"
 #include "../../TestMacros.h"
 
 using namespace ns3;
@@ -95,6 +95,7 @@ namespace TestSuiteCCNxStandardPit {
 //b3 two interests same port one matching content
 //b4 two interests one content, repeat
 //b5 no interest one content
+//interest expires. with Perhopheader containing interestlifetime
 
 //TODO CCN - KEYID and HASH unit tests as listed below
 // KEYID
@@ -138,9 +139,7 @@ namespace TestSuiteCCNxStandardPit {
 
 
 // EXPIRY
-//1 interest 1 content but interest expired
-//receiveInterest - no key restriction
-//satisfyInterest - matching content - but interest has expired
+
 //1 interest 1 content but content expired
 //receiveInterest - no key restriction
 //satisfyInterest - matching content - but content has expired
@@ -150,7 +149,7 @@ namespace TestSuiteCCNxStandardPit {
 //satisfyInterest - matching content - but one interest has expired
 
 
-static Time _layerDelay = MicroSeconds (1);
+static Time _layerDelay = MilliSeconds (10);	//increased so can experiment with interest lifetime easily
 
 static Ptr<CCNxPacket> _receiveInterestCallbackPacket;
 static enum CCNxPit::Verdict _receiveInterestCallbackVerdict;
@@ -229,8 +228,10 @@ StepSimulatorSatisfyInterest ()
 BeginTest (Constructor)
 {
   printf ("TestCCNxStandardPitConstructor DoRun\n");
-  LogComponentEnable ("CCNxStandardPitEntry", LOG_LEVEL_DEBUG);
-  LogComponentEnable ("CCNxStandardPit", LOG_LEVEL_DEBUG);
+  Time::SetResolution (Time::MS);
+
+  LogComponentEnable ("CCNxStandardPit", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
+  LogComponentEnable ("CCNxStandardPitEntry", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
 
 }
 EndTest ()
@@ -674,6 +675,90 @@ BeginTest (b6)
 }
 EndTest ()
 
+BeginTest (InterestExpires)
+{
+  //interest expires. with Perhopheader containing interestlifetime
+  //no interest one content
+  //satisfyInterest - should return empty,no port
+
+  printf ("\n");
+
+
+  Ptr<CCNxStandardPit> pit = CreatePit ();
+
+  Ptr<CCNxName> name1 = Create<CCNxName> ("ccnx:/name=trump/name=is");
+  Ptr<CCNxInterest> interest1 = Create<CCNxInterest> (name1);
+  Ptr<CCNxPacket> iPacket1 = CCNxPacket::CreateFromMessage (interest1);
+   // Add per hop header entry
+   Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (Create<CCNxTime>(5)); //interest lifetime in MS -  shorter than _layerDelay
+   iPacket1->AddPerHopHeaderEntry(interestLifetime);
+
+  Ptr<CCNxContentObject> content1 = Create<CCNxContentObject> (name1);
+  Ptr<CCNxPacket> cPacket1 = CCNxPacket::CreateFromMessage (content1);
+
+  Ptr<CCNxVirtualConnection> connection1 = Create<CCNxVirtualConnection> ();
+
+  pit->ReceiveInterest (Create<CCNxForwarderMessage> (iPacket1, connection1));
+  StepSimulatorReceiveInterest ();
+  NS_TEST_EXPECT_MSG_EQ (_receiveInterestCallbackVerdict, CCNxPit::Forward, "verdict should be forward !");
+
+  std::cout << "Time="<< Simulator::Now().As(Time::MS) << ", map after 1 interest present but technically has already expired" << std::endl;
+  pit->Print (std::cout);
+
+
+  pit->SatisfyInterest (Create<CCNxForwarderMessage> (cPacket1, connection1));
+  StepSimulatorSatisfyInterest ();
+
+  NS_TEST_EXPECT_MSG_EQ (_satisfyInterestCallbackConnections->size (), 0, "wrong number of connections returned!");
+
+  std::cout << "Time="<< Simulator::Now().As(Time::MS)<< ", map after 1 interest expired and was removed when matching content arrived" << std::endl;
+  pit->Print (std::cout);
+
+  printf ("TestCCNxStandardPitInterestExpires End\n");
+}
+EndTest ()
+
+BeginTest (PerhopheaderDoesntExpire)
+{
+  //interest has Perhopheader containing interestlifetime which doesnt cause expiration
+
+  printf ("\n");
+
+  Ptr<CCNxStandardPit> pit = CreatePit ();
+
+  Ptr<CCNxName> name1 = Create<CCNxName> ("ccnx:/name=trump/name=is");
+  Ptr<CCNxInterest> interest1 = Create<CCNxInterest> (name1);
+  Ptr<CCNxPacket> iPacket1 = CCNxPacket::CreateFromMessage (interest1);
+   // Add per hop header entry
+   Ptr<CCNxInterestLifetime> interestLifetime = Create<CCNxInterestLifetime> (Create<CCNxTime>(50)); //interest lifetime in MS -  greater than _layerDelay
+   iPacket1->AddPerHopHeaderEntry(interestLifetime);
+
+  Ptr<CCNxContentObject> content1 = Create<CCNxContentObject> (name1);
+  Ptr<CCNxPacket> cPacket1 = CCNxPacket::CreateFromMessage (content1);
+
+  Ptr<CCNxVirtualConnection> connection1 = Create<CCNxVirtualConnection> ();
+  Ptr<CCNxVirtualConnection> connection2 = Create<CCNxVirtualConnection> ();
+
+  pit->ReceiveInterest (Create<CCNxForwarderMessage> (iPacket1, connection1));
+  StepSimulatorReceiveInterest ();
+  NS_TEST_EXPECT_MSG_EQ (_receiveInterestCallbackVerdict, CCNxPit::Forward, "verdict should be forward !");
+
+  std::cout << "Time="<< Simulator::Now().As(Time::MS) << ", map after 1 interest present - should not have expired" << std::endl;
+  pit->Print (std::cout);
+
+
+  pit->SatisfyInterest (Create<CCNxForwarderMessage> (cPacket1, connection2));
+  StepSimulatorSatisfyInterest ();
+
+  NS_TEST_EXPECT_MSG_EQ (_satisfyInterestCallbackConnections->size (), 1, "wrong number of connections returned!");
+
+  std::cout << "Time="<< Simulator::Now().As(Time::MS)<< ", map after 1 interest was removed when matching content arrived" << std::endl;
+  pit->Print (std::cout);
+
+  printf ("TestCCNxStandardPitPerhopheaderDoesntExpire End\n");
+}
+EndTest ()
+
 /**
  * \ingroup ccnx-test
  *
@@ -693,6 +778,8 @@ public:
     AddTestCase (new b4 (), TestCase::QUICK);
     AddTestCase (new b5 (), TestCase::QUICK);
     AddTestCase (new b6 (), TestCase::QUICK);
+    AddTestCase (new InterestExpires(), TestCase::QUICK);
+    AddTestCase (new PerhopheaderDoesntExpire(), TestCase::QUICK);
 
   }
 } g_TestSuiteCCNxStandardPit;

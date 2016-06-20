@@ -57,9 +57,12 @@
 #include "ns3/log.h"
 #include "ns3/assert.h"
 #include "ccnx-standard-content-store-entry.h"
+#include "ns3/ccnx-cachetime.h"
 
 using namespace ns3;
 using namespace ns3::ccnx;
+
+NS_LOG_COMPONENT_DEFINE ("CCNxStandardContentStoreEntry");
 
 CCNxStandardContentStoreEntry::CCNxStandardContentStoreEntry (Ptr<CCNxPacket> contentObject) : m_contentObject (contentObject), m_useCount (0)
 {
@@ -78,14 +81,45 @@ Ptr<CCNxPacket> CCNxStandardContentStoreEntry::GetPacket () const
 
 bool CCNxStandardContentStoreEntry::IsExpired () const
 {
-  // TODO CCN - FIXME
-  return false;
+  bool expired = false;
+  Ptr<CCNxContentObject> content = DynamicCast<CCNxContentObject, CCNxMessage>(m_contentObject->GetMessage());
+  if (content->GetExpiryTime()->getTime() != 0) //Ignore null expiry time
+    {
+    Time expiryTime(content->GetExpiryTime()->getTime());
+    if (expiryTime < Simulator::Now())
+      {
+	expired = true;
+	NS_LOG_DEBUG("content packet " << *m_contentObject << " in store is expired!");
+      }
+    }
+  return expired;
 }
 
 bool CCNxStandardContentStoreEntry::IsStale () const
 {
-  // TODO CCN - FIXME
-  return false;
+
+  bool stale=false;
+  Ptr<CCNxPerHopHeader> perHopHeader = m_contentObject->GetPerhopHeaders();
+  for (size_t i=0;i<perHopHeader->size();i++)
+    {
+      Ptr<CCNxPerHopHeaderEntry> entry = perHopHeader->GetHeader(i);
+      if (entry->GetInstanceTLVType() == 2) //TODO - why aren't we using an enum for TLV types?
+	{
+	  Ptr<CCNxCachetime> rct = DynamicCast<CCNxCachetime,CCNxPerHopHeaderEntry >(entry);
+	  if (rct->GetCachetime()->getTime() != 0) //Ignore null  time
+	    {
+	    Time expiryTime(rct->GetCachetime()->getTime());
+	    if (expiryTime < Simulator::Now())
+	      {
+		stale = true;
+		NS_LOG_DEBUG("content packet " << *m_contentObject << " in store is stale!");
+		break;
+	      }
+	    }
+	}
+    }
+
+  return stale;
 }
 
 void CCNxStandardContentStoreEntry::IncrementUseCount ()

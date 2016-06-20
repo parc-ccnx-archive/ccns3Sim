@@ -53,83 +53,33 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3_CCNXTIME_H
-#define CCNS3_CCNXTIME_H
+#include "ns3/test.h"
+#include "ns3/ccnx-null-content-store-factory.h"
 
-#include "ns3/ptr.h"
-#include <ns3/simple-ref-count.h>
-#include <stdint.h>
-#include "ns3/nstime.h"
+#include "../TestMacros.h"
 
-namespace ns3 {
-namespace ccnx {
+using namespace ns3;
+using namespace ns3::ccnx;
+
+namespace TestSuiteCCNxNullContentStoreFactory {
+
+BeginTest (Constructor)
+{
+}
+EndTest ()
 
 /**
- * @ingroup ccnx-messages
+ * @ingroup ccnx-test
  *
- * TODO: This class should wrap ns3::Time instead
- *
- * Class representation of Time.
- *
+ * Test Suite for CCNxContentStore
  */
-class CCNxTime : public SimpleRefCount<CCNxTime>,ns3::Time
+static class TestSuiteCCNxNullContentStoreFactory : public TestSuite
 {
 public:
-  /**
-   * Create CCNx Time.
-   *
-   * @param time     The time value
-   *
-   * Example
-   * @code
-   * Ptr<CCNxTime> time = Create<CCNxTime>(time);
-   * @endcode
-   */
-   CCNxTime (uint64_t time);
+  TestSuiteCCNxNullContentStoreFactory () : TestSuite ("ccnx-null-content-store-factory", UNIT)
+  {
+    AddTestCase (new Constructor (), TestCase::QUICK);
+  }
+} g_TestSuiteCCNxNullContentStoreFactory;
 
-  /**
-   * Create CCNx Time
-   *
-   * @param ccnxTime  Pointer to CCNxTime object
-   *
-   * Example
-   * @code
-   * Ptr<CCNxTime> time = Create<CCNxTime>(ccnxTime);
-   * @endcode
-   */
-   CCNxTime (const CCNxTime &ccnxTime);
-
-  /**
-   * Deconstructor for CCNx Time
-   *
-   */
-  virtual ~CCNxTime ();
-
-
-  /**
-   * Returns the time value associated with this CCNxTime.
-   */
-  virtual uint64_t getTime () const;
-
-  /**
-   * Determines if the given CCNxTime is equivalent to this Time.
-   *
-   * Two times are equivalent if the time values are exactly equal.
-   */
-  virtual bool Equals (const Ptr<CCNxTime> other) const;
-
-  /**
-   * Determines if the given CCNxTime is equivalent to this Time.
-   *
-   * Two times are equivalent if the time values are exactly equal.
-   */
-  virtual bool Equals (CCNxTime const &other) const;
-
-protected:
-
-};
-
-}
-}
-
-#endif //CCNS3_CCNXTIME_H
+} // namespace TestSuiteCCNxContentStore

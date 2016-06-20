@@ -53,83 +53,33 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3_CCNXTIME_H
-#define CCNS3_CCNXTIME_H
+#include "ns3/ccnx-null-content-store-factory.h"
+#include "ns3/integer.h"
+#include "ns3/object.h"
 
-#include "ns3/ptr.h"
-#include <ns3/simple-ref-count.h>
-#include <stdint.h>
-#include "ns3/nstime.h"
 
-namespace ns3 {
-namespace ccnx {
+using namespace ns3;
+using namespace ns3::ccnx;
 
-/**
- * @ingroup ccnx-messages
- *
- * TODO: This class should wrap ns3::Time instead
- *
- * Class representation of Time.
- *
- */
-class CCNxTime : public SimpleRefCount<CCNxTime>,ns3::Time
+NS_OBJECT_ENSURE_REGISTERED (CCNxNullContentStoreFactory);
+
+CCNxNullContentStoreFactory::CCNxNullContentStoreFactory () : ObjectFactory("ns3::ccnx::CCNxNullContentStoreFactory")
 {
-public:
-  /**
-   * Create CCNx Time.
-   *
-   * @param time     The time value
-   *
-   * Example
-   * @code
-   * Ptr<CCNxTime> time = Create<CCNxTime>(time);
-   * @endcode
-   */
-   CCNxTime (uint64_t time);
-
-  /**
-   * Create CCNx Time
-   *
-   * @param ccnxTime  Pointer to CCNxTime object
-   *
-   * Example
-   * @code
-   * Ptr<CCNxTime> time = Create<CCNxTime>(ccnxTime);
-   * @endcode
-   */
-   CCNxTime (const CCNxTime &ccnxTime);
-
-  /**
-   * Deconstructor for CCNx Time
-   *
-   */
-  virtual ~CCNxTime ();
-
-
-  /**
-   * Returns the time value associated with this CCNxTime.
-   */
-  virtual uint64_t getTime () const;
-
-  /**
-   * Determines if the given CCNxTime is equivalent to this Time.
-   *
-   * Two times are equivalent if the time values are exactly equal.
-   */
-  virtual bool Equals (const Ptr<CCNxTime> other) const;
-
-  /**
-   * Determines if the given CCNxTime is equivalent to this Time.
-   *
-   * Two times are equivalent if the time values are exactly equal.
-   */
-  virtual bool Equals (CCNxTime const &other) const;
-
-protected:
-
-};
-
-}
 }
 
-#endif //CCNS3_CCNXTIME_H
+CCNxNullContentStoreFactory::~CCNxNullContentStoreFactory ()
+{
+}
+
+TypeId
+CCNxNullContentStoreFactory::GetTypeId ()
+{
+  static TypeId tid = TypeId ("ns3::ccnx::CCNxNullContentStoreFactory")
+    .SetParent<Object> ()
+    .SetGroupName ("CCNx")
+//    .AddConstructor<CCNxNullContentStoreFactory> ()
+    ;
+    return tid;
+}
+
+

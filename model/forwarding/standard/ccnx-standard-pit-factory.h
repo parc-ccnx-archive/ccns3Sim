@@ -75,6 +75,8 @@ public:
   CCNxStandardPitFactory ();
   virtual ~CCNxStandardPitFactory ();
 
+  static TypeId GetTypeId ();
+
   /**
    * Sets the default lifetime of an Interest that does not have a "LifeTime" header
    *

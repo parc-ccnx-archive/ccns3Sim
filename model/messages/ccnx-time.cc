@@ -58,41 +58,49 @@
 using namespace ns3;
 using namespace ns3::ccnx;
 
-CCNxTime::CCNxTime (uint64_t t)
+CCNxTime::CCNxTime (uint64_t t) : Time(t)
 {
-  this->value = t;
+
 }
 
-CCNxTime::CCNxTime (const CCNxTime &ccnxTime)
+CCNxTime::CCNxTime (const CCNxTime &ccnxTime) : Time(ccnxTime.getTime())
 {
-  this->value = ccnxTime.getTime ();
+
 }
+
+CCNxTime::~CCNxTime()
+{
+}
+
 
 uint64_t CCNxTime::getTime () const
 {
-  return this->value;
+    return ToInteger(ns3::Time::GetResolution());  //use current time unit
 }
 
 bool
 CCNxTime::Equals (const Ptr<CCNxTime> other) const
 {
+  bool equal=false;
   if (other)
     {
-      return Equals (*other);
+      if (Compare (*other)==0)
+	{
+	  equal=true;
+	}
     }
-  else
-    {
-      return false;
-    }
+  return equal;
 }
 
 bool
 CCNxTime::Equals (CCNxTime const &other) const
 {
-  bool result = false;
-  if (value == other.value)
+  bool equal=false;
+
+  if (Compare (other)==0)
     {
-      result = true;
+      equal=true;
     }
-  return result;
+
+  return equal;
 }

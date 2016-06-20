@@ -53,83 +53,34 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3_CCNXTIME_H
-#define CCNS3_CCNXTIME_H
+#ifndef CCNS3SIM_MODEL_FORWARDING_NULL_CCNX_NULL_CONTENT_STORE_FACTORY_H_
+#define CCNS3SIM_MODEL_FORWARDING_NULL_CCNX_NULL_CONTENT_STORE_FACTORY_H_
 
-#include "ns3/ptr.h"
-#include <ns3/simple-ref-count.h>
-#include <stdint.h>
+#include "ns3/object-factory.h"
 #include "ns3/nstime.h"
 
 namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-messages
+ * @ingroup ccnx-null-forwarder
  *
- * TODO: This class should wrap ns3::Time instead
- *
- * Class representation of Time.
+ * Factory to create a null ContentStore.
  *
  */
-class CCNxTime : public SimpleRefCount<CCNxTime>,ns3::Time
+class CCNxNullContentStoreFactory : public ns3::ObjectFactory
 {
 public:
-  /**
-   * Create CCNx Time.
-   *
-   * @param time     The time value
-   *
-   * Example
-   * @code
-   * Ptr<CCNxTime> time = Create<CCNxTime>(time);
-   * @endcode
-   */
-   CCNxTime (uint64_t time);
 
-  /**
-   * Create CCNx Time
-   *
-   * @param ccnxTime  Pointer to CCNxTime object
-   *
-   * Example
-   * @code
-   * Ptr<CCNxTime> time = Create<CCNxTime>(ccnxTime);
-   * @endcode
-   */
-   CCNxTime (const CCNxTime &ccnxTime);
+  static TypeId GetTypeId ();
 
-  /**
-   * Deconstructor for CCNx Time
-   *
-   */
-  virtual ~CCNxTime ();
+  CCNxNullContentStoreFactory ();
+  virtual ~CCNxNullContentStoreFactory ();
 
-
-  /**
-   * Returns the time value associated with this CCNxTime.
-   */
-  virtual uint64_t getTime () const;
-
-  /**
-   * Determines if the given CCNxTime is equivalent to this Time.
-   *
-   * Two times are equivalent if the time values are exactly equal.
-   */
-  virtual bool Equals (const Ptr<CCNxTime> other) const;
-
-  /**
-   * Determines if the given CCNxTime is equivalent to this Time.
-   *
-   * Two times are equivalent if the time values are exactly equal.
-   */
-  virtual bool Equals (CCNxTime const &other) const;
-
-protected:
 
 };
 
-}
-}
+}   /* namespace ccnx */
+} /* namespace ns3 */
 
-#endif //CCNS3_CCNXTIME_H
+#endif /* CCNS3SIM_MODEL_FORWARDING_NULL_CCNX_NULL_CONTENT_STORE_FACTORY_H_ */
