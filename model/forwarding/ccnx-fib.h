@@ -79,7 +79,7 @@ class CCNxFib : public ns3::Object
 {
 public:
   CCNxFib ();
-  virtual ~CCNxFib ();               //c++ thang
+  virtual ~CCNxFib ();
 
   /**
    *  Get the type ID.
@@ -187,21 +187,32 @@ public:
    */
   virtual bool DeleteRoute (Ptr<const CCNxName> ccnxName, Ptr<CCNxConnection>  connection) = 0;
 
+
   /**
-   * PrintRoute(s) - print one or more Fib entries.
+   * PrintRoutes - print all Fib entries.
    *
-   * @param [in] ccnxName (PrintRoute only)
-   * @return single route (PrintRoute) or route table (PrintRoutes)
+   * @param [in] output stream
+   * @return route table
    *
-   * Example:
-   * @code
-   * {
-   * }
    */
   virtual std::ostream & PrintRoutes (std::ostream & os) = 0;
 
+  /**
+   * PrintRoute - print one Fib entry.
+   *
+   * @param [in] ccnxName of Fib entry to print.
+   * @param [in] output stream
+   * @return single route
+   *
+   */
   virtual std::ostream & PrintRoute (std::ostream & os, Ptr<const CCNxName> ccnxName) = 0;
 
+  /**
+   * CountEntries - count total number of Fib entries.
+   *
+   * @return number of entries currently in the FIB.
+   *
+   */
   virtual int CountEntries () = 0;
 
 

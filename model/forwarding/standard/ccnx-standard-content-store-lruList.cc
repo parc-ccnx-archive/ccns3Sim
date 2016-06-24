@@ -112,9 +112,9 @@ CCNxStandardContentStoreLruList::DeleteEntry(Ptr<CCNxStandardContentStoreEntry> 
 
   if(it != m_lruMap.end())
     { // already exists, remove it from list and map (quicker to update map entry?)
-      result=true;
       m_lruList.erase(it->second);
       m_lruMap.erase(it);
+      result=true; 	//TODO CCN - should only return true if erasures successful
     }
   else
     {

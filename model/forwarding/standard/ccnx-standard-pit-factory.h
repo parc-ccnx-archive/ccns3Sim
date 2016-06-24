@@ -72,7 +72,9 @@ namespace ccnx {
 class CCNxStandardPitFactory : public ns3::ObjectFactory
 {
 public:
+
   CCNxStandardPitFactory ();
+
   virtual ~CCNxStandardPitFactory ();
 
   static TypeId GetTypeId ();

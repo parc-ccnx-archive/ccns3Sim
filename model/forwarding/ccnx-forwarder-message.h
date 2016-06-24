@@ -77,14 +77,36 @@ namespace ccnx {
 class CCNxForwarderMessage : public SimpleRefCount< CCNxForwarderMessage >
 {
 public:
+
   CCNxForwarderMessage (Ptr<CCNxPacket> packet, Ptr<CCNxConnection> ingressConnection);
+
   virtual ~CCNxForwarderMessage ();
 
+  /**
+   * return m_packet of the forwarder message.
+   *
+   * @return the pointer to the ccnx packet.
+   */
   virtual Ptr<CCNxPacket> GetPacket () const;
+
+  /**
+   * return m_ingressConnection of the forwarder message.
+   *
+   * @return the pointer to the ingress connection.
+   */
   virtual Ptr<CCNxConnection> GetIngressConnection () const;
 
+
 private:
+
+  /**
+   * forwarder message packet.
+   */
   Ptr<CCNxPacket> m_packet;
+
+  /**
+   * forwarder message ingress connection.
+   */
   Ptr<CCNxConnection> m_ingressConnection;
 };
 

@@ -74,10 +74,11 @@ class CCNxStandardContentStoreFactory : public ns3::ObjectFactory
 {
 public:
 
-  static TypeId GetTypeId ();
-
   CCNxStandardContentStoreFactory ();
+
   virtual ~CCNxStandardContentStoreFactory ();
+
+  static TypeId GetTypeId ();
 
   /**
    * Sets the constant of the layer delay (content store processing time)

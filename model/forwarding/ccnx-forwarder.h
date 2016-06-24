@@ -223,7 +223,6 @@ public:
   virtual void PrintForwardingStatistics (Ptr<OutputStreamWrapper> streamWrapper) const = 0;
 
 
-  // =======
 
   /**
    * Sets the node on which this forwarder sits.
@@ -233,8 +232,20 @@ public:
   void SetNode (Ptr<Node> node);
 
 protected:
+
+  /*
+   * Type of CCNx protocol in use.
+   */
   Ptr<CCNxL3Protocol> m_ccnx;
+
+  /*
+   * Node of forwarder
+   */
   Ptr<Node> m_node;
+
+  /*
+   * Callback from RouteIn() and RouteOut().
+   */
   RouteCallback m_routeCallback;
 };
 

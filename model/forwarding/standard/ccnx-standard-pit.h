@@ -109,12 +109,16 @@ namespace ccnx {
 class CCNxStandardPit : public CCNxPit
 {
 public:
+
   //Map Names to PitEntrys
   typedef std::map < Ptr<const CCNxName>, Ptr<CCNxStandardPitEntry>, CCNxName::isLessPtrCCNxName >  PitByNameType;
 
-  // Map Name and keyid restriction
-
+  //Name and keyid restriction pair
   typedef std::pair < Ptr<const CCNxName>, Ptr<const CCNxHashValue> > NameAndKeyIdType;
+
+
+  //Map Hash values to PitEntrys
+  typedef std::map < Ptr<const CCNxHashValue>, Ptr<CCNxStandardPitEntry>, CCNxHashValue::isLessPtrCCNxHashValue > PitByHashType;
 
   /**
    * ordering function for operating on a pair < Name, KeyId >.  The total order is defined
@@ -143,10 +147,19 @@ public:
     }
   };
 
+  // Map Name and Key to PitEntrys
   typedef std::map < NameAndKeyIdType,  Ptr<CCNxStandardPitEntry>, isLessNameAndKeyIdType > PitByNameAndKeyIdType;
 
-  //Map Hash values to PitEntrys
-  typedef std::map < Ptr<const CCNxHashValue>, Ptr<CCNxStandardPitEntry>, CCNxHashValue::isLessPtrCCNxHashValue > PitByHashType;
+
+  /**
+   * Create a standard pit.  It is configured via the NS attribute system.
+   */
+  CCNxStandardPit ();
+
+  /**
+   * Virtual destructor for inheritance
+   */
+  virtual ~CCNxStandardPit ();
 
   /**
    *  Get the type ID.
@@ -154,34 +167,48 @@ public:
    */
   static TypeId GetTypeId (void);
 
-  CCNxStandardPit ();
-  virtual ~CCNxStandardPit ();
-
+  /**
+   * @copydoc CCNxPit::ReceiveInterest()
+   */
   virtual void ReceiveInterest (Ptr<CCNxForwarderMessage> message);
-
+  /**
+    * @copydoc CCNxPit::SetReceiveInterestCallback()
+    */
   virtual void SetReceiveInterestCallback (ReceiveInterestCallback receiveInterestCallback);
-
+  /**
+    * @copydoc CCNxPit::SatisfyInterest()
+    */
   virtual void SatisfyInterest (Ptr<CCNxForwarderMessage> message);
-
+  /**
+    * @copydoc CCNxPit::SetSatisfyInterestCallback()
+    */
   virtual void SetSatisfyInterestCallback (SatisfyInterestCallback satisfyInterestCallback);
-
+  /**
+    * @copydoc CCNxPit::RemoveEntry()
+    */
   virtual void RemoveEntry (Ptr<CCNxInterest> interest);
-
+  /**
+    * @copydoc CCNxPit::CountEntries()
+    */
   int CountEntries ();
-
+  /**
+    * @copydoc CCNxPit::Print()
+    */
   virtual void Print (std::ostream &os) const;
 
+  /**
+   * ostream << operator for printing
+   *
+   */
   friend std::ostream &operator<< (std::ostream& os, Ptr<CCNxStandardPit> ccnxStandardPit);
 
 protected:
-  // ns3::Object::DoInitialize()
+
+  /**
+   * DoInitialize - called in Object Initialize()
+   */
   virtual void DoInitialize ();
 
-
-//  template  <typename MapType, typename MapKey, typename MapTypeIt > CCNxPit::Verdict GetVerdict(MapType a, MapKey b, Ptr<CCNxInterest> interest, Ptr<CCNxConnection> ingress);
-
-  //internal method to clean the list of connections returned from SatisfyInterest
-  Ptr<CCNxConnectionList>  RemoveDuplicates (Ptr<CCNxConnectionList> a, Ptr<CCNxConnectionList> b, Ptr<CCNxConnection> ingress);
 
 private:
 
@@ -319,8 +346,13 @@ private:
   void ServiceSatisfyInterest (Ptr<CCNxForwarderMessage> item);
 
 
+   //Map Names to PitEntrys
   PitByNameType m_tableByName;
+
+  // Map Name and Key to PitEntrys
   PitByNameAndKeyIdType m_tableByNameAndKeyId;
+
+  //Map Hash values to PitEntrys
   PitByHashType m_tableByHash;
 
   /*
@@ -329,7 +361,14 @@ private:
    */
   Time m_defaultLifetime;
 
+  /*
+   * @copydoc CCNxPit::ReceiveInterestCallback
+   */
   ReceiveInterestCallback m_receiveInterestCallback;
+
+  /*
+   * @copydoc CCNxPit::SatisfyInterestCallback
+   */
   SatisfyInterestCallback m_satisfyInterestCallback;
 
   /**
