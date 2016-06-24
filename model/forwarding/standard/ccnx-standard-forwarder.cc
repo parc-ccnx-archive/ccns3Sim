@@ -523,10 +523,10 @@ CCNxStandardForwarder::RemoveRoute (Ptr<const CCNxRoute> route)
   return success;
 }
 
-int
+size_t
 CCNxStandardForwarder::CountEntries (TableTypes t)
 {
-  int count = 0;
+  size_t count = 0;
 
   switch (t)
     {
@@ -538,6 +538,11 @@ CCNxStandardForwarder::CountEntries (TableTypes t)
     case FibTable:
       {
         count = m_fib->CountEntries ();
+        break;
+      }
+    case ContentStore:
+      {
+        count = m_contentStore->GetObjectCount ();
         break;
       }
     default:

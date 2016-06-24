@@ -77,6 +77,7 @@ namespace ccnx {
  * CCNx standard fib is derived from `CCNxFib` base class.
  * This fib should work for all implementations but may be replaced if desired.
  */
+
 class CCNxStandardFib : public CCNxFib
 {
 protected:

@@ -66,7 +66,7 @@ namespace ccnx {
 /**
  * @ingroup ccnx-standard-forwarder
  *
- *
+ * Standard Content Store Entry Class.
  */
 class CCNxStandardContentStoreEntry : public SimpleRefCount<CCNxStandardContentStoreEntry>
 {

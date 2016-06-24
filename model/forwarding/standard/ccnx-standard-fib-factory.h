@@ -72,7 +72,9 @@ namespace ccnx {
 class CCNxStandardFibFactory : public ns3::ObjectFactory
 {
 public:
+
   CCNxStandardFibFactory ();
+
   virtual ~CCNxStandardFibFactory ();
 
   /**

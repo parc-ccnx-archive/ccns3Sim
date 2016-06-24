@@ -76,6 +76,5 @@ CCNxContentStore::CCNxContentStore ()
 
 CCNxContentStore::~CCNxContentStore ()
 {
-  // TODO CCN Auto-generated destructor stub
 }
 

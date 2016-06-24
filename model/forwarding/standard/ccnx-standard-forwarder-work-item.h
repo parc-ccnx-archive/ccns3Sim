@@ -82,6 +82,8 @@ public:
 
   virtual ~CCNxStandardForwarderWorkItem ();
 
+
+
   Ptr<CCNxConnection> GetEgressConnection () const;
 
   /**
@@ -159,13 +161,28 @@ public:
 
 
 private:
+  /**
+   * additional parameter - egress connection - in case it was explicitly specified
+   */
   Ptr<CCNxConnection> m_egressConnection;
+  /**
+   * routing error number, if any.
+   */
   CCNxRoutingError::RoutingErrno m_routingErrno;
 
+  /**
+   * connections list from pit or fib
+   */
   Ptr<CCNxConnectionList> m_connectionsList;
 
+  /**
+   * content packet provided from content store, if any.
+   */
   Ptr<CCNxPacket> m_contentStorePacket;
 
+  /**
+   * true if content was added from content store.
+   */
   bool m_contentAddedFlag;
 };
 

@@ -113,7 +113,7 @@ public:
   *
   * @return Verdict::Forward - forward this packet (using next hop from fib)
   * @return Verdict::Aggregrate - do not forward
-  * @return Verdict::Error - something has gone badly wrong
+  * @return Verdict::Error - something has gone badly wrong - should probably assert
   */
   virtual CCNxPit::Verdict ReceiveInterest (Ptr<CCNxInterest> interest, Ptr<CCNxConnection> ingress, Time expiryTime);
 
@@ -125,7 +125,6 @@ public:
   * @param ingressConnection [in] source of this packet (not used)
   *
   * @return A set of the connections satisfied by the content object (may be empty)
-  virtual std::pair <bool, Ptr<CCNxConnectionList> > SatisfyInterest (Ptr<CCNxPacket> packet,  bool nameMap);
   */
   virtual ReverseRouteType SatisfyInterest (Ptr<CCNxConnection> ingressConnection);
 

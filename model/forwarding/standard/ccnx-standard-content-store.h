@@ -66,6 +66,14 @@
 #include "ns3/ccnx-hash-value.h"
 
 
+/**
+ * @ingroup ccnx-standard-forwarder
+ *
+ * The Standard ContentStore Class. The standard content store implements a map based content cache
+ * with least recently used eviction algorithm.
+ *
+ */
+
 namespace ns3 {
 namespace ccnx {
 
@@ -111,38 +119,29 @@ public:
   virtual void SetAddContentObjectCallback (AddContentObjectCallback addContentObjectCallback);
 
 
-//TODO CCN make ServiceMatchInterest and other internal methods private:
-
-  /**
-   * After input delay, service a MatchInterest request and send the
-   * result to the MatchInterestCallback.
-   *
-   * @param workItem [in] The work Item containing the interest being serviced
-   */
-  bool ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkItem> workItem);
-
-  /**
-   * After input delay, service a AddContentObject request and send the
-   * result to the AddContentObjectCallback.
-   *
-   * @param workItem [in] The work Item containing the interest being serviced
-   * Adds a content object to the content store.
-   *
-   * The caller should ensure that only the desired per-hop headers are in the packet.
-   *
-   * @param object The content object packet to add
-   * @return true If the object was added
-   * @return false If the object was not added
-   */
-   bool ServiceAddContentObject (Ptr<CCNxStandardForwarderWorkItem> workItem);
-
   /**
    * Deletes the given object from the content store
    *
    * This should be the same object (name, keyid, hash) as was added previously, or
    * found via `MatchInterest()`.
    *
-   * @param object The content object packet to remove
+   * @param cPacket The content object packet to remove
+   * @code
+   * {
+   *   Ptr<CCNxStandardContentStore> a = CreateContentStore ();
+   *   data.name1 = Create<CCNxName> ("ccnx:/name=trump/name=is/name=a/name=paradox");
+   *   data.content1 = Create<CCNxContentObject> (data.name1);
+   *   data.cPacket1 = CCNxPacket::CreateFromMessage (data.content1);
+   *   data.cForwarderMessage1 = Create<CCNxForwarderMessage> (data.cPacket1,data.ingress1);
+   *   data.cWorkItem1 = CreateWorkItem(data.cPacket1,data.ingress1);
+   *   data.nextHop1 = Create<CCNxVirtualConnection> ();
+   *   data.eConnList1 = Create<CCNxConnectionList>(); data.eConnList1->push_back(data.nextHop1);
+   *
+   *   a->AddContentObject(data.cWorkItem1,data.eConnList1);
+   *   ...events which advance time to the point where the content object has been added to the CS...
+   *   a->DeleteContentObject(data.cPacket1);
+   * }
+   * @endcode
    * @return true if removed
    * @return false If not removed (i.e. not found)
    */
@@ -167,23 +166,84 @@ public:
   virtual size_t GetObjectCapacity () const;
 
   /**
-   * return entry pointer if this object in the content store, null otherwise.
+   * FindEntryInNameMap
+   * @param cPacket - content packet
+   * @return entry pointer if this object in the hash map, or null if not found.
    *
    */
-
   Ptr<CCNxStandardContentStoreEntry> FindEntryInHashMap(Ptr<CCNxPacket> cPacket);
 
+  /**
+   * FindEntryInNameMap
+   *
+   * @param cPacket - content packet
+   * @return entry pointer if this object in the name map, or null if not found.
+   *
+   */
   Ptr<CCNxStandardContentStoreEntry> FindEntryInNameMap(Ptr<CCNxPacket> cPacket);
 
-  Ptr<CCNxStandardContentStoreEntry> GetEntryFromPacket(Ptr<CCNxPacket> cPacket);
-
-
+  /**
+   * IsEntryValid - check if this entry is still valid.
+   *
+   * @param entry - entry in question.
+   * @return true - entry is neither expired nor beyond it's recommended cache time.
+   * @return false - entry is  expired or beyond it's recommended cache time.
+   *
+   */
   virtual bool IsEntryValid(Ptr<CCNxStandardContentStoreEntry> entry) const;
 
-  static  Ptr<CCNxHashValue> nullHashValue;
-
+  /**
+   * AddMapEntry - add new entry to hash map if hash exists, else name map if name exists, else no add occurs.
+   *
+   * @param cPacket - content packet to be added
+   * @param newEntry - entry for this packet
+   *
+   * @return true
+   *
+   */
   virtual bool AddMapEntry(Ptr<CCNxPacket> cPacket, Ptr<CCNxStandardContentStoreEntry> newEntry);
 
+
+
+protected:
+
+
+  /**
+   * After input delay, service a MatchInterest request and send the
+   * result to the MatchInterestCallback.
+   *
+   * @param workItem [in] The work Item containing the interest being serviced
+   */
+  bool ServiceMatchInterest (Ptr<CCNxStandardForwarderWorkItem> workItem);
+
+  /**
+   * After input delay, service a AddContentObject request and send the
+   * result to the AddContentObjectCallback.
+   *
+   * @param workItem [in] The work Item containing the interest being serviced
+   * Adds a content object to the content store.
+   *
+   * The caller should ensure that only the desired per-hop headers are in the packet.
+   *
+   * @param object The content object packet to add
+   * @return true If the object was added
+   * @return false If the object was not added
+   */
+   bool ServiceAddContentObject (Ptr<CCNxStandardForwarderWorkItem> workItem);
+
+
+  /**
+   * GetEntryFromPacket
+   * @return entry pointer - found in hash map if hash exists, else name map if name exists, else null if not found.
+   *
+   */
+  Ptr<CCNxStandardContentStoreEntry> GetEntryFromPacket(Ptr<CCNxPacket> cPacket);
+
+  /**
+   * nullHashValue - Static Null Hash Value - used for internal comparisons.
+   *
+   */
+  static  Ptr<CCNxHashValue> nullHashValue;
 
   /**
      * Function to compare two smart pointers to CCNx packets based on Hash and Keyid.
@@ -288,6 +348,17 @@ public:
         }
       };
 
+      /**
+	* The maps below hold pointers to content packets in the content store.
+	* When a packet is added to the store, it is added to one or more maps.
+	* It is always added to the hash list (since all content objects have a hash value),
+	* but only added to the name list if it has a name,
+	* and only added to the name/keyid list if it has a name and a keyid.
+	* They are Protected rather than private so they can be accessed by test methods in a derived class used for unit testing.
+	*
+	*/
+
+
         //Names to CS entry lookup
         typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByName>  CSByNameType;
 
@@ -300,19 +371,7 @@ public:
         //Name and Keyid to CS entry lookup
         typedef std::map<Ptr<const CCNxPacket>,Ptr<CCNxStandardContentStoreEntry>,isLessPtrCCNxPacketByHashKeyid> CSByHashKeyidType;
 
-        //TODO CCN ask marc can content object  have keyid but no name?
-
-protected:
-
-      /**
-	* The maps below hold pointers to content packets in the content store.
-	* When a packet is added to the store, it is added to one or more maps.
-	* It is always added to the hash list (since all content objects have a hash value),
-	* but only added to the name list if it has a name,
-	* and only added to the name/keyid list if it has a name and a keyid.
-	* They are Protected rather than private so they can be accessed by test methods in a derived class used for unit testing.
-	*
-	*/
+        //TODO CCN  marc - can content object  have keyid but no name?
 
         CSByNameType m_csByName;
 
@@ -333,7 +392,9 @@ protected:
 
 private:
 
-  // ns3::Object::DoInitialize()
+  /**
+   * DoInitialize - called in Object Initialize()
+   */
   virtual void DoInitialize ();
 
   /**

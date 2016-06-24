@@ -172,9 +172,14 @@ public:
 
   /**
    * Removes the PIT entry that corresponds to the given Interest
+   * @param the interest to use in finding the pit entry.
    */
   virtual void RemoveEntry (Ptr<CCNxInterest> interest) = 0;
 
+  /**
+   * Removes the PIT entry that corresponds to the given Interest
+   * @return the number of entries currently in the pit.
+   */
   virtual int CountEntries () = 0;
 
   /**

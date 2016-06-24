@@ -88,48 +88,78 @@ namespace ccnx {
 class CCNxStandardForwarder : public CCNxForwarder
 {
 public:
-  static TypeId GetTypeId ();
 
   CCNxStandardForwarder ();
+
   virtual ~CCNxStandardForwarder ();
 
+  static TypeId GetTypeId ();
+
+  /**
+   * @copydoc CCNxForwarder::RouteOutput()
+   */
   virtual void RouteOutput (Ptr<CCNxPacket> packet,
                             Ptr<CCNxConnection> ingressConnection,
                             Ptr<CCNxConnection> egressConnection);
 
+  /**
+   * @copydoc CCNxForwarder::RouteInput()
+   */
   virtual void RouteInput (Ptr<CCNxPacket> packet,
                            Ptr<CCNxConnection> ingressConnection);
-
+  /**
+   * @copydoc CCNxForwarder::RouteOutput(Ptr<CCNxConnection> connection, Ptr<const CCNxName> name)
+   */
   virtual bool AddRoute (Ptr<CCNxConnection> connection, Ptr<const CCNxName> name);
 
+  /**
+   * @copydoc CCNxForwarder::AddRoute(Ptr<const CCNxRoute> route)
+   */
   virtual bool AddRoute (Ptr<const CCNxRoute> route);
 
+  /**
+   * @copydoc CCNxForwarder::RemoveRoute()
+   */
   virtual bool RemoveRoute (Ptr<CCNxConnection> connection, Ptr<const CCNxName> name);
 
+  /**
+   * @copydoc CCNxForwarder::RemoveRoute(Ptr<const CCNxRoute> route)
+   */
   virtual bool RemoveRoute (Ptr<const CCNxRoute> route);
 
+  /**
+   * @copydoc CCNxForwarder::Ptr<const CCNxRoute> route()
+   */
   virtual void PrintForwardingTable (Ptr<OutputStreamWrapper> stream) const;
 
+  /**
+   * @copydoc CCNxForwarder::PrintForwardingStatistics()
+   */
   virtual void PrintForwardingStatistics (Ptr<OutputStreamWrapper> stream) const;
+
+  /**
+   * Types of tables to count entries in
+   */
 
   typedef enum
   {
-    PitTable,FibTable
+    PitTable,FibTable,ContentStore
   } TableTypes;
 
   /**
-   *  Count total number of entries in pit or fib.
+   *  Count total number of entries in pit , fib or content store.
    *
-   * \param t Table to be used (PitTable or FibTable).
+   * \param t Table to be used (PitTable , FibTable or ContentStore).
    */
 
-  virtual int CountEntries (TableTypes t);
-
-
+  virtual size_t CountEntries (TableTypes t);
 
 
 private:
 
+  /**
+   * Internal statistics counter struct.
+   */
   typedef struct _stats {
     size_t RouteInputPacketsIn;		/*!< total number of packets from Layer 2 */
     size_t RouteOutputPacketsIn;	/*!< total number of packets from CCNxL3Protocol */
@@ -181,7 +211,7 @@ private:
   bool InnerRemoveRoute (Ptr<CCNxConnection> connection, Ptr<const CCNxName> name);
 
   /**
-   *   cleanup function - currently void - called by deconstructor?
+   *   cleanup function - currently void
    *
    */
   virtual void DoDispose (void);

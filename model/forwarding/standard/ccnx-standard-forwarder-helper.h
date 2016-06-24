@@ -215,6 +215,9 @@ public:
   virtual TypeId GetForwardingTypeId () const;
 
 private:
+  /*
+   * ptr to top level factory.
+   */
   ObjectFactory m_factory;
 };
 

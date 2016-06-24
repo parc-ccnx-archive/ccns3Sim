@@ -73,11 +73,7 @@ namespace ccnx {
 class CCNxContentStore : public Object
 {
 public:
-  /**
-   * Returns the NS3 runtime type of the class
-   * @return The NS3 runtime type
-   */
-  static TypeId GetTypeId (void);
+
   CCNxContentStore ();
 
   /**
@@ -86,20 +82,30 @@ public:
   virtual ~CCNxContentStore ();
 
   /**
+   * Returns the NS3 runtime type of the class
+   * @return The NS3 runtime type
+   */
+  static TypeId GetTypeId (void);
+
+  /**
    * Try to match an Interest in the content store.
-   * This is an asynchronous call to match a content object in the content store.  The
+   * This is an asynchronous call to start an attempt to match an interest with content object in the content store.  The
    * result of the match will be returned at a later time via the `MatchInterestCallback()`
    * Example:
    * @code
    * {
-   *
+   *  if (m_contentStore)
+   *	{
+   *	      // start next asynchronous call
+   *	      m_contentStore->MatchInterest (message);
+   *	}
    * }
    * @endcode
    *
    * @see MatchInterestCallback
-   * *
-   * @param interestPacket
-
+   *
+   * @param Ptr<CCNxForwarderMessage> message @see CCNxForwarderMessage
+   *
    */
   virtual void MatchInterest (Ptr< CCNxForwarderMessage> message) = 0;
 
@@ -109,6 +115,7 @@ public:
    *
    * The Content Store should ensure there is always one call to the callback for each call to `MatchInterest()`.
    *
+   *
    * @param Ptr<CCNxPacket> [in] The forwarder interest packet
    * @param Ptr<CCNxPacket> [out] The matching content object (may be empty)
    */
@@ -117,17 +124,29 @@ public:
   /**
    * Configure the callback for `MatchInterest()`.  This must be set before using the Content Store.
    *
+   * @code
+   * if (m_contentStoreFactory.GetTypeId().GetUid() != nullContentStoreFactory.GetTypeId ().GetUid())
+   * {
+   * m_contentStore = m_contentStoreFactory.Create<CCNxContentStore> ();
+   * m_contentStore->SetMatchInterestCallback (MakeCallback (&CCNxStandardForwarder::ContentStoreMatchInterestCallback, this));
+   * m_contentStore->Initialize ();
+   * }
+   * @endcode
+   *
    * @param matchInterestCallback [in] The callback to use for `MatchInterest()`.
    */
   virtual void SetMatchInterestCallback (MatchInterestCallback matchInterestCallback) = 0;
 
   /**
-    * Try to add a content object to  the content store. This is an asynchronous call.  The
+    * Try to add a content object to the content store. This is an asynchronous call.  The
     * result of the add will be returned at a later time via the `AddContentObjectCallback()`
     * Example:
     * @code
     * {
-    *
+    *  if  (m_contentStore and item->GetIngressConnection())
+	{ // there is a CS and this content is not from the CS, so try to add this content
+	  m_contentStore->AddContentObject(message,egressConnections); //will fwd packet after this, so must retain egressConnections
+	}
     * }
     * @endcode
     *
@@ -150,6 +169,17 @@ public:
 
    /**
     * Configure the callback for `AddContentObject()`.  This must be set before using the Content Store.
+    *
+    * @code
+    * {
+    * if (m_contentStoreFactory.GetTypeId().GetUid() != nullContentStoreFactory.GetTypeId ().GetUid())
+    *  {
+    *  m_contentStore = m_contentStoreFactory.Create<CCNxContentStore> ();
+    *  m_contentStore->SetAddContentObjectCallback (MakeCallback (&CCNxStandardForwarder::ContentStoreAddContentObjectCallback, this));
+    *  m_contentStore->Initialize ();
+    *  }
+    * }
+    * @endcode
     *
     * @param addContentObjectCallback [in] The callback to use for `AddContentObject()`.
     */

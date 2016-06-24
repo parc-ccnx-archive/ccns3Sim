@@ -63,19 +63,26 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-null-forwarder
+ * @ingroup ccnx-forwarder
  *
- * Factory to create a null ContentStore.
+ * Factory which can be used to create a null ContentStore in a forwarder.
  *
  */
 class CCNxNullContentStoreFactory : public ns3::ObjectFactory
 {
 public:
 
-  static TypeId GetTypeId ();
 
   CCNxNullContentStoreFactory ();
+
   virtual ~CCNxNullContentStoreFactory ();
+
+  /**
+    *  Get the type ID.
+    * @return the object TypeId
+    */
+  static TypeId GetTypeId ();
+
 
 
 };

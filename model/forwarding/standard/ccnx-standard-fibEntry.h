@@ -85,7 +85,9 @@ class CCNxStandardFibEntry : public ns3::SimpleRefCount<CCNxStandardFibEntry>
 
 
 public:
+
   CCNxStandardFibEntry ();
+
   virtual ~CCNxStandardFibEntry ();
 
   /*
