@@ -97,6 +97,7 @@ ccnx_help()
     A_BUILD="${C_WHITE}build${C_END}"
     A_CLEAN="${C_WHITE}clean${C_END}"
     A_CFG="${C_WHITE}config${C_END}"
+    A_DOXYGEN="${C_WHITE}doxygen${C_END}"
     A_EX="${C_WHITE}example${C_END}"
     A_GCOV="${C_WHITE}gcov${C_END}"
     A_GCOV_CLEAN="${C_WHITE}gcov_clean${C_END}"
@@ -109,7 +110,7 @@ ccnx_help()
 
     A_EXE="${C_WHITE}$0${C_END}"
     echo -e "
-usage: $A_EXE [$A_LIST] [$A_CLEAN] [$A_CFG] [$A_BUILD] [$A_GCOV] [$A_OPT] [$A_REBUILD] [$A_PYTHON] [$A_TEST] [$A_EX <example_name>]
+usage: $A_EXE [$A_LIST] [$A_CLEAN] [$A_CFG] [$A_BUILD] [$A_DOXYGEN] [$A_GCOV] [$A_OPT] [$A_REBUILD] [$A_PYTHON] [$A_TEST] [$A_EX <example_name>]
 
     $A_CLEAN           Runs './waf clean'
     $A_CFG          Runs './waf configure' or './waf configure --enable-gcov' if the
@@ -119,14 +120,15 @@ usage: $A_EXE [$A_LIST] [$A_CLEAN] [$A_CFG] [$A_BUILD] [$A_GCOV] [$A_OPT] [$A_RE
                     enable/disable args that does not include python unless the
                     argument python is also provided
     $A_BUILD           Runs './waf build'
+    $A_DOXYGEN         Omits the default waf argument '--doxygen-no-build'.
     $A_GCOV            Adds '--enable-gcov' to the configure command. Requires $A_CFG.
                     If the configuration has both $A_GCOV and $A_PYTHON enabled,
                     the build will fail.
                     You can do '$0 $A_REBUILD $A_GCOV to clean/config/build
                     for gcov.
-    $A_OPT             Adds --build-profile=optimized to the configure command.
-                    Requires $A_CFG. You can do '$0 $A_REBUILD $A_OPT to
-                    clean/config/build
+    $A_OPT             Adds '--build-profile=optimized' to the configure command
+                    instead of '--build-profile=debug'. Requires $A_CFG. You
+                    can do '$0 $A_REBUILD $A_OPT to clean/config/build
     $A_PYTHON          Used to run 'waf configure' with python enabled (i.e.
                     --disable-python is not used). Can not be combined with
                     gcov. $A_GCOV_CLEAN is implied when gcov arg is not provided.
@@ -151,6 +153,7 @@ CLEAN=0
 CONFIG=0
 BUILD=0
 GCOV=0
+WITH_DOXYGEN=0
 OPTIMIZED=0
 TEST=0
 RUN_EXAMPLE=0
@@ -195,6 +198,9 @@ for arg in "$@"; do
             ;;
         "config"|"configure"|"cfg")
             CONFIG=1
+            ;;
+        "doxygen")
+            WITH_DOXYGEN=1
             ;;
         "opt"|"optimized")
             OPTIMIZED=1
@@ -273,6 +279,7 @@ pushd "$WAF_DIR" > /dev/null
         [ $PYTHON == 1 ] && CONFIG_ARGS+=" python"
         [ $GCOV == 1 ] && CONFIG_ARGS+=" gcov"
         [ $OPTIMIZED == 1 ] && CONFIG_ARGS+=" optimized"
+        [ $WITH_DOXYGEN == 1 ] && CONFIG_ARGS+=" doxygen"
         waf_config "$CONFIG_ARGS"
     fi
 

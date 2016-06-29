@@ -199,10 +199,15 @@ do_debug_purge()
 waf_config()
 {
     OPTS="$@"
-    ARGS="--build-profile=optimized --enable-examples --enable-tests"
+    ARGS="--enable-examples --enable-tests"
     WITH_PYTHON=0
+    WITH_DOXYGEN=0
+    OPTIMIZED=0
     for opt in $OPTS; do
         case $opt in
+            "doxygen")
+                WITH_DOXYGEN=1
+                ;;
             "python")
                 WITH_PYTHON=1
                 ;;
@@ -210,7 +215,7 @@ waf_config()
                 ARGS+=" --enable-gcov"
                 ;;
             "opt"|"optimized")
-                ARGS+=" --build-profile=optimized"
+                OPTIMIZED=1
                 ;;
             *)
                 echo "$0: waf_config: ERROR!"
@@ -221,6 +226,14 @@ waf_config()
     done
     if [ "$WITH_PYTHON" == "0" ]; then
         ARGS+=" --disable-python --disable-nsclick --disable-gtk"
+    fi
+    if [ "$WITH_DOXYGEN" == "0" ]; then
+        ARGS+=" --doxygen-no-build"
+    fi
+    if [ "$OPTIMIZED" == "1" ]; then
+        ARGS+=" --build-profile=optimized"
+    else
+        ARGS+=" --build-profile=debug"
     fi
     if [ "$NS3_XCODE_COMPILE_BUGS_FIXED" == 1 ] || [ "$(uname -s)" == "Linux" ]; then
         echo "$0: waf_config:: [./waf configure $ARGS]"
