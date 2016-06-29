@@ -380,7 +380,7 @@ CCNxStandardForwarder::PitSatisfyInterestCallback (Ptr<CCNxForwarderMessage> mes
     { //no match - drop pkt
       m_forwarderStats.contentObjectsNotMatchedInPit++;
       NS_LOG_ERROR ("CONTENT: no matching Pit Entry! discarding packet="<< *message->GetPacket());
-      FinishRouteLookup (item, Ptr<CCNxConnectionList>(0));
+//      FinishRouteLookup (item, Ptr<CCNxConnectionList>(0)); no packet to forward
     }
 
 }

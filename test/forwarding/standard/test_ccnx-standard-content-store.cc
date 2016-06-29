@@ -74,10 +74,12 @@ namespace TestSuiteCCNxStandardContentStore {
 BeginTest (Constructor)
 {
   printf ("TestCCNxStandardContentStoreConstructor DoRun\n");
-   LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
+  LogComponentEnable ("CCNxStandardContentStore", LOG_LEVEL_ALL);
+//  LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_ALL | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
    LogComponentEnable ("CCNxStandardContentStoreLruList", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
    LogComponentEnable ("CCNxStandardContentStoreEntry", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_TIME | LOG_PREFIX_FUNC));
    Time::SetResolution (Time::MS);
+
 }
 EndTest ()
 
@@ -161,23 +163,32 @@ CreateWorkItem (Ptr<CCNxPacket> packet, Ptr<CCNxConnection> ingress)
 }
 typedef struct
 {
+  Ptr<const CCNxName> prefix0;
   Ptr<const CCNxName> prefix1;
   Ptr<const CCNxName> prefix2;
   Ptr<const CCNxName> prefix3;
 
+  Ptr<CCNxVirtualConnection> ingress0;
   Ptr<CCNxVirtualConnection> ingress1;
   Ptr<CCNxVirtualConnection> ingress2;
   Ptr<CCNxVirtualConnection> ingress3;
 
+  Ptr<CCNxVirtualConnection> nextHop0;
   Ptr<CCNxVirtualConnection> nextHop1;
   Ptr<CCNxVirtualConnection> nextHop2;
   Ptr<CCNxVirtualConnection> nextHop3;
 
   Ptr<CCNxConnectionList> eConnList1;
 
+  Ptr<const CCNxName> name0;
   Ptr<const CCNxName> name1;
   Ptr<const CCNxName> name2;
   Ptr<const CCNxName> name3;
+
+  Ptr<CCNxInterest> interest0;
+  Ptr<CCNxPacket> iPacket0;
+  Ptr<CCNxForwarderMessage> iForwarderMessage0;
+  Ptr<CCNxStandardForwarderWorkItem> iWorkItem0;
 
   Ptr<CCNxInterest> interest1;
   Ptr<CCNxPacket> iPacket1;
@@ -194,6 +205,11 @@ typedef struct
   Ptr<CCNxForwarderMessage> iForwarderMessage3;
   Ptr<CCNxStandardForwarderWorkItem> iWorkItem3;
 
+  Ptr<CCNxContentObject> content0;
+  Ptr<CCNxPacket> cPacket0;
+  Ptr<CCNxForwarderMessage> cForwarderMessage0;
+  Ptr<CCNxStandardForwarderWorkItem> cWorkItem0;
+
   Ptr<CCNxContentObject> content1;
   Ptr<CCNxPacket> cPacket1;
   Ptr<CCNxForwarderMessage> cForwarderMessage1;
@@ -209,6 +225,7 @@ typedef struct
   Ptr<CCNxForwarderMessage> cForwarderMessage3;
   Ptr<CCNxStandardForwarderWorkItem> cWorkItem3;
 
+  Ptr<CCNxHashValue> hash0;
   Ptr<CCNxHashValue> hash1;
   Ptr<CCNxHashValue> hash2;
   Ptr<CCNxHashValue> hash3;
@@ -220,20 +237,37 @@ static TestData
 CreateTestData ()
 {
   TestData data;
+  data.prefix0 = Create<CCNxName> ("ccnx:/name=trump/name=is/name=forwarder");
   data.prefix1 = Create<CCNxName> ("ccnx:/name=trump/name=is/name=forwarder");
   data.prefix2 = Create<CCNxName> ("ccnx:/name=catfur/name=and/name=mayonnaise");
   data.prefix3 = Create<CCNxName> ("ccnx:/name=my/name=old/name=LPs");
 
+  data.ingress0 = Create<CCNxVirtualConnection> ();
   data.ingress1 = Create<CCNxVirtualConnection> ();
   data.ingress2 = Create<CCNxVirtualConnection> ();
   data.ingress3 = Create<CCNxVirtualConnection> ();
 
+  data.nextHop0 = Create<CCNxVirtualConnection> ();
   data.nextHop1 = Create<CCNxVirtualConnection> ();
   data.nextHop2 = Create<CCNxVirtualConnection> ();
   data.nextHop3 = Create<CCNxVirtualConnection> ();
 
   data.eConnList1 = Create<CCNxConnectionList>(); data.eConnList1->push_back(data.nextHop1);
 
+  //interest and content #0 - same as #1 but with null hash
+     data.name0 = Create<CCNxName> ("ccnx:/name=trump/name=is/name=forwarder/name=paradox");
+  // interest
+    data.interest0 = Create<CCNxInterest> (data.name0);
+    data.iPacket0 = CCNxPacket::CreateFromMessage (data.interest0);
+    data.iForwarderMessage0 = Create<CCNxForwarderMessage> (data.iPacket0,data.ingress0);
+    data.iWorkItem0 = CreateWorkItem(data.iPacket0,data.ingress0);
+  //content
+    data.content0 = Create<CCNxContentObject> (data.name0);
+    data.cPacket0 = CCNxPacket::CreateFromMessage (data.content0);
+    data.hash0 = Create<CCNxHashValue>(0);
+    data.cPacket0->SetContentObjectHash(data.hash0);
+    data.cForwarderMessage0 = Create<CCNxForwarderMessage> (data.cPacket0,data.ingress0);
+    data.cWorkItem0 = CreateWorkItem(data.cPacket0,data.ingress0);
 
   //interest and content #1 - content has hash, name, and keyid. interest name matches
   data.name1 = Create<CCNxName> ("ccnx:/name=trump/name=is/name=forwarder/name=paradox");
@@ -293,6 +327,25 @@ CreateTestData ()
 
 
 
+BeginTest (MatchInterestContentHasNullHash)
+{
+  printf ("TestCCNxStandardContentStore_MatchInterestContentHasNullHash DoRun\n");
+  //AddContentObject with name but null hash,  verify MatchInterest returns same packet
+
+  TestData data = CreateTestData ();
+
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
+
+  a->AddContentObject(data.cWorkItem0,data.eConnList1); StepSimulatorAddContentObject();
+
+  a->MatchInterest(data.iWorkItem0); StepSimulatorMatchInterest ();
+
+  NS_TEST_EXPECT_MSG_EQ (_lookupMatchInterestCallbackPacket, data.cPacket0, "wrong Packet returned !");
+
+
+}
+EndTest ()
+
 BeginTest (MatchInterest)
 {
   printf ("TestCCNxStandardContentStore_matchInterest DoRun\n");
@@ -307,6 +360,25 @@ BeginTest (MatchInterest)
   a->MatchInterest(data.iWorkItem1); StepSimulatorMatchInterest ();
 
   NS_TEST_EXPECT_MSG_EQ (_lookupMatchInterestCallbackPacket, data.cPacket1, "wrong Packet returned !");
+
+
+}
+EndTest ()
+
+BeginTest (NoMatchInterest)
+{
+  printf ("TestCCNxStandardContentStore_NoMatchInterest DoRun\n");
+  //AddContentObject with name,  verify MatchInterest returns same packet
+  //TODO CCN add method to allow us to verify entry->GetUseCount
+  TestData data = CreateTestData ();
+
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
+
+  a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
+
+  a->MatchInterest(data.iWorkItem2); StepSimulatorMatchInterest ();
+
+  NS_TEST_EXPECT_MSG_EQ (_lookupMatchInterestCallbackPacket, Ptr<CCNxPacket>(0), "wrong Packet returned !");
 
 
 }
@@ -374,26 +446,7 @@ EndTest ()
 
 
 
-BeginTest (MatchInterestButExpired)
-{
-  printf ("TestCCNxStandardContentStore_MatchInterestButExpired DoRun\n");
-  // 	AddContentObject with name but expired,  verify MatchInterest returns null packet
-  TestData data = CreateTestData ();
 
-  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
-
-  a->AddContentObject(data.cWorkItem1,data.eConnList1); StepSimulatorAddContentObject();
-  // TODO CCN make content object expire
-  a->MatchInterest(data.iWorkItem1); StepSimulatorMatchInterest ();
-
-  NS_TEST_EXPECT_MSG_EQ(_lookupMatchInterestCallbackPacket,Ptr<CCNxPacket>(0),"Null packet should be returned");
-  NS_TEST_EXPECT_MSG_EQ(a->GetMapByHashCount(),0,"map by hash size wrong");
-  NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameCount(),0,"map by name size wrong");
-  NS_TEST_EXPECT_MSG_EQ(a->GetMapByNameKeyidCount(),0, "Wrong namekeyid map size");
-  NS_TEST_EXPECT_MSG_EQ(a->GetObjectCount(),0,"LRU list size wrong");
-
-}
-EndTest ()
 
 
 BeginTest (AddContentObject)
@@ -454,6 +507,7 @@ BeginTest (AddContentObject_ObjectCapacity)
 
 }
 EndTest ()
+
 
 
 BeginTest (FindEntryInHashMap)
@@ -601,6 +655,37 @@ BeginTest (IsEntryValid)
 EndTest ()
 
 
+
+BeginTest (MatchInterestWithExpiredContent)
+{
+  printf ("TestCCNxStandardContentStore_MatchInterestWithExpiredContent DoRun\n");
+
+  //setup
+      TestData data = CreateTestData ();
+      Ptr<CCNxStandardContentStoreWithTestMethods> dut = CreateContentStore ();
+
+  //create stale content
+      uint64_t rctInMs = Simulator::Now().GetTimeStep() -1; //set  to current time less small delta
+      Ptr<CCNxCachetime> rct2 = Create<CCNxCachetime> (Create<CCNxTime> (rctInMs));
+      data.cPacket2->AddPerHopHeaderEntry(rct2);
+  // add to content store
+      dut->AddContentObject(data.cWorkItem2,data.eConnList1); StepSimulatorAddContentObject();
+      NS_TEST_EXPECT_MSG_EQ(dut->GetObjectCount(),1,"wrong number of objects in content store!");
+
+
+  // send matching interest
+
+      dut->MatchInterest(data.iWorkItem2); StepSimulatorMatchInterest ();
+      NS_TEST_EXPECT_MSG_EQ (_lookupMatchInterestCallbackPacket, Ptr<CCNxPacket>(0), "wrong Packet returned !");
+      NS_TEST_EXPECT_MSG_EQ(dut->GetObjectCount(),0,"wrong number of objects in content store!");
+
+
+}
+EndTest ()
+
+
+
+
 BeginTest (GetMapCounts)
 {
   printf ("TestCCNxStandardContentStore_GetMapCounts DoRun\n");
@@ -621,6 +706,20 @@ BeginTest (GetMapCounts)
 }
 EndTest ()
 
+BeginTest (DeleteNonExistentContentObject)
+{
+  printf ("DeleteNonExistentContentObject DoRun\n");
+  //AddContentObject with name, verify GetMapCounts = 1,1,0
+  TestData data = CreateTestData ();
+
+  Ptr<CCNxStandardContentStoreWithTestMethods> a = CreateContentStore ();
+
+  NS_TEST_EXPECT_MSG_EQ(a->DeleteContentObject(data.cPacket1),false,"should not have found entry for this packet!");
+
+}
+EndTest ()
+
+
 
 /**
  * @ingroup ccnx-test
@@ -633,20 +732,24 @@ public:
   TestSuiteCCNxStandardContentStore () : TestSuite ("ccnx-standard-content-store", UNIT)
   {
     AddTestCase (new Constructor (), TestCase::QUICK);
+
+    AddTestCase (new MatchInterestContentHasNullHash (), TestCase::QUICK);
     AddTestCase (new MatchInterest (), TestCase::QUICK);
+    AddTestCase (new NoMatchInterest (), TestCase::QUICK);
     AddTestCase (new MatchInterestHash (), TestCase::QUICK);
     AddTestCase (new MatchInterestKeyid (), TestCase::QUICK);
 
     AddTestCase (new AddContentObject (), TestCase::QUICK);
     AddTestCase (new AddContentObject_ObjectCapacity (), TestCase::QUICK);
-    AddTestCase (new GetMapCounts (), TestCase::QUICK);
     AddTestCase (new MatchInterestTwoObjects (), TestCase::QUICK);
     AddTestCase (new AddContentObject2x (), TestCase::QUICK);
     AddTestCase (new FindEntryInHashMap (), TestCase::QUICK);
     AddTestCase (new DeleteContentObject (), TestCase::QUICK);
     AddTestCase (new AddMapEntry (), TestCase::QUICK);
-    // TODO CCN FINISH THIS AddTestCase (new MatchInterestButExpired (), TestCase::QUICK);
     AddTestCase (new IsEntryValid (), TestCase::QUICK);
+    AddTestCase (new MatchInterestWithExpiredContent (), TestCase::QUICK);
+    AddTestCase (new GetMapCounts (), TestCase::QUICK);
+    AddTestCase (new DeleteNonExistentContentObject (), TestCase::QUICK);
 
 
   }

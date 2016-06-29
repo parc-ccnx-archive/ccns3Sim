@@ -413,7 +413,7 @@ CCNxStandardContentStore::GetEntryFromPacket(Ptr<CCNxPacket> cPacket)
   else
     if (cPacket->GetMessage()->GetName()->GetSegmentCount())
       {
-	  NS_LOG_INFO("cPacket has null hash. looking in name map");
+	  NS_LOG_INFO("cPacket has name but null hash. looking in name map");
 	  return(FindEntryInNameMap(cPacket));
       }
   return (Ptr<CCNxStandardContentStoreEntry>(0));

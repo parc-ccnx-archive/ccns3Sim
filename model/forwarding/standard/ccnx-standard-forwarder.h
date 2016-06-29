@@ -143,7 +143,7 @@ public:
 
   typedef enum
   {
-    PitTable,FibTable,ContentStore
+    PitTable,FibTable,ContentStore,Unused
   } TableTypes;
 
   /**
