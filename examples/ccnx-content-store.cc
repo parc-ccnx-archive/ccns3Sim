@@ -178,8 +178,8 @@ main (int argc, char *argv[])
 #if 1
 //  LogComponentEnable ("CCNxContentRepository", LOG_LEVEL_DEBUG);
   LogComponentEnable ("CCNxStandardForwarder", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
-//  LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
-//  LogComponentEnable ("CCNxStandardContentStoreLruList", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
+  LogComponentEnable ("CCNxStandardContentStore", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
+  LogComponentEnable ("CCNxStandardContentStoreLruList", (LogLevel) (LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_FUNC));
 #endif
   RunSimulation ();
   return 0;
