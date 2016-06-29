@@ -458,7 +458,6 @@ verify_test_suite_names()
          exit 13
      fi
 }
-
 if [ $RUN_SUITE == 1 ] || [ $DEBUG_SUITE == 1 ]; then
     SUITES="$SUITE_TO_RUN"
     verify_test_suite_names "$SUITES"
