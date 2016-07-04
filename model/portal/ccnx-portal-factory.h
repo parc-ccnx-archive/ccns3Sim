@@ -68,7 +68,7 @@ namespace ccnx {
  * Abstract base class for a portal factory.
  *
  * Implementations:
- *      CCNxMessagePortal
+ *      CCNxMessagePortal (This is the only one implemented right now)
  *      CCNxManifestPortal
  *      CCNxChunkPortal
  */
@@ -94,7 +94,7 @@ public:
    *
    * This usage is similar to how ns3 does its sockets and socket factories.
    *
-   * @return smart pointer to Socket
+   * @return Smart pointer to CCNx Portal
    *
    * @code
    * Ptr<CCNxPortal>

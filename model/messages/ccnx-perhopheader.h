@@ -134,6 +134,7 @@ public:
   typedef std::vector< Ptr<CCNxPerHopHeaderEntry> > HdrListType;
 
   friend std::ostream &operator<< (std::ostream &os, CCNxPerHopHeader const &headerlist);
+
 private:
 
   HdrListType m_perhopheaders;

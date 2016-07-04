@@ -63,7 +63,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup ccns-packet
+ * @ingroup ccnx-packet
  *
  * While this codec is written as a Header subclass, it is not intended
  * for independent use as a packet header.  It is written this way so it
@@ -76,13 +76,16 @@ namespace ccnx {
 class CCNxCodecName : public Header
 {
 public:
-  // virtual from Object (really Chunk)
-
+  /**
+   * virtual from Object (really Chunk)
+   */
   static TypeId GetTypeId (void);
 
   virtual TypeId GetInstanceTypeId (void) const;
 
-  // virtual from Header
+  /**
+   * virtual from Header
+   */
 
   virtual uint32_t GetSerializedSize (void) const;
 
@@ -92,7 +95,6 @@ public:
 
   virtual void Print (std::ostream &os) const;
 
-  // subclass
   CCNxCodecName ();
 
   virtual ~CCNxCodecName ();

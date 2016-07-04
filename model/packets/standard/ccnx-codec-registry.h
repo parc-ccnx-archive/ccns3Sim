@@ -63,6 +63,8 @@ namespace ns3 {
 namespace ccnx {
 
   /**
+   * @ingroup ccnx-packet
+   *
    * Registry of the codecs for each message element.  This allows a user to override a codec or
    * supply a new codec for a new TLV field.
    *
