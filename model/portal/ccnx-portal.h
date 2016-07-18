@@ -120,7 +120,7 @@ public:
   /**
    * Notify the application when a CCNxPacket sent from transport to forwarder.
    *
-   * The callback include the CCNxPortal pointer plus the CCNxPacket pointer
+   * The callback includes the CCNxPortal pointer plus the CCNxPacket pointer
    */
   void SetDataSentCallback (Callback<void, Ptr<CCNxPortal>, Ptr<CCNxPacket> > dataSentCallback);
 
@@ -168,11 +168,9 @@ private:
 
 public:
   /**
-   * Pure virtual functions to be implemented by concrete class
-   */
-
-  /**
    * Returns the CCNx L3 protocol this socket is bound to
+   *
+   * @return Smart pointer to the CCNx L3 Protocol structure
    */
   virtual Ptr<CCNxL3Protocol> GetCCNx (void) const = 0;
 

@@ -64,20 +64,21 @@ namespace ns3 {
 namespace ccnx {
 
 /**
-   * A CCNxName is an immutable object, so it is constructed and modified using a CCNxNameBuilder.
-   * A name builder allows the user to add and remove name segments.  It also supports an STL-style
-   * const_iterator over those name segments.
-   *
-   * Example: (This code sample will return "ccnx:/name=foo/name=bar/name=car")
-   * @code
-   * CCNxNameBuilder test;
-   * test.Append(Create<const CCNxNameSegment>("name=foo"));
-   * test.Append(Create<const CCNxNameSegment>("name=bar"));
-   * test.Append(Create<const CCNxNameSegment>("name=car"));
-   *
-   * Ptr<const CCNxName> name = builder.CreateName();
-   * @endcode
-   */
+ * @ingroup ccnx-messages
+ * A CCNxName is an immutable object, so it is constructed and modified using a CCNxNameBuilder.
+ * A name builder allows the user to add and remove name segments.  It also supports an STL-style
+ * const_iterator over those name segments.
+ *
+ * Example: (This code sample will return "ccnx:/name=foo/name=bar/name=car")
+ * @code
+ * CCNxNameBuilder test;
+ * test.Append(Create<const CCNxNameSegment>("name=foo"));
+ * test.Append(Create<const CCNxNameSegment>("name=bar"));
+ * test.Append(Create<const CCNxNameSegment>("name=car"));
+ *
+ * Ptr<const CCNxName> name = builder.CreateName();
+ * @endcode
+ */
 class CCNxNameBuilder
 {
 public:

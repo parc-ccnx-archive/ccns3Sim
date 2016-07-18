@@ -65,21 +65,26 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup ccnx-packet
+ * @ingroup ccnx-packet
  *
- * Codec for reading/writing a CCNxFixedHeader.
+ * Codec for reading/writing a CCNxFixedHeader. This codec takes care of
+ * reading/writing CCNx Per hop header as well.
  *
  */
 class CCNxCodecFixedHeader : public Header
 {
 public:
-  // virtual from Object (really Chunk)
+  /**
+   * virtual from Object (really Chunk)
+   */
 
   static TypeId GetTypeId (void);
 
   virtual TypeId GetInstanceTypeId (void) const;
 
-  // virtual from Header
+  /**
+   * virtual from Header
+   */
 
   /**
    * Return the number of bytes required to serialize this header
@@ -103,7 +108,6 @@ public:
    */
   virtual void Print (std::ostream &os) const;
 
-  // subclass
   CCNxCodecFixedHeader ();
 
   virtual ~CCNxCodecFixedHeader ();
