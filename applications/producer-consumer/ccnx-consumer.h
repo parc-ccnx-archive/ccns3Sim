@@ -81,7 +81,7 @@
 namespace ns3 {
 namespace ccnx {
 /**
-  * @ingroup ccnx-apps-impl
+  * @ingroup ccnx-apps-prod-cons
   *
   * The consumer class generate interests randomly for a given prefix.
   * The prefix, number of objects to express interests for are determined by the ContentRepositoryPtr that is

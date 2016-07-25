@@ -62,7 +62,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
  *
  * TLV type values for the NFP messages.
  *

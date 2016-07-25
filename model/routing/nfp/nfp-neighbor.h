@@ -68,7 +68,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
  *
  * An NfpNeighbor tracks peers in the routing protocol.  A neighbor is identified by
  * a CCNxName, which we assume is unique in the system.  Each neigbor tracks an expiry

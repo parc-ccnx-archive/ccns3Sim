@@ -68,12 +68,17 @@ namespace ccnx {
 class CCNxL3Protocol;
 
 /**
- * @defgroup ccnx-routing CCNx Routing Models
+ * @defgroup ccnx-routing CCNx Routing
  * @ingroup ccnx
  */
 
 /**
+ * @defgroup ccnx-routing-base Base Classes
  * @ingroup ccnx-routing
+ */
+
+/**
+ * @ingroup ccnx-routing-base
  *
  * Abstract base class for CCNx Routing protocol implementations
  *

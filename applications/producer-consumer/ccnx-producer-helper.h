@@ -58,11 +58,12 @@
 
 #include "ns3/object-factory.h"
 #include "ns3/ccnx-producer.h"
+
 namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-apps-impl
+ * @ingroup ccnx-apps-prod-cons
  *
  * A producer helper class helps build and associated producer classes with nodes.
  */

@@ -64,6 +64,11 @@ namespace ns3
   namespace ccnx
   {
 
+    /**
+     * @ingroup nfp-routing
+     *
+     */
+
     class NfpStats
     {
     public:

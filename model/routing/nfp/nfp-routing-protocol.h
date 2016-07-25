@@ -84,8 +84,8 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \defgroup nfp-routing Name Flooding Protocol Routing for CCNx
- * \ingroup ccnx-routing
+ * @defgroup nfp-routing Name Flooding Protocol Routing for CCNx
+ * @ingroup ccnx-routing
  *
  * The Name Flooding Protocol (NFP) is a distance vector routing protocol for CCNx names.
  * It is implemented in the class NfpRoutingProtocol that inherits from CCNxRoutingProtocol.

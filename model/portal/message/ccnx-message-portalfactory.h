@@ -63,7 +63,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-portal-impl
+ * @ingroup ccnx-portal-message
  *
  * A factory to aggregate to an ns3::Node. Used to create CCNxMessagePortal instances.
  */
