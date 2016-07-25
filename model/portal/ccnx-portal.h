@@ -71,7 +71,12 @@ namespace ccnx {
  */
 
 /**
+ * @defgroup ccnx-portal-base Base classes
  * @ingroup ccnx-portal
+ */
+
+/**
+ * @ingroup ccnx-portal-base
  *
  * The approximate equivalent of a Socket.  This is the abstraction that an Application
  * uses to communicate with a CCNxL4Protocol.
