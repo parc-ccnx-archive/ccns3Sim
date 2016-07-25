@@ -73,7 +73,8 @@
 namespace ns3 {
 namespace ccnx {
 /**
- * @ingroup ccnx-apps
+ * @ingroup ccnx-apps-impl
+ *
  * The content repository class is specific to the producer consumer app implementation.
  * This class when instantiated provides the entire set of possible content objects.
  * This is then used by the producer class to serve content objects from.

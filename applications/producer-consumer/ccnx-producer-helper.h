@@ -62,7 +62,8 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-apps
+ * @ingroup ccnx-apps-impl
+ *
  * A producer helper class helps build and associated producer classes with nodes.
  */
 class CCNxProducerHelper

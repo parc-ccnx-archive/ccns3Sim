@@ -71,7 +71,12 @@ namespace ccnx {
  */
 
 /**
- * @defgroup ccnx-portal-base Base classes
+ * @defgroup ccnx-portal-base Base Classes
+ * @ingroup ccnx-portal
+ */
+
+/**
+ * @defgroup ccnx-portal-impl Message portal
  * @ingroup ccnx-portal
  */
 

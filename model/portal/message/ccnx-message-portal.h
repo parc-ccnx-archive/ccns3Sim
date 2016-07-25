@@ -72,11 +72,6 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @defgroup ccnx-portal-impl Message portal
- * @ingroup ccnx-portal
- */
-
-/**
  * @ingroup ccnx-portal-impl
  *
  * A Message portal does no L4 processing on packets, it passes them one for one.
