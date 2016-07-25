@@ -80,7 +80,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-apps
+ * @ingroup ccnx-apps-impl
  *
  * The producer class is the custodian of content objects.
  * The producer class is derived from the CCNxApplication class which in turn is derived from ns3::Application.

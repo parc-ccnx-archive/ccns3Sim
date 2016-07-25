@@ -63,11 +63,23 @@ namespace ccnx {
 /**
  * @defgroup ccnx-apps CCNx Applications
  * @ingroup ccnx
+ * CCN applications.
+ */
+
+/**
+ * @defgroup ccnx-apps-base Base Classes
+ * @ingroup ccnx-apps
  * The base class for CCN applications.
  */
 
-/*
+/**
+ * @defgroup ccnx-apps-impl Producer Consumer
  * @ingroup ccnx-apps
+ * The implementation for CCN applications.
+ */
+
+/**
+ * @ingroup ccnx-apps-base
  * This is the abstract base class of a CCNx application.
  */
 class CCNxApplication : public Application
