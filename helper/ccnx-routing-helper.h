@@ -73,9 +73,9 @@ class CCNxRoutingProtocol;
 class CCNxListRouting;
 
 /**
- * @ingroup ccnx-routing
+ * @ingroup ccnx-routing-base
  *
- * \brief a factory to create ns3::ccnx::CCNxRoutingProtocol on a node.
+ * A factory to create ns3::ccnx::CCNxRoutingProtocol on a node.
  *
  * This is a base class for a specific routing helper, such as CCNxStaticRoutingHelper
  * or NfpRoutingHelper.

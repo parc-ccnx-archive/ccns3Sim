@@ -62,7 +62,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
  *
  * NFP uses 32-bit and 16-bit sequence numbers.  This class encapsulates those sequence numbers
  * to make it easy to do comparisons.

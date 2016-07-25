@@ -65,10 +65,11 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
+ *
  * Represents a withdraw message to cancel a route advertisement.
  *
- * \see nfp-schema.h for packet formats
+ * @see nfp-schema.h for packet formats
  */
 class NfpWithdraw : public NfpMessage
 {

@@ -69,9 +69,9 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
  *
- * \brief NFP data is carried in the Payload field of a CCNxInterest.
+ * NFP data is carried in the Payload field of a CCNxInterest.
  *
  * The payload of an Interest.
  */

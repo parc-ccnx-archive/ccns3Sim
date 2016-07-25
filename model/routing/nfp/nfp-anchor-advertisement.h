@@ -68,6 +68,8 @@ namespace ns3 {
 namespace ccnx {
 
 /**
+ * @ingroup nfp-routing
+ *
  * Represents an advertisement by an anchor for a specific prefix.
  *
  * These entries are stored in the prefixes table (NfpPrefix).

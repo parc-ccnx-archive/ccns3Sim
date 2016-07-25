@@ -74,6 +74,8 @@ namespace ns3 {
 namespace ccnx {
 
 /**
+ * @ingroup nfp-routing
+ *
  * Stores state related to a prefix.
  *
  * Multiple anchors can advertise the same prefix.  This allows us to multi-path for

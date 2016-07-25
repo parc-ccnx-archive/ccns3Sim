@@ -62,6 +62,10 @@
 namespace ns3 {
 namespace ccnx {
 
+/**
+ * @ingroup nfp-routing
+ */
+
 class NfpWorkQueueEntry : public SimpleRefCount<NfpWorkQueueEntry>
 {
 public:

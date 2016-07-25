@@ -76,7 +76,7 @@ namespace ccnx {
  */
 
 /**
- * @defgroup ccnx-portal-impl Message portal
+ * @defgroup ccnx-portal-message Message portal
  * @ingroup ccnx-portal
  */
 

@@ -67,7 +67,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
  *
  * The work queue tracks (anchorName, prefix) pairs.  When something is inserted into the work queue,
  * it is a book mark for the routing protocol that it has to do something with that pair.

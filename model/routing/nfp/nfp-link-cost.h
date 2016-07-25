@@ -63,7 +63,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
  *
  * An entry in the link cost table.  A link cost entry tracks the cost of
  * a link represented by a Layer 3 CCNxConnection.

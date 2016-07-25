@@ -64,6 +64,8 @@ namespace ns3 {
 namespace ccnx {
 
 /**
+ * @ingroup nfp-routing
+ *
  * Represents an entry in the NfpPrefixTimerHeap.
  */
 class NfpPrefixTimerEntry : public SimpleRefCount<NfpPrefixTimerEntry>

@@ -73,7 +73,7 @@ namespace ccnx {
  */
 
 /**
- * @defgroup ccnx-apps-impl Producer Consumer
+ * @defgroup ccnx-apps-prod-cons Producer Consumer
  * @ingroup ccnx-apps
  * The implementation for CCN applications.
  */

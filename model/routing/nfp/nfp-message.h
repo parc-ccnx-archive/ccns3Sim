@@ -65,7 +65,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
  *
  * The abstract base class of an Advertise or a Withdraw
  */

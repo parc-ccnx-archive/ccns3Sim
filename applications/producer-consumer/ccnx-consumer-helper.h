@@ -61,7 +61,7 @@
 namespace ns3 {
 namespace ccnx {
 /**
- * @ingroup ccnx-apps-impl
+ * @ingroup ccnx-apps-prod-cons
  *
  * A consumer helper class helps build consumer classes and associate them with nodes.
  */

@@ -67,7 +67,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
  *
  * An advertisement inside an NfpMessage.  See NfpSchema.h for packet format.
  */

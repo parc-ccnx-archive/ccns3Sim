@@ -66,7 +66,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup nfp-routing
+ * @ingroup nfp-routing
  *
  * Implements the base class CCNxRoutingProtocol.
  *

@@ -60,7 +60,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup ccnx-routing
+ * @ingroup ccnx-routing-base
  *
  * A class that is used for results of RouteIn() and RouteOut() lookups by forwarders.
  *
