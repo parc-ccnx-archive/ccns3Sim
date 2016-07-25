@@ -63,7 +63,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-portal
+ * @ingroup ccnx-portal-base
  *
  * Abstract base class for a portal factory.
  *
