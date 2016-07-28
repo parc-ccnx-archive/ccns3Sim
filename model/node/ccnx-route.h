@@ -68,7 +68,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-l3
+ * @ingroup ccnx-l3-base
  *
  * Represents a route to a prefix.  It is zero or more CCNxRouteEntry.
  *

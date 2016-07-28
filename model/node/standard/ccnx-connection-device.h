@@ -67,7 +67,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-standard-l3
+ * @ingroup ccnx-l3-standard
  *
  * Represents a network device (NetDevice) as a CCnx connection.
  * You must set the protocol number, output device, and nexthop.

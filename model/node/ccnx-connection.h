@@ -68,7 +68,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-l3
+ * @ingroup ccnx-l3-base
  *
  * Represents a peering association with a neighbor.
  * Also represents the reverse route from which a packet came.

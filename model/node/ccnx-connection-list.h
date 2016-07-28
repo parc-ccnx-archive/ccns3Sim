@@ -64,7 +64,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-l3
+ * @ingroup ccnx-l3-base
  *
  * A memory managed list of `Ptr<CCNxConnection>`s.  This is so we don't
  * need to toss around a `std::list< Ptr<CCNxConnection> >`.

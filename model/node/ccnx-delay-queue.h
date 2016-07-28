@@ -67,7 +67,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-l3
+ * @ingroup ccnx-l3-base
  *
  * The CCNxDelayQueue is a general queuing class to delay events.  Several of
  * the major CCNx forwarding components have delay queues to model computation time.

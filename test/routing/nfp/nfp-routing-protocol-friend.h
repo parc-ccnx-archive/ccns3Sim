@@ -84,7 +84,7 @@ CreateProtocol (Ptr<Node> node)
 }
 
 /**
- * \ingroup ccnx-test
+ * @ingroup ccnx-test
  *
  * This class is a Friend of NfpRoutingProtocol so we can access protected class members.
  *

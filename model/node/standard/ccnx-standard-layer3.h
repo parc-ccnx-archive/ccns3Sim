@@ -86,12 +86,7 @@ class Node;
 namespace ccnx {
 
 /**
- * @defgroup ccnx-standard-l3 CCNx Standard L3
- * @ingroup ccnx-l3
- */
-
-/**
- * @ingroup ccnx-standard-l3
+ * @ingroup ccnx-l3-standard
 *
 * Implements the NS3 interface for CCNx Forwarder implementation (CCNxForwarder)
 *

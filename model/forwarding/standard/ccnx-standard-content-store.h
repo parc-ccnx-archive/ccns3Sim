@@ -65,6 +65,10 @@
 #include "ns3/ccnx-name.h"
 #include "ns3/ccnx-hash-value.h"
 
+#define KEYIDHACK
+
+namespace ns3 {
+namespace ccnx {
 
 /**
  * @ingroup ccnx-standard-forwarder
@@ -74,10 +78,6 @@
  *
  */
 
-namespace ns3 {
-namespace ccnx {
-
-#define KEYIDHACK
 class CCNxStandardContentStore : public CCNxContentStore
 {
 public:

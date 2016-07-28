@@ -288,13 +288,9 @@ BeginTest (TestDeserialize_PayloadType)
 
 }
 EndTest ()
-}
-
-// =================================
-// Finally, define the TestSuite
 
 /**
- * #ingroup ccnx-test
+ * @ingroup ccnx-test
  *
  * Test Suite for CCNxCodecContentObject
  */
@@ -313,3 +309,4 @@ public:
   }
 } g_TestSuiteCCNxCodecContentObject;
 
+}

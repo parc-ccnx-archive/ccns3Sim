@@ -64,7 +64,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-l3
+ * @ingroup ccnx-l3-base
  *
  * Abstract base class for a CCNx Layer3 helper.  This is used to install a specific
  * Layer 3 protocol on a node, for example `CCNxStandardLayer3Helper`.

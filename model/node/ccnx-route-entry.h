@@ -65,7 +65,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-l3
+ * @ingroup ccnx-l3-base
  *
  * A CCNxRouteEntry represents the data that is put in the FIB.  It is a (prefix, cost, Connection) tuple.  The prefix
  * is the CCNx name prefix.  The cost is a measure of using the route.  The Connection is the egress connection, which

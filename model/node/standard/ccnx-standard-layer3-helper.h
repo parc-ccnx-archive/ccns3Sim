@@ -62,7 +62,7 @@
 namespace ns3 {
 namespace ccnx {
 /**
- * @ingroup ccnx-standard-l3
+ * @ingroup ccnx-l3-standard
  *
  * Installs the `CCNxStandardLayer3` protocol on a node as the `CCNxLayer3Protocol`.
  */

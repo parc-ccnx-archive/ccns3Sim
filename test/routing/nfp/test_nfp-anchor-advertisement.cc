@@ -268,9 +268,9 @@ BeginTest (TestUpdateAdvertisement_GetNexthopCount_WithExpiry)
 EndTest ()
 
 /**
- * \ingroup ccnx-test
+ * @ingroup ccnx-test
  *
- * \brief Test Suite for NfpRoutingProtocol
+ * Test Suite for NfpRoutingProtocol
  */
 static class TestSuiteNfpAnchorAdvertisement : public TestSuite
 {

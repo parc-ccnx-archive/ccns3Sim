@@ -66,7 +66,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-forwarder
+ * @ingroup ccnx-forwarder-base
  *
  * Abstract base class for the helper that will install a specific CCNx forwarder
  * on a node.  For example, `CCNxFlatForwarderHelper` or `CCNxStandardForwarderHelper`.

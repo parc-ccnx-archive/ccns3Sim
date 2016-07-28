@@ -68,9 +68,8 @@
 namespace ns3 {
 namespace ccnx {
 
-
 /**
- * @ingroup ccnx-forwarder
+ * @ingroup ccnx-forwarder-base
  *
  * Abstract base class of a PIT.
  *
