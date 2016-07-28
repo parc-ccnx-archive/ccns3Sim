@@ -129,9 +129,9 @@ BeginTest (TestDeserialize)
 EndTest ()
 
 /**
- * \ingroup ccnx-test
+ * @ingroup ccnx-test
  *
- * \brief Test Suite for CCNxCodecName
+ * Test Suite for CCNxCodecName
  */
 static class TestSuiteCCNxCodecName : public TestSuite
 {

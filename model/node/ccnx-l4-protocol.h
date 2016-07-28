@@ -68,7 +68,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-l3
+ * @ingroup ccnx-l3-base
  *
  * This class is used as an interface between the CCNxL3Protocol and CCNxPortal instances.
  * The CCNxL4Protocol is the view of a L4 protocol from the L3 side.

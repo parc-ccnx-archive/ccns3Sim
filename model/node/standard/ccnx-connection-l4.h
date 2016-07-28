@@ -64,7 +64,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-standard-l3
+ * @ingroup ccnx-l3-standard
  *
  * Represents a local L4 protocol.  You must set the ReceiveCallback.
  */

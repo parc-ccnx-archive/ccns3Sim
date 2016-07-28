@@ -74,12 +74,17 @@ namespace ccnx {
 class CCNxL3Protocol;
 
 /**
- * @defgroup ccnx-forwarder CCNx Forwarder model
+ * @defgroup ccnx-forwarder CCNx Forwarder
  * @ingroup ccnx
  */
 
 /**
+ * @defgroup ccnx-forwarder-base Base Classes
  * @ingroup ccnx-forwarder
+ */
+
+/**
+ * @ingroup ccnx-forwarder-base
  *
  * This is the abstract base class of a CCNx Forwarder.  The forwarder is responsible for
  * handling requests to `RouteIn()` and `RouteOut()` to resolve a CCNxConnection for forwarding

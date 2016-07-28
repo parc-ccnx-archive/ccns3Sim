@@ -63,7 +63,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-forwarder
+ * @ingroup ccnx-forwarder-base
  *
  * Factory which can be used to create a null ContentStore in a forwarder.
  *

@@ -67,7 +67,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-l3
+ * @ingroup ccnx-l3-base
  *
  * Represents a device interface at the L3 level.  Has controls to turn the interface
  * up/down or forwarding/non-forwarding at the L3 level without affecting the actual device.

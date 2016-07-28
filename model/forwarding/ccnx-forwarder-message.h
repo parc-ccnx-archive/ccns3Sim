@@ -64,7 +64,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * @ingroup ccnx-forwarder
+ * @ingroup ccnx-forwarder-base
  *
  * The `CCNxForwarderMessage` is the object that is passed between forwarder components.  The PIT, FIB, and ContentStore
  * use an asynchronous message passing API, and this is the message that is passed.

@@ -53,9 +53,6 @@
  * contact PARC at cipo@parc.com for more information or visit http://www.ccnx.org
  */
 
-#ifndef CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_
-#define CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_
-
 #include <map>
 #include "ns3/ccnx-content-store.h"
 #include "ns3/ccnx-standard-content-store-entry.h"
@@ -65,8 +62,16 @@
 #include "ns3/ccnx-hash-value.h"
 #include "ns3/log.h"
 
+#ifndef CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_
+#define CCNS3SIM_MODEL_FORWARDING_STANDARD_CCNX_SSTANDARD_CONTENT_WITH_TEST_METHODS_STORE_H_
+
 namespace ns3 {
 namespace ccnx {
+
+/**
+ * @ingroup ccnx-test
+ *
+ */
 
 class CCNxStandardContentStoreWithTestMethods : public CCNxStandardContentStore
 {

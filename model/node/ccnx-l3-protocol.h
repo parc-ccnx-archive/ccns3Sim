@@ -89,7 +89,17 @@ namespace ccnx {
  */
 
 /**
+ * @defgroup ccnx-l3-base Base Classes
  * @ingroup ccnx-l3
+ */
+
+/**
+ * @defgroup ccnx-l3-standard Standard L3 protocol
+ * @ingroup ccnx-l3
+ */
+
+/**
+ * @ingroup ccnx-l3-base
  *
  * Defines the CCNx Layer 3 protocol
  *

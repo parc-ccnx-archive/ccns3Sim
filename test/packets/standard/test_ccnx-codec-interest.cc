@@ -60,8 +60,6 @@
 using namespace ns3;
 using namespace ns3::ccnx;
 
-// =================================
-
 static const uint8_t payloadBytes[] = "an apple a day";
 
 static Ptr<CCNxBuffer>
@@ -175,13 +173,13 @@ BeginTest (TestDeserialize)
   NS_TEST_EXPECT_MSG_EQ (equal, true, "Data in buffer wrong");
 }
 EndTest ()
-}
 
 /**
  * @ingroup ccnx-test
  *
  * Test Suite for CCNxCodecInterest
  */
+
 static class TestSuiteCCNxCodecInterest : public TestSuite
 {
 public:
@@ -193,3 +191,4 @@ public:
   }
 } g_TestSuiteCCNxCodecInterest;
 
+}

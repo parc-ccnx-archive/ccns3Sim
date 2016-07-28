@@ -247,9 +247,9 @@ BeginTest (TestEquals)
 EndTest ()
 
 /**
- * \ingroup ccnx-test
+ * @ingroup ccnx-test
  *
- * \brief Test Suite for NfpRoutingProtocol
+ * @brief Test Suite for NfpRoutingProtocol
  */
 static class TestSuiteNfpAdvertise : public TestSuite
 {

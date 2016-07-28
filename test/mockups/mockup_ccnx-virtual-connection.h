@@ -64,7 +64,7 @@ namespace ns3 {
 namespace ccnx {
 
 /**
- * \ingroup ccnx-l3
+ * @ingroup ccnx-test
  *
  *  This is a derived CCNxConnection class used for testing only.
  *  Needed for Unit Testing since CCNxConnection base class is abstract.
