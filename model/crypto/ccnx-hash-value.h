@@ -155,6 +155,13 @@ public:
    */
   bool operator < (const CCNxHashValue &other) const;
 
+  /**
+   * Returns the number of bytes in the hash value
+   *
+   * @return Byte length of hash value
+   */
+  size_t size() const;
+
 private:
   void InitializeFromInteger (uint64_t value, size_t length);
   Ptr<const CCNxByteArray> m_value;

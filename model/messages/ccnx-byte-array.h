@@ -85,16 +85,67 @@ public:
 
   virtual ~CCNxByteArray ();
 
+  /**
+   * The byte length of the array
+   * @return The number of bytes in the array
+   */
   size_t size () const;
 
+  /**
+   * Index operator
+   *
+   * Will throw exception if index is out of range.
+   *
+   * @param index The byte position to return, must be 0 <= index < size()
+   * @return The byte value at index
+   */
   const uint8_t operator [] (size_t index) const;
 
+  /**
+   * Represents the byte array as a CCNxBuffer
+   *
+   * @return A CCNxBuffer wraped around the byte array
+   */
   Ptr<CCNxBuffer> CreateBuffer () const;
 
+  /**
+   * Two byte arrays are equal if they are the same length and byte-for-byte the same.
+   *
+   * lexicographically compares two byte arrays.
+   *
+   * @param other The byte array to compare against
+   * @return true If same length and byte-for-byte equal
+   * @return false Otherwise
+   */
   bool operator == (const CCNxByteArray &other) const;
+
+  /**
+   * Two byte arrays are not equal if they are the different lengths or at least one byte differs.
+   *
+   * lexicographically compares two byte arrays.
+   *
+   * @param other The byte array to compare against
+   * @return true If they are not equal
+   * @return false If they are equal
+   */
   bool operator != (const CCNxByteArray &other) const;
+
+  /**
+   * lexicographically compares two byte arrays.
+   *
+   * @param other The other byte array to compare with
+   * @return true if this byte array is less than the other byte array
+   * @return false If this byte arrays is not less then the other
+   */
   bool operator < (const CCNxByteArray &other) const;
 
+  /**
+   * Output operator to hex print the byte array
+   *
+   * @param os The output stream
+   * @param array The byte array to dump (must be non-null)
+   * @return The updated output stream
+   */
   friend std::ostream & operator << (std::ostream &os, CCNxByteArray const &array);
 
   typedef std::vector<uint8_t> StorageType;
@@ -106,6 +157,11 @@ protected:
 public:
   typedef std::allocator< uint8_t > allocator_type;
 
+  /**
+   * A const forward iterator for a byte array.
+   *
+   * Allows walking through the bytes via a C++ iterator
+   */
   class const_iterator
   {
 public:
@@ -132,9 +188,28 @@ protected:
     CCNxByteArray::IteratorType m_iter;
   };
 
+  /**
+   * Returns a forward const iterator representing the start of the array
+   * @return An iterator
+   */
   const_iterator begin () const;
+
+  /**
+   * Returns a forward const iterator representing the start of the array
+   * @return An iterator
+   */
   const_iterator cbegin () const;
+
+  /**
+   * Returns a forward const iterator representing the end of the array
+   * @return An iterator
+   */
   const_iterator end () const;
+
+  /**
+   * Returns a forward const iterator representing the end of the array
+   * @return An iterator
+   */
   const_iterator cend () const;
 
 };

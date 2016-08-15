@@ -144,3 +144,95 @@ ns3::ccnx::operator << (std::ostream &os, CCNxByteArray const &array)
   os << " }";
   return os;
 }
+
+Ptr<CCNxBuffer>
+CCNxByteArray::CreateBuffer () const
+{
+  // Exploits the fact that a std::vector will be linear memory from begin()
+  const uint8_t *p = &m_bytes[0];
+  Ptr<CCNxBuffer> buffer = Create<CCNxBuffer>(m_bytes.size(), (const char *) p );
+  return buffer;
+}
+
+// ==========
+// STL Container style interface
+
+CCNxByteArray::const_iterator
+CCNxByteArray::begin () const
+{
+  return CCNxByteArray::const_iterator (m_bytes.begin ());
+}
+
+CCNxByteArray::const_iterator
+CCNxByteArray::cbegin () const
+{
+  return CCNxByteArray::const_iterator (m_bytes.cbegin ());
+}
+
+CCNxByteArray::const_iterator
+CCNxByteArray::end () const
+{
+  return CCNxByteArray::const_iterator (m_bytes.end ());
+}
+
+CCNxByteArray::const_iterator
+CCNxByteArray::cend () const
+{
+  return CCNxByteArray::const_iterator (m_bytes.cend ());
+}
+
+CCNxByteArray::const_iterator::const_iterator (CCNxByteArray::IteratorType iter) : m_iter (iter)
+{
+  // empty
+}
+
+CCNxByteArray::const_iterator::const_iterator (const CCNxByteArray::const_iterator& other) : m_iter (other.m_iter)
+{
+  // empty
+}
+
+CCNxByteArray::const_iterator::~const_iterator ()
+{
+  // empty
+}
+
+CCNxByteArray::const_iterator &
+CCNxByteArray::const_iterator::operator = (const const_iterator &other)
+{
+  m_iter = other.m_iter;
+  return *this;
+}
+
+bool
+CCNxByteArray::const_iterator::operator == (const const_iterator & other) const
+{
+  return m_iter == other.m_iter;
+}
+
+bool
+CCNxByteArray::const_iterator::operator != (const const_iterator & other) const
+{
+  return m_iter != other.m_iter;
+}
+
+CCNxByteArray::const_iterator &
+CCNxByteArray::const_iterator::operator++ ()
+{
+  m_iter++;
+  return *this;
+}
+
+CCNxByteArray::const_iterator::const_reference
+CCNxByteArray::const_iterator::operator* () const
+{
+  // We want to only return the Ptr<CCNxByteArray>, so we look at the second part of m_iter
+  return *m_iter;
+}
+
+CCNxByteArray::const_iterator::const_pointer
+CCNxByteArray::const_iterator::operator-> () const
+{
+  return &*m_iter;
+}
+
+

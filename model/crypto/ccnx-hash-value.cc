@@ -120,6 +120,11 @@ ns3::ccnx::operator == (Ptr<const CCNxHashValue> a, Ptr<const CCNxHashValue> b)
 Ptr<CCNxBuffer>
 CCNxHashValue::CreateBuffer () const
 {
-  // FIXME
-  return Ptr<CCNxBuffer> (0);
+  return m_value->CreateBuffer();
+}
+
+size_t
+CCNxHashValue::size() const
+{
+  return m_value->size();
 }
