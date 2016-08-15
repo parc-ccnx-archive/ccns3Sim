@@ -63,8 +63,188 @@ using namespace ns3::ccnx;
 
 namespace TestSuiteCCNxByteArray {
 
-BeginTest (Constructor)
+BeginTest (Constructor_Pointer)
 {
+  const uint8_t truth[] = { 1, 2, 3, 4, 5 };
+  Ptr<CCNxByteArray> array = Create<CCNxByteArray>(sizeof(truth), truth);
+
+  bool exists = (array);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Got null pointer");
+
+  NS_TEST_EXPECT_MSG_EQ(array->size(), sizeof(truth), "Wrong size");
+}
+EndTest ()
+
+BeginTest (Constructor_Vector)
+{
+  const uint8_t truth[] = { 1, 2, 3, 4, 5 };
+  std::vector<uint8_t> v ( truth, truth + sizeof(truth) );
+  Ptr<CCNxByteArray> array = Create<CCNxByteArray>(v);
+
+  bool exists = (array);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Got null pointer");
+
+  NS_TEST_EXPECT_MSG_EQ(array->size(), v.size(), "Wrong size");
+}
+EndTest ()
+
+BeginTest (size)
+{
+  const uint8_t truth[] = { 1, 2, 3, 4, 5, 6 };
+  Ptr<CCNxByteArray> array = Create<CCNxByteArray>(sizeof(truth), truth);
+  NS_TEST_EXPECT_MSG_EQ(array->size(), sizeof(truth), "Wrong size");
+}
+EndTest ()
+
+BeginTest (Operator_Index)
+{
+  const uint8_t truth[] = { 1, 2, 3, 4, 5, 6 };
+  Ptr<CCNxByteArray> array = Create<CCNxByteArray>(sizeof(truth), truth);
+  for (int i = 0; i < sizeof(truth); ++i) {
+      uint8_t actual = truth[i];
+      uint8_t test = (*array)[i];
+      NS_TEST_EXPECT_MSG_EQ(actual, test, "Wrong value");
+  }
+}
+EndTest ()
+
+BeginTest (Operator_Equals)
+{
+  const uint8_t base[] = { 1, 2, 3, 4, 5, 6 };
+  Ptr<CCNxByteArray> a = Create<CCNxByteArray>(sizeof(base), base);
+  Ptr<CCNxByteArray> b = Create<CCNxByteArray>(sizeof(base), base);
+  Ptr<CCNxByteArray> c = Create<CCNxByteArray>(sizeof(base), base);
+
+  const uint8_t false_x[] = { 1, 2, 3, 4 }; // wrong size
+  const uint8_t false_y[] = { 1, 2, 9, 4, 5, 6 };  // wrong value
+
+  Ptr<CCNxByteArray> x = Create<CCNxByteArray>(sizeof(false_x), false_x);
+  Ptr<CCNxByteArray> y = Create<CCNxByteArray>(sizeof(false_y), false_y);
+
+  bool equals;
+
+  equals = ((*a) == (*b));
+  NS_TEST_EXPECT_MSG_EQ(equals, true, "a != b");
+  equals = ((*b) == (*c));
+  NS_TEST_EXPECT_MSG_EQ(equals, true, "b != c");
+  equals = ((*c) == (*a));
+  NS_TEST_EXPECT_MSG_EQ(equals, true, "c != a");
+
+  equals = ((*a) == (*x));
+  NS_TEST_EXPECT_MSG_EQ(equals, false, "a == x");
+  equals = ((*a) == (*y));
+  NS_TEST_EXPECT_MSG_EQ(equals, false, "a == y");
+}
+EndTest ()
+
+BeginTest (Operator_NotEquals)
+{
+  const uint8_t base[] = { 1, 2, 3, 4, 5, 6 };
+  Ptr<CCNxByteArray> a = Create<CCNxByteArray>(sizeof(base), base);
+  Ptr<CCNxByteArray> b = Create<CCNxByteArray>(sizeof(base), base);
+  Ptr<CCNxByteArray> c = Create<CCNxByteArray>(sizeof(base), base);
+
+  const uint8_t false_x[] = { 1, 2, 3, 4 }; // wrong size
+  const uint8_t false_y[] = { 1, 2, 9, 4, 5, 6 };  // wrong value
+
+  Ptr<CCNxByteArray> x = Create<CCNxByteArray>(sizeof(false_x), false_x);
+  Ptr<CCNxByteArray> y = Create<CCNxByteArray>(sizeof(false_y), false_y);
+
+  bool equals;
+
+  equals = ((*a) != (*b));
+  NS_TEST_EXPECT_MSG_EQ(equals, false, "a != b");
+  equals = ((*b) != (*c));
+  NS_TEST_EXPECT_MSG_EQ(equals, false, "b != c");
+  equals = ((*c) != (*a));
+  NS_TEST_EXPECT_MSG_EQ(equals, false, "c != a");
+
+  equals = ((*a) != (*x));
+  NS_TEST_EXPECT_MSG_EQ(equals, true, "a == x");
+  equals = ((*a) != (*y));
+  NS_TEST_EXPECT_MSG_EQ(equals, true, "a == y");
+}
+EndTest ()
+
+BeginTest (Operator_Less)
+{
+
+  const uint8_t aArray[] = { 1, 2, 3, 4, 5, 6 };
+  Ptr<CCNxByteArray> a = Create<CCNxByteArray>(sizeof(aArray), aArray);
+  Ptr<CCNxByteArray> equal = Create<CCNxByteArray>(sizeof(aArray), aArray);
+
+  const uint8_t shorterArray[] = { 1, 2, 3, 4 };
+  Ptr<CCNxByteArray> shorter = Create<CCNxByteArray>(sizeof(shorterArray), shorterArray);
+
+  const uint8_t longerArray[] = { 1, 2, 3, 4, 5, 6, 7 };
+  Ptr<CCNxByteArray> longer = Create<CCNxByteArray>(sizeof(longerArray), longerArray);
+
+  const uint8_t lessArray[] = { 1, 2, 3, 4, 5, 5 };
+  Ptr<CCNxByteArray> less = Create<CCNxByteArray>(sizeof(lessArray), lessArray);
+
+  bool isLess;
+
+  isLess = ((*a) < (*a));
+  NS_TEST_EXPECT_MSG_EQ(isLess, false, "a < a");
+
+  isLess = ((*a) < (*equal));
+  NS_TEST_EXPECT_MSG_EQ(isLess, false, "a < equal");
+
+  isLess = ((*a) < (*shorter));
+  NS_TEST_EXPECT_MSG_EQ(isLess, false, "a < shorter");
+
+  isLess = ((*shorter) < (*a));
+  NS_TEST_EXPECT_MSG_EQ(isLess, true, "shorter !< a");
+
+  isLess = ((*a) < (*longer));
+  NS_TEST_EXPECT_MSG_EQ(isLess, true, "a !< longer");
+
+  isLess = ((*longer) < (*a));
+  NS_TEST_EXPECT_MSG_EQ(isLess, false, "longer < a");
+
+  isLess = ((*a) < (*less));
+  NS_TEST_EXPECT_MSG_EQ(isLess, false, "a < less");
+
+  isLess = ((*less) < (*a));
+  NS_TEST_EXPECT_MSG_EQ(isLess, true, "less !< a");
+}
+EndTest ()
+
+BeginTest (Iterator)
+{
+  const uint8_t aArray[] = { 1, 2, 3, 4, 5, 6 };
+  Ptr<CCNxByteArray> a = Create<CCNxByteArray>(sizeof(aArray), aArray);
+
+  int offset = 0;
+  for (CCNxByteArray::const_iterator i = a->begin(); i != a->end(); ++i) {
+      uint8_t truth = aArray[offset];
+      uint8_t test = *i;
+      NS_TEST_EXPECT_MSG_EQ(truth, test, "Incorrect value from iterator");
+      ++offset;
+  }
+}
+EndTest ()
+
+BeginTest (CreateBuffer)
+{
+  const uint8_t aArray[] = { 1, 2, 3, 4, 5, 6 };
+  Ptr<CCNxByteArray> a = Create<CCNxByteArray>(sizeof(aArray), aArray);
+
+  Ptr<CCNxBuffer> buffer = a->CreateBuffer();
+  bool exists = (buffer);
+  NS_TEST_EXPECT_MSG_EQ (exists, true, "Got null pointer from CreateBuffer");
+
+  NS_TEST_EXPECT_MSG_EQ(a->size(), buffer->GetSize(), "Wrong buffer size");
+
+  int offset = 0;
+
+  Buffer::Iterator i = buffer->Begin();
+  while (! i.IsEnd() ) {
+      uint8_t truth = aArray[offset];
+      uint8_t test = i.ReadU8();
+      NS_TEST_EXPECT_MSG_EQ(truth, test, "Incorrect value from iterator");
+      ++offset;
+  }
 }
 EndTest ()
 
@@ -78,7 +258,15 @@ static class TestSuiteCCNxByteArray : public TestSuite
 public:
   TestSuiteCCNxByteArray () : TestSuite ("ccnx-byte-array", UNIT)
   {
-    AddTestCase (new Constructor (), TestCase::QUICK);
+    AddTestCase (new Constructor_Pointer (), TestCase::QUICK);
+    AddTestCase (new Constructor_Vector (), TestCase::QUICK);
+    AddTestCase (new size (), TestCase::QUICK);
+    AddTestCase (new Operator_Index (), TestCase::QUICK);
+    AddTestCase (new Operator_Equals (), TestCase::QUICK);
+    AddTestCase (new Operator_NotEquals (), TestCase::QUICK);
+    AddTestCase (new Operator_Less (), TestCase::QUICK);
+    AddTestCase (new Iterator (), TestCase::QUICK);
+    AddTestCase (new CreateBuffer (), TestCase::QUICK);
   }
 } g_TestSuiteCCNxByteArray;
 
