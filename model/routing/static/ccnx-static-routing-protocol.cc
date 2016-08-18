@@ -65,7 +65,7 @@ NS_OBJECT_ENSURE_REGISTERED (StaticRoutingProtocol);
 TypeId
 StaticRoutingProtocol::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::ccnx::staticRoutingProtocol")
+  static TypeId tid = TypeId ("ns3::ccnx::StaticRoutingProtocol")
     .SetParent<CCNxRoutingProtocol> ()
     .SetGroupName ("CCNx")
     .AddConstructor<StaticRoutingProtocol> ();
