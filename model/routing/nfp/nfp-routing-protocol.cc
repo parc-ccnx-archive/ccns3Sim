@@ -320,6 +320,8 @@ void
 NfpRoutingProtocol::SetTimer (Timer &timer, Time interval, Time jitter)
 {
   Time final = CalculateJitteredTime (interval, jitter);
+
+  timer.Cancel();
   timer.SetDelay (final);
   timer.Schedule ();
 

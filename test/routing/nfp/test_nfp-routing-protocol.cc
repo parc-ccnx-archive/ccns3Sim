@@ -132,6 +132,8 @@ SetupTapDevice (Ptr<Node> node, uint32_t id,
 
 BeginTest (TestGetTypeId)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   TypeId id = NfpRoutingProtocol::GetTypeId ();
 
   std::string name = id.GetName ();
@@ -143,6 +145,7 @@ EndTest ()
 
 BeginTest (TestAddAnchor_FirstTime)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (Create<Node> ());
   NfpRoutingProtocolFriend theFriend (nfp);
   theFriend.DoInitialize ();
@@ -160,6 +163,8 @@ EndTest ()
 
 BeginTest (TestAddAnchor_SecondTime)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (Create<Node> ());
   NfpRoutingProtocolFriend theFriend (nfp);
   theFriend.DoInitialize ();
@@ -178,6 +183,8 @@ EndTest ()
 
 BeginTest (TestRemoveAnchor_1refcount)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (Create<Node> ());
   NfpRoutingProtocolFriend theFriend (nfp);
   theFriend.DoInitialize ();
@@ -194,6 +201,8 @@ EndTest ()
 
 BeginTest (TestRemoveAnchor_2refcount)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (Create<Node> ());
   NfpRoutingProtocolFriend theFriend (nfp);
   theFriend.DoInitialize ();
@@ -213,6 +222,8 @@ EndTest ()
 
 BeginTest (TestSetTimer_NoJitter)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (Create<Node> ());
   NfpRoutingProtocolFriend theFriend (nfp);
   theFriend.DoInitialize ();
@@ -223,7 +234,7 @@ BeginTest (TestSetTimer_NoJitter)
   timer.SetFunction (&TestSetTimer_NoJitter::TimerExpire, this);
   theFriend.SetTimer (timer, interval, jitter);
 
-  NS_TEST_ASSERT_MSG_LT (timer.GetDelay (), interval,
+  NS_TEST_ASSERT_MSG_LT_OR_EQ (timer.GetDelay (), interval,
                          "Timer value should be less than interval");
   timer.Cancel ();
 }
@@ -236,6 +247,8 @@ EndTest ()
 
 BeginTest (TestSetTimer_WithJitter)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (Create<Node> ());
   NfpRoutingProtocolFriend theFriend (nfp);
   theFriend.DoInitialize ();
@@ -258,6 +271,7 @@ EndTest ()
 
 BeginTest (TestDoInitialize)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
 
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (Create<Node> ());
   NfpRoutingProtocolFriend theFriend (nfp);
@@ -271,6 +285,8 @@ EndTest ()
 
 BeginTest (TestCreatePayload)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (Create<Node> ());
   NfpRoutingProtocolFriend theFriend (nfp);
   theFriend.DoInitialize ();
@@ -292,12 +308,13 @@ EndTest ()
 
 BeginTest (TestCreatePacket)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (Create<Node> ());
   NfpRoutingProtocolFriend theFriend (nfp);
   theFriend.DoInitialize ();
 
-  Ptr<CCNxPacket> packet = theFriend.CreatePacket (
-      theFriend.CreatePayload ());
+  Ptr<CCNxPacket> packet = theFriend.CreatePacket (theFriend.CreatePayload ());
   bool exists = (packet);
   NS_TEST_ASSERT_MSG_EQ (exists, true, "Got empty packet");
 
@@ -308,9 +325,14 @@ BeginTest (TestCreatePacket)
   NS_TEST_ASSERT_MSG_EQ (message->GetMessageType (), CCNxMessage::Interest,
                          "Wrong message type");
 
-  Ptr<const CCNxName> name = message->GetName ();
-  NS_TEST_ASSERT_MSG_EQ (name->Equals (*theFriend.GetNfpPrefix ()), true,
-                         "Wrong name in Interest");
+  Ptr<const CCNxName> messageName = message->GetName ();
+  Ptr<const CCNxName> prefixName = theFriend.GetNfpPrefix ();
+
+//  std::cout << "message " << *messageName << std::endl;
+//  std::cout << "prefix  " << *prefixName << std::endl;
+  NS_TEST_ASSERT_MSG_EQ (prefixName->IsPrefixOf(*messageName),
+			 true,
+                         "The NFP prefix is not a prefix of the message name");
 }
 EndTest ()
 
@@ -319,6 +341,8 @@ EndTest ()
  */
 BeginTest (TestNotifyInterfaceUp)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   Ptr<Node> node = Create<Node> ();
 
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (node);
@@ -344,6 +368,8 @@ EndTest ()
 
 BeginTest (TestBroadcast)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   Ptr<Node> node = Create<Node> ();
 
   Ptr<NfpRoutingProtocol> nfp = CreateProtocol (node);
@@ -398,6 +424,8 @@ EndTest ()
 
 BeginTest (TestReceiveHello_FirstTime)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   // receive a hello message for a neighbor for the first time
   Ptr<Node> node = Create<Node> ();
 
@@ -428,6 +456,8 @@ EndTest ()
 
 BeginTest (TestReceiveHello_OldSeqnum)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   // receive a hello message for a neighbor for the first time
   Ptr<Node> node = Create<Node> ();
 
@@ -456,6 +486,8 @@ EndTest ()
 
 BeginTest (TestReceiveHello_Update)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   // receive a hello message for a neighbor for the first time
   Ptr<Node> node = Create<Node> ();
 
@@ -484,8 +516,20 @@ BeginTest (TestReceiveHello_Update)
 }
 EndTest ()
 
+static uint32_t
+GetLastConnectionId()
+{
+  // Create a new device.  The last connectionId would be this devices connection ID minus 1.
+
+  Ptr<CCNxConnection> conn = Create<CCNxConnectionDevice>();
+  return conn->GetConnectionId() - 1;
+}
+
+
 BeginTest (TestReceiveNotify_Hello)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   // Send a packet up a virtual network device with a Hello
   Ptr<Node> node = Create<Node> ();
 
@@ -499,7 +543,7 @@ BeginTest (TestReceiveNotify_Hello)
   Simulator::Run ();
 
   // now try to broadcast the packet
-  Ptr<const CCNxName> neighborName = Create<CCNxName> ("ccnx:/name=martian");
+  Ptr<const CCNxName> neighborName = Create<CCNxName> ("ccnx:/name=venusian");
   Ptr<NfpPayload> payload = Create<NfpPayload> (1500, neighborName, 100);
   Ptr<CCNxPacket> packet = theFriend.CreatePacket (payload);
 
@@ -515,8 +559,11 @@ BeginTest (TestReceiveNotify_Hello)
   Simulator::Stop (MicroSeconds (5));
   Simulator::Run ();
 
-  // TODO: HACK we need to get this number from the Layer 3 protocol
-  Ptr<CCNxVirtualConnection> ingressConnection = Create<CCNxVirtualConnection> (20);
+  // Figure out the connection ID of the neighbor.  This is a little bit of a hack.  We use the knowledge
+  // that connection IDs are assigned monotonically so we create a device that will be assigned the next
+  // connection ID, then subtract one.
+  uint32_t connid = GetLastConnectionId();
+  Ptr<CCNxVirtualConnection> ingressConnection = Create<CCNxVirtualConnection> (connid);
 
   // It should now be in our neighbor table
   NfpRoutingProtocolFriend::NeighborMapType neighbors = theFriend.GetNeighbors ();
@@ -543,6 +590,8 @@ EndTest ()
 
 BeginTest (TestReceivePayload_ForSelf)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   // receive a payload message with our name in it
 
 }
@@ -550,6 +599,8 @@ EndTest ()
 
 BeginTest (TestHelloExpired)
 {
+  std::cout << GetName() << ".DoRun()" << std::endl;
+
   // do not add any anchors and let the simulator free-run for a while.  We should see the
   // routing process emit Hello packets every HelloInterval.  We need to setup with a virtual
   // net device so we receive the hello packets.
