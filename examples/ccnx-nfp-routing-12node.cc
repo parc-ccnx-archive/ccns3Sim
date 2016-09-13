@@ -54,7 +54,7 @@
  */
 
 /*
- * Uses a point-to-poit topology.  Sink is on n0, source is n10 for ccnx:/name=foo/name=sink.
+ * Uses a point-to-point topology.  Sink is on n0, source is n10 for ccnx:/name=foo/name=sink.
  *
  *                             -----------n11
  *                             |           |
