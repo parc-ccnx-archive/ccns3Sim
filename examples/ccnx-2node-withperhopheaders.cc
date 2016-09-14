@@ -118,8 +118,6 @@ CreatePacket (uint32_t size, Ptr<CCNxName> name, CCNxMessage::MessageType msgTyp
       }
     }
   return packet;
-
-
 }
 
 

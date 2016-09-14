@@ -54,7 +54,7 @@
  */
 
 /*
- * Uses a point-to-poit topology.  Sink will RegisterPrefix() on n0 which creates a route from n0 to the sink
+ * Uses a point-to-point topology.  Sink will RegisterPrefix() on n0 which creates a route from n0 to the sink
  * Portal.  We add a static route on node n1 -> n0 for ccnx:/name=foo/name=sink.
  *
  * sink                        source

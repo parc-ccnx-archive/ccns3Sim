@@ -140,9 +140,6 @@ RunSimulation (void)
   fibFactory.SetLayerDelayServers (2);
   forwarderHelper.SetFibFactory (fibFactory);
 
-  // Set the CS processing time (linear function of ContentObject bytes returned)
-
-
   ccnxStack.SetForwardingHelper (forwarderHelper);
 
 
