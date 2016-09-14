@@ -183,7 +183,7 @@ RunSimulation (uint32_t nPrefixes)
 int
 main (int argc, char *argv[])
 {
-  uint32_t nPrefixes = 1;
+  uint32_t nPrefixes = 4;
   CommandLine cmd;
   cmd.AddValue ("nPrefixes", "Number of Prefixes to simulate", nPrefixes);
   cmd.Parse (argc, argv);

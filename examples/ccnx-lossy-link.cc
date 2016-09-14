@@ -74,8 +74,8 @@ using namespace ns3::ccnx;
 void
 RunSimulation (std::string uri, uint32_t nSize, uint32_t nCount, double nSecsToRun)
 {
-  LogComponentEnable ("CCNxStandardPit", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_ALL));
-  LogComponentEnable ("CCNxStandardPitEntry", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_ALL));
+  // LogComponentEnable ("CCNxStandardPit", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_ALL));
+  // LogComponentEnable ("CCNxStandardPitEntry", (LogLevel) (LOG_LEVEL_DEBUG | LOG_PREFIX_ALL));
 
   Time::SetResolution (Time::NS);
 
@@ -97,21 +97,36 @@ RunSimulation (std::string uri, uint32_t nSize, uint32_t nCount, double nSecsToR
    */
   NodeContainer nodes;
   nodes.Create (3);
-  NodeContainer lossyNode = NodeContainer (nodes.Get (0), nodes.Get (1));
-  NodeContainer losslessNode = NodeContainer (nodes.Get (1), nodes.Get (2));
+  NodeContainer lossyNodes = NodeContainer (nodes.Get (0), nodes.Get (1));
+  NodeContainer losslessNodes = NodeContainer (nodes.Get (1), nodes.Get (2));
 
   PointToPointHelper p2pLossyLink;
   p2pLossyLink.SetDeviceAttribute ("DataRate", StringValue ("1Gbps"));
   p2pLossyLink.SetChannelAttribute ("Delay", StringValue ("20ms"));
 
-
   PointToPointHelper p2pLosslessLink;
   p2pLosslessLink.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
   p2pLosslessLink.SetChannelAttribute ("Delay", StringValue ("10ms"));
 
+  NetDeviceContainer lossyDevices = p2pLossyLink.Install(lossyNodes);
+
   NetDeviceContainer pppDevices;
-  pppDevices.Add(p2pLossyLink.Install(lossyNode));
-  pppDevices.Add(p2pLosslessLink.Install(losslessNode));
+  pppDevices.Add(lossyDevices);
+  pppDevices.Add(p2pLosslessLink.Install(losslessNodes));
+
+  /*
+   * Now add a receive error model to the devices on the lossy link
+   */
+
+  Ptr<RateErrorModel> error = CreateObject<RateErrorModel>();
+  error->SetUnit(RateErrorModel::ERROR_UNIT_PACKET);
+  error->SetRate(0.05);
+  error->Enable();
+
+  for (int i = 0; i < lossyDevices.GetN(); ++i) {
+      Ptr<NetDevice> dev = lossyDevices.Get(i);
+      dev->SetAttribute("ReceiveErrorModel", PointerValue(error));
+  }
 
 
   /*
