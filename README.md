@@ -4,6 +4,9 @@
 This code represents the CCNx 1.0 Protocol (see IRTF ICNRG documents
 irtf-icnrg-ccnx-semantics-01.txt and irtf-icnrg-ccnx-messages-01.txt).
 
+A more detailed technical report describing the simulator can be
+found [at this link](http://parc.github.io/ccns3Sim/docs/ccns3sim.pdf).
+
 # Installation
 
 ## Dependencies and configuration
