@@ -179,14 +179,12 @@ public:
    */
 
   /**
-   * Add an interface to a device
-   * Once added, it can never be removed: if you want
-   * to disable it, you can invoke Ipv4::SetDown which will
-   * make sure that it is never used during packet forwarding.
+   * Add an interface to a node's CCNx protocol
+   * To disable it, use GetInterface() then call CCNxL3Interface::SetDown() on it.
    *
-   * @param [in] device device to add the list of Ipv4 interfaces to,
+   * @param [in] device device to add the list of CCNx interfaces to,
    *             which can be used as output interfaces during packet forwarding.
-   * @return The index of the Ipv4 interface added.
+   * @return The index of the CCNx interface added.
    */
   virtual uint32_t AddInterface (Ptr<NetDevice> device) = 0;
 
@@ -360,8 +358,7 @@ public:
   /**
    * TracedCallback signature for packet drop events.
    *
-   * @param [in] The CCNx L3 reporting the trace
-   * @param [in] header The Ipv4Header.
+   * @param [in] ccnx The CCNx L3 reporting the trace
    * @param [in] packet The packet.
    * @param [in] ccnxPacket The CCNx Packet
    * @param [in] interface
